@@ -1,0 +1,109 @@
+<section class="register section">
+    <div class="container">
+        <div class="inner">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="register-left"></div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="register-form">
+                        <h2>Регистрация</h2>
+                        <p>
+                            Уже есть аккаунт? <a [routerLink]="['/login']" [queryParams]="{next: nextUrl}">Войдите здесь</a>
+                        </p>
+                        <!-- Form -->
+                        <form class="form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                            <div class="row">
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <input
+                                                type="text"
+                                                formControlName="first_name"
+                                                placeholder="Имя"
+                                                [class.is-invalid]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <input
+                                                type="text"
+                                                formControlName="last_name"
+                                                placeholder="Фамилия"
+                                                [class.is-invalid]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <input
+                                                type="tel"
+                                                formControlName="phone_number"
+                                                placeholder="Номер телефона"
+                                                [class.is-invalid]="registerForm.get('phone_number')?.invalid && registerForm.get('phone_number')?.touched">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <input
+                                                type="email"
+                                                formControlName="email"
+                                                placeholder="Email"
+                                                [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <input
+                                                type="password"
+                                                formControlName="password"
+                                                placeholder="Пароль"
+                                                [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <input
+                                                type="password"
+                                                formControlName="password_confirm"
+                                                placeholder="Подтвердите пароль"
+                                                [class.is-invalid]="registerForm.get('password_confirm')?.invalid && registerForm.get('password_confirm')?.touched">
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group login-btn">
+                                        <button
+                                                class="btn"
+                                                type="submit"
+                                                [disabled]="registerForm.invalid || isLoading">
+                                            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            Зарегистрироваться
+                                        </button>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label class="checkbox-inline" for="terms">
+                                            <input
+                                                    name="terms"
+                                                    id="terms"
+                                                    formControlName="agreeToTerms"
+                                                    type="checkbox"
+                                                    required>
+                                            Да, я согласен со всеми
+                                        </label>
+                                    </div>
+                                    <a href="#" class="terms">Terms &amp; Conditions</a>
+                                </div>
+                            </div>
+                        </form>
+                        <!--/ End Form -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,48 @@
+<!-- Spacer -->
+<div style="height: 100px;"></div>
+
+<!-- Profile Selection Section -->
+<section class="schedule">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="section-title">
+                <h2>Выберите профиль:</h2>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="schedule-inner">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-12"
+                     style="margin-bottom: 15px;"
+                     *ngFor="let roleData of roleDataList">
+                    <div class="single-schedule first schedule-card">
+                        <div class="inner">
+                            <div class="icon">
+                                <i class="fa" [class]="roleData.icon"></i>
+                            </div>
+                            <div class="single-content">
+                                <span>Профиль:</span>
+                                <h4>{{ roleData.display_name }}</h4>
+
+                                <p class="role-info">
+                                    {{ getRoleInfoText(roleData) }}
+                                </p>
+
+                                <a href="#"
+                                   (click)="chooseRole(roleData.name); $event.preventDefault()"
+                                   [class.disabled]="isLoading">
+                                    <span *ngIf="!isLoading">ВЫБРАТЬ <i class="fa fa-long-arrow-right"></i></span>
+                                    <span *ngIf="isLoading">ЗАГРУЗКА...</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Spacer -->
+<div style="height: 320px;"></div>

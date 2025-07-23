@@ -1,0 +1,129 @@
+<header class="header">
+    <div class="header-inner">
+        <div class="container-fluid">
+            <div class="inner">
+                <div class="row align-items-center justify-content-between">
+                    <!-- Логотип -->
+                    <div class="col-lg-auto col-md-3 col-12">
+                        <div class="logo">
+                            <a routerLink="/">
+                                <img src="assets/img/logo.png" alt="Logo">
+                            </a>
+                        </div>
+                        <div class="mobile-nav"></div>
+                    </div>
+
+                    <!-- Меню -->
+                    <div class="">
+                        <div class="main-menu">
+                            <nav class="navigation">
+                                <ul class="nav menu d-flex justify-content-center">
+                                    <!-- Главная -->
+                                    <li>
+                                        <a routerLink="/patient/dashboard">
+                                            Главная <i class="icofont-rounded-down"></i>
+                                        </a>
+                                        <ul class="dropdown">
+                                            <li><a routerLink="/patient/doctors">Мои врачи</a></li>
+                                            <li><a routerLink="/patient/invite-doctor">Пригласить врача</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Мониторинг -->
+                                    <li>
+                                        <a routerLink="/patient/monitoring">
+                                            Мониторинг <i class="icofont-rounded-down"></i>
+                                        </a>
+                                        <ul class="dropdown">
+                                            <li><a routerLink="/patient/activity">Физ. активность</a></li>
+                                            <li><a routerLink="/patient/nutrition">Питание</a></li>
+                                            <li><a routerLink="/patient/medication">Лекарственная терапия</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Уведомления + badge -->
+                                    <li>
+                                        <a routerLink="/patient/notifications">
+                                            Уведомления
+                                            <span class="badge"
+                                                  *ngIf="notificationCount > 0"
+                                                  id="notifications-badge">
+                                                {{ notificationCount > 9 ? '9+' : notificationCount }}
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <!-- Сообщения + badge -->
+                                    <li>
+                                        <a routerLink="/patient/messages">
+                                            Сообщения
+                                            <span class="badge"
+                                                  *ngIf="messageCount > 0"
+                                                  id="messages-badge">
+                                                {{ messageCount > 9 ? '9+' : messageCount }}
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <!-- Врач -->
+                                    <li>
+                                        <a routerLink="/patient/doctor">
+                                            Врач <i class="icofont-rounded-down"></i>
+                                        </a>
+                                        <ul class="dropdown">
+                                            <li><a routerLink="/patient/doctors">Мои врачи</a></li>
+                                            <li><a routerLink="/patient/invite-doctor">Пригласить врача</a></li>
+                                            <li><a routerLink="/patient/remove-access">Удалить доступ</a></li>
+                                            <li><a routerLink="/patient/restrict-access">Ограничить доступ</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Доверенные лица -->
+                                    <li>
+                                        <a routerLink="/patient/trusted-person">
+                                            Доверенные лица <i class="icofont-rounded-down"></i>
+                                        </a>
+                                        <ul class="dropdown">
+                                            <li><a routerLink="/patient/trusted-persons">Доверенные лица</a></li>
+                                            <li><a routerLink="/patient/invite-trusted">Пригласить</a></li>
+                                            <li><a routerLink="/patient/remove-trusted-access">Удалить доступ</a></li>
+                                            <li><a routerLink="/patient/restrict-trusted-access">Ограничить доступ</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Настройки -->
+                                    <li>
+                                        <a routerLink="/patient/settings">
+                                            Настройки <i class="icofont-rounded-down"></i>
+                                        </a>
+                                        <ul class="dropdown">
+                                            <li><a routerLink="/patient/profile">Профиль</a></li>
+                                            <li><a routerLink="/patient/access-settings">Доступ</a></li>
+                                            <li><a routerLink="/patient/interface-settings">Интерфейс</a></li>
+                                            <li><a routerLink="/patient/sensor-settings">Датчик</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-auto">
+                        <div class="get-quote text button">
+                            <button *ngIf="hasMultipleRoles"
+                                    (click)="switchProfile()"
+                                    class="btn">
+                                Сменить профиль
+                            </button>
+                            <button
+                                    class="btn btn-sm btn-outline-light"
+                                    (click)="logout()">
+                                Выход
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

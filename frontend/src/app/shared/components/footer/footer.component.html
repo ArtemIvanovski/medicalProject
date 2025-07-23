@@ -1,0 +1,75 @@
+<footer id="footer" class="footer">
+    <div class="footer-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-12">
+                    <div class="single-footer">
+                        <h2>О нас</h2>
+                        <p>Lorem ipsum dolor sit am consectetur adipisicing elit do eiusmod tempor incididunt ut labore dolore magna.</p>
+                        <ul class="social">
+                            <li><a href="#"><i class="icofont-facebook"></i></a></li>
+                            <li><a href="#"><i class="icofont-google-plus"></i></a></li>
+                            <li><a href="#"><i class="icofont-twitter"></i></a></li>
+                            <li><a href="#"><i class="icofont-vimeo"></i></a></li>
+                            <li><a href="#"><i class="icofont-pinterest"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <div class="single-footer f-link">
+                        <h2>Быстрые ссылки</h2>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <ul>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Главная станица</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>О нас</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Сервисы</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Наши дела</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Другие ссылки</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <ul>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Консультирование</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Финансы</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Рекомендации</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>FAQ</a></li>
+                                    <li><a href="#"><i class="fa fa-caret-right"></i>Связаться с нами</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <div class="single-footer">
+                        <h2>График работы</h2>
+                        <p>Lorem ipsum dolor sit ame consectetur adipisicing elit do eiusmod tempor incididunt.</p>
+                        <ul class="time-sidual">
+                            <li class="day">Понедельник - Пятница <span>8.00-20.00</span></li>
+                            <li class="day">Суббота <span>9.00-18.30</span></li>
+                            <li class="day">Понедельник - Четверг <span>9.00-15.00</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <div class="single-footer">
+                        <h2>Newsletter</h2>
+                        <p>Подпишитесь на нашу рассылку, чтобы получать все новости на свой почтовый ящик.</p>
+                        <form (ngSubmit)="subscribeNewsletter()" class="newsletter-inner">
+                            <input
+                                    name="email"
+                                    [(ngModel)]="emailForNewsletter"
+                                    placeholder="Email Address"
+                                    class="common-input"
+                                    type="email"
+                                    required>
+                            <button type="submit" class="button">
+                                <i class="icofont icofont-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

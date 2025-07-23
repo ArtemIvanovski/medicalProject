@@ -1,0 +1,124 @@
+<div class="container">
+    <!-- Блок с текущим уровнем глюкозы + Параметры системы -->
+    <div class="section-header">Текущий уровень глюкозы</div>
+    <div class="current-glucose">
+        <!-- Пример: глюкоза = 8.2 ммоль/л, фон = warning -->
+        <div class="glucose-value glucose-warning">
+            {{ currentGlucose.value }} <span style="font-size:1rem;">{{ currentGlucose.unit }}</span>
+            <div class="trend-arrow" [ngClass]="getTrendClass()">
+                {{ getTrendSymbol() }} ({{ currentGlucose.trend }})
+            </div>
+            <div class="last-updated">Последний замер: {{ currentGlucose.lastUpdate | date:'HH:mm' }}</div>
+        </div>
+
+        <!-- Параметры системы (границы, калибровка, заряд) -->
+        <div class="system-params">
+            <ul>
+                <li><span>Границы:</span> {{ systemParams.minRange }} - {{ systemParams.maxRange }} {{ currentGlucose.unit }}</li>
+                <li><span>Коэф. калибр.:</span> {{ systemParams.calibrationCoeff }}</li>
+                <li><span>Интервал:</span> каждые {{ systemParams.interval }} мин.</li>
+                <li><span>Заряд блока:</span> {{ systemParams.batteryLevel }}%</li>
+                <li><span>Дней до замены:</span> {{ systemParams.daysToReplace }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- График за сутки -->
+    <div class="chart-block">
+        <canvas #dailyChart
+                id="dailyChart"
+                width="1550"
+                height="775"
+                style="display: block; box-sizing: border-box; height: 620px; width: 1240px;">
+        </canvas>
+    </div>
+
+    <!-- Сводка TIR/TAR/TBR -->
+    <div class="range-summary">
+        <div class="range-box">
+            <div class="range-title">Время в диапазоне (TIR)</div>
+            <div class="range-value" style="color:green;">{{ ranges.tir }}%</div>
+            <div class="range-goal">Цель: >70%</div>
+        </div>
+        <div class="range-box">
+            <div class="range-title">Выше диапазона (TAR)</div>
+            <div class="range-value" style="color:orange;">{{ ranges.tar }}%</div>
+            <div class="range-goal">Цель: <25%</div>
+        </div>
+        <div class="range-box">
+            <div class="range-title">Ниже диапазона (TBR)</div>
+            <div class="range-value" style="color:red;">{{ ranges.tbr }}%</div>
+            <div class="range-goal">Цель: <4%</div>
+        </div>
+    </div>
+
+    <div class="monitoring-block">
+        <h4>Мониторинг (быстрое добавление события)</h4>
+
+        <p style="margin-bottom:15px; font-size:0.9rem; color:#555;">
+            Сегодня съедено: <strong>{{ dailyStats.calories }} ккал</strong>
+            |  Физ. активность: <strong>{{ dailyStats.activity }}</strong>
+            |  Инсулин короткий: <strong>{{ dailyStats.insulin }} ед.</strong>
+        </p>
+
+        <div class="monitoring-buttons">
+            <button class="btn-insulin" (click)="addEvent('insulin')">Принял инсулин</button>
+            <button class="btn-pill" (click)="addEvent('pill')">Принял таблетку</button>
+            <button class="btn-food" (click)="addEvent('food')">Приём пищи</button>
+            <button class="btn-activity" (click)="addEvent('activity')">Физическая активность</button>
+        </div>
+    </div>
+
+    <div id="doctor" class="device-info" style="margin-top:30px;">
+        <h4>Врач</h4>
+        <ul>
+            <li><span>ФИО врача:</span> {{ doctorInfo.fullName }}</li>
+            <li><span>Контакты:</span> {{ doctorInfo.phone }}</li>
+            <li><span>График:</span> {{ doctorInfo.schedule }}</li>
+        </ul>
+        <p style="font-size:0.85rem; color:#666; margin-top:5px;">
+            Здесь можно узнать, кто вас курирует. Подробные отчёты отправляются этому врачу.
+        </p>
+    </div>
+
+    <div id="trusted" class="trusted-block">
+        <h4>Доверенные лица</h4>
+        <div class="trusted-list">
+            <div class="trusted-item" *ngFor="let person of trustedPersons; let i = index">
+                {{ i + 1 }}) {{ person.name }} ({{ person.relation }}),
+                <ng-container *ngIf="person.email">e-mail: <em>{{ person.email }}</em></ng-container>
+                <ng-container *ngIf="person.phone">тел.: <em>{{ person.phone }}</em></ng-container>
+            </div>
+        </div>
+        <p style="font-size:0.85rem; color:#666; margin-top:5px;">
+            Эти люди могут смотреть ваши данные, если вы разрешите общий доступ.
+        </p>
+    </div>
+
+    <div id="device" class="device-info">
+        <h4>Информация о датчике</h4>
+        <ul>
+            <li><span>ID датчика:</span> {{ sensorInfo.id }}</li>
+            <li><span>Дата установки:</span> {{ sensorInfo.installDate | date:'dd.MM.yyyy' }}</li>
+            <li><span>Тип:</span> {{ sensorInfo.type }}</li>
+            <li><span>Версия ПО:</span> {{ sensorInfo.softwareVersion }}</li>
+            <li><span>Состояние:</span> {{ sensorInfo.status }}</li>
+        </ul>
+    </div>
+
+    <div id="chat" class="chat-block">
+        <h4>Чат с врачом</h4>
+        <div class="chat-messages" #chatMessagesContainer>
+            <div class="chat-msg" *ngFor="let message of chatMessages">
+                <b>{{ message.sender }}:</b> {{ message.content }}
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text"
+                   [(ngModel)]="newMessage"
+                   (keyup.enter)="sendMessage()"
+                   placeholder="Напишите сообщение...">
+            <button (click)="sendMessage()">Отправить</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+gservice_account.json
+*.json
+.env
+.env.local
+.env.production
+__pycache__/
+*.pyc
+*.pyo
+.angular/
+.node_modules/
+.idea/
+.vscode/

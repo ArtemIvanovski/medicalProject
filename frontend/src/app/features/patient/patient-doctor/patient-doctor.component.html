@@ -1,0 +1,57 @@
+<br> <br>
+<br> <br>
+<section class="our-vision-area ptb-100 pt-0">
+    <div class="container">
+        <div class="row">
+            <!-- Врачи -->
+            <div class="col-lg-6 col-md-6 col-12">
+                <a href="{% url 'doctor_list' %}" class="d-block text-decoration-none text-dark">
+                    <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
+                        <div class="icon mb-3">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3 class="fw-bold">Врачи</h3>
+                        <p>Просмотрите список врачей, ведущих ваш аккаунт, и получайте актуальную информацию о них.</p>
+                    </div>
+                </a>
+            </div>
+            <!-- Пригласить Врача -->
+            <div class="col-lg-6 col-md-6 col-12">
+                <a href="{% url 'invite_doctor' %}" class="d-block text-decoration-none text-dark">
+                    <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
+                        <div class="icon mb-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h3 class="fw-bold">Пригласить Врача</h3>
+                        <p>Отправьте приглашение врачу для получения доступа к вашей медицинской информации.</p>
+                    </div>
+                </a>
+            </div>
+            <!-- Удалить доступ -->
+            <div class="col-lg-6 col-md-6 col-12">
+                <a href="{% url 'stop_access_doctor' %}" class="d-block text-decoration-none text-dark">
+                    <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
+                        <div class="icon mb-3">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                        <h3 class="fw-bold">Удалить доступ</h3>
+                        <p>Отмените привязку врача, если он больше не должен получать доступ к вашим данным.</p>
+                    </div>
+                </a>
+            </div>
+            <!-- Ограничить Доступ -->
+            <div class="col-lg-6 col-md-6 col-12">
+                <a href="{% url 'doctor_list' %}" class="d-block text-decoration-none text-dark">
+                    <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
+                        <div class="icon mb-3">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <h3 class="fw-bold">Ограничить доступ</h3>
+                        <p>Установите ограничения для контроля доступа врача к вашей информации.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<br> <br>
