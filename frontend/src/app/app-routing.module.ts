@@ -7,7 +7,6 @@ import { AuthGuard } from './core/guards/auth.guard';
 import {MainLayoutComponent} from "./shared/layouts/main-layout.component";
 
 const routes: Routes = [
-    { path: '', redirectTo: '/login', pathMatch: 'full' },
     {
         path: '',
         component: MainLayoutComponent,
@@ -29,16 +28,13 @@ const routes: Routes = [
     },
     {
         path: 'patient',
-        loadChildren: () => import('./features/patient/patient.module').then(m => m.PatientModule),
-        canActivate: [AuthGuard]
+        loadChildren: () => import('./features/patient/patient.module').then(m => m.PatientModule)
     },
     {
         path: 'home',
         loadChildren: () => import('./features/home/home.module').then(m => m.HomeModule),
-        canActivate: [AuthGuard]
     },
-    { path: 'unauthorized', redirectTo: '/profile-selection' },
-    { path: '**', redirectTo: '/login' }
+    { path: 'unauthorized', redirectTo: '/profile-selection' }
 ];
 
 @NgModule({

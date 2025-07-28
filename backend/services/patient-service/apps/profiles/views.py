@@ -10,6 +10,12 @@ from .drive_service import DriveService
 
 @require_http_methods(["GET"])
 def get_profile(request):
+    print(f"request.user: {request.user}")
+    print(f"request.user type: {type(request.user)}")
+    print(f"hasattr email: {hasattr(request.user, 'email')}")
+    print(f"is_anonymous: {request.user.is_anonymous}")
+    print(f"is_authenticated: {request.user.is_authenticated}")
+
     if request.user.is_anonymous:
         return JsonResponse({'error': 'Authentication required'}, status=401)
 
@@ -163,6 +169,7 @@ def upload_avatar(request):
 
 
 @require_http_methods(["DELETE"])
+@csrf_exempt
 def delete_avatar(request):
     if request.user.is_anonymous:
         return JsonResponse({'error': 'Authentication required'}, status=401)

@@ -1,56 +1,89 @@
 version: '3.8'
 
 services:
-  auth-db:
+  postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: medical_auth_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - auth_postgres_data:/var/lib/postgresql/data
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5433:5432"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6380:6379"
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 3s
       retries: 3
 
   auth-service:
-    build: .
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     environment:
-      - DEBUG=True
-      - DB_NAME=medical_auth_db
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=auth-db
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=postgres
       - DB_PORT=5432
-      - SECRET_KEY=your-development-secret-key
-      - CORS_ALLOWED_ORIGINS=http://localhost:4200
+      - REDIS_URL=redis://redis:6379/0
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
     depends_on:
-      auth-db:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "8001:8000"
     volumes:
-      - .:/app
+      - ./services/auth-service:/app
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
+    restart: unless-stopped
+
+  patient-service:
+    build:
+      context: ./services/patient-service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    volumes:
+      - ./services/patient-service:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8002"
+    restart: unless-stopped
 
 volumes:
-  auth_postgres_data:
+  postgres_data:

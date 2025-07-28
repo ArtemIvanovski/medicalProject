@@ -1,5 +1,5 @@
 # Google Service Account
-gservice_account.json
+services/patient-service/gservice_account.json
 *.json
 
 # Environment files

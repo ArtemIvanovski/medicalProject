@@ -69,19 +69,50 @@ export class AuthService {
         private http: HttpClient,
         private router: Router
     ) {
-        this.initializeAuth();
+        this.initializeFromStorage();
     }
 
-    private initializeAuth(): void {
+    private initializeFromStorage(): void {
         const token = this.getAccessToken();
         const activeRole = this.getActiveRole();
 
+        console.log('Initializing auth from storage:', {
+            hasToken: !!token,
+            tokenExpired: token ? this.isTokenExpired(token) : 'no token',
+            activeRole
+        });
+
         if (token && !this.isTokenExpired(token)) {
-            this.loadCurrentUser();
+            console.log('Valid token found, setting authenticated state');
+            this.isAuthenticatedSubject.next(true);
+
             if (activeRole) {
                 this.activeRoleSubject.next(activeRole);
             }
+
+            setTimeout(() => this.loadCurrentUser(), 0);
+        } else {
+            console.log('No valid token, clearing auth state');
+            this.clearAuthState();
         }
+    }
+
+    public isAuthenticated(): boolean {
+        const token = this.getAccessToken();
+        const result = token != null && !this.isTokenExpired(token);
+        console.log('Sync auth check:', { hasToken: !!token, isValid: result });
+        return result;
+    }
+
+    public initializeAuthenticatedState(): void {
+        if (this.isAuthenticated()) {
+            console.log('Force setting authenticated state');
+            this.isAuthenticatedSubject.next(true);
+        }
+    }
+
+    public loadUserData(): void {
+        this.loadCurrentUser();
     }
 
     login(email: string, password: string): Observable<LoginResponse> {
@@ -90,6 +121,7 @@ export class AuthService {
             password
         }).pipe(
             tap(response => {
+                console.log('Login successful, setting tokens and state');
                 this.setTokens(response.access, response.refresh);
 
                 const userWithRoles = {
@@ -135,11 +167,8 @@ export class AuthService {
             refresh_token: refreshToken
         }).pipe(
             tap(() => {
-                this.clearTokens();
-                this.clearActiveRole();
-                this.currentUserSubject.next(null);
-                this.isAuthenticatedSubject.next(false);
-                this.activeRoleSubject.next(null);
+                console.log('Logout, clearing all auth state');
+                this.clearAuthState();
                 this.router.navigate(['/login']);
             })
         );
@@ -159,6 +188,7 @@ export class AuthService {
     }
 
     private setActiveRoleLocal(roleName: string): void {
+        console.log('Setting active role:', roleName);
         localStorage.setItem('active_role', roleName);
         this.activeRoleSubject.next(roleName);
 
@@ -193,20 +223,30 @@ export class AuthService {
     }
 
     private loadCurrentUser(): void {
+        console.log('Loading current user data');
         this.http.get<User>(`${environment.authApiUrl}/me/`)
             .subscribe({
                 next: user => {
+                    console.log('User data loaded:', user.email);
                     this.currentUserSubject.next(user);
                     this.isAuthenticatedSubject.next(true);
                 },
-                error: () => {
-                    this.clearTokens();
-                    this.clearActiveRole();
-                    this.currentUserSubject.next(null);
-                    this.isAuthenticatedSubject.next(false);
-                    this.activeRoleSubject.next(null);
+                error: (error) => {
+                    console.error('Failed to load user data:', error);
+                    if (error.status === 401) {
+                        console.log('401 error, clearing auth state');
+                        this.clearAuthState();
+                    }
                 }
             });
+    }
+
+    private clearAuthState(): void {
+        this.clearTokens();
+        this.clearActiveRole();
+        this.currentUserSubject.next(null);
+        this.isAuthenticatedSubject.next(false);
+        this.activeRoleSubject.next(null);
     }
 
     private setTokens(access: string, refresh: string): void {
@@ -235,11 +275,18 @@ export class AuthService {
         return localStorage.getItem('active_role');
     }
 
-    private isTokenExpired(token: string): boolean {
+    public isTokenExpired(token: string): boolean {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return Date.now() >= payload.exp * 1000;
-        } catch {
+            const isExpired = Date.now() >= payload.exp * 1000;
+            console.log('Token expiry check:', {
+                exp: payload.exp,
+                now: Math.floor(Date.now() / 1000),
+                isExpired
+            });
+            return isExpired;
+        } catch (error) {
+            console.error('Error parsing token:', error);
             return true;
         }
     }

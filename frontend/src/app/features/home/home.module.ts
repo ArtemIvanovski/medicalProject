@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {HomeComponent} from "./home/home.component";
 import {SharedModule} from "../../shared/shared.module";
+import {ContactUsComponent} from "./contact-us/contact-us.component";
 
 const routes: Routes = [
     {
@@ -17,6 +18,10 @@ const routes: Routes = [
             {
                 path: 'home',
                 component: HomeComponent
+            },
+            {
+                path: 'contact_us',
+                component: HomeComponent
             }
         ]
     }
@@ -24,7 +29,8 @@ const routes: Routes = [
 
 @NgModule({
     declarations: [
-        HomeComponent
+        HomeComponent,
+        ContactUsComponent
     ],
     imports: [
         CommonModule,
