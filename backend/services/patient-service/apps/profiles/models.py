@@ -152,3 +152,60 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user.email}"
+
+
+class Feature(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'main_app_feature'
+
+    def __str__(self):
+        return self.name
+
+
+class DoctorPatient(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patients')
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doctors')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    features = models.ManyToManyField(Feature, blank=True)
+
+    class Meta:
+        db_table = 'main_app_doctorpatient'
+
+    def __str__(self):
+        return f"{self.doctor.email} -> {self.patient.email}"
+
+
+class Invite(models.Model):
+    class Kind(models.TextChoices):
+        SENSOR = "SENSOR_ACTIVATE", "Sensor activate"
+        DOCTOR = "DOCTOR", "Doctor"
+        TRUSTED = "TRUSTED", "Trusted person"
+
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    message = models.TextField(blank=True)
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="invites_sent")
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="invites_to_me", null=True, blank=True)
+    features = models.ManyToManyField(Feature, blank=True)
+
+    class Meta:
+        db_table = 'main_app_invite'
+
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at
+
+    def __str__(self):
+        return f"{self.get_kind_display()}-invite {self.token}"

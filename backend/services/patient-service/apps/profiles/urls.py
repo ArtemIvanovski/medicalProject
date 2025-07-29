@@ -14,4 +14,10 @@ urlpatterns = [
     path('references/allergies/', views.get_allergies, name='get_allergies'),
     path('references/diagnoses/', views.get_diagnoses, name='get_diagnoses'),
     path('references/diabetes-types/', views.get_diabetes_types, name='get_diabetes_types'),
+
+    path('doctors/', views.get_patient_doctors, name='get_patient_doctors'),
+    path('doctors/<uuid:doctor_id>/remove/', views.remove_doctor_access, name='remove_doctor_access'),
+    path('doctors/<uuid:doctor_id>/restrict/', views.restrict_doctor_access, name='restrict_doctor_access'),
+    path('doctors/invite/', views.invite_doctor, name='invite_doctor'),
+    path('features/', views.get_available_features, name='get_available_features'),
 ]
