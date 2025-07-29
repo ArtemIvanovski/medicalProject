@@ -71,10 +71,10 @@
                                             Врач <i class="icofont-rounded-down"></i>
                                         </a>
                                         <ul class="dropdown">
-                                            <li><a routerLink="/patient/doctors">Мои врачи</a></li>
+                                            <li><a routerLink="/patient/doctors-list">Мои врачи</a></li>
                                             <li><a routerLink="/patient/invite-doctor">Пригласить врача</a></li>
-                                            <li><a routerLink="/patient/remove-access">Удалить доступ</a></li>
-                                            <li><a routerLink="/patient/restrict-access">Ограничить доступ</a></li>
+                                            <li><a routerLink="/patient/stop-access-doctor">Удалить доступ</a></li>
+                                            <li><a routerLink="/patient/restrict-doctor-list">Ограничить доступ</a></li>
                                         </ul>
                                     </li>
 
@@ -117,6 +117,7 @@
                             </button>
                             <button
                                     class="btn btn-sm btn-outline-light"
+                                    style="margin-left: 15px;"
                                     (click)="logout()">
                                 Выход
                             </button>

@@ -364,3 +364,124 @@ def restrict_doctor_access(request, doctor_id):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_doctor_permissions(request, doctor_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info(f"Getting permissions for doctor {doctor_id}, patient {request.user.id}")
+
+        relation = DoctorPatient.objects.select_related('doctor').prefetch_related('features').filter(
+            doctor_id=doctor_id,
+            patient=request.user,
+            is_deleted=False
+        ).first()
+
+        if not relation:
+            logger.warning(f"No relation found for doctor {doctor_id} and patient {request.user.id}")
+            return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+        doctor = relation.doctor
+        current_features = list(relation.features.values_list('code', flat=True))
+        logger.info(f"Current features for relation: {current_features}")
+
+        all_features = Feature.objects.all()
+        logger.info(f"All available features: {list(all_features.values_list('code', flat=True))}")
+
+        features_data = []
+        for feature in all_features:
+            enabled = feature.code in current_features
+            features_data.append({
+                'id': str(feature.id),
+                'code': feature.code,
+                'name': feature.name,
+                'description': feature.description,
+                'enabled': enabled
+            })
+            logger.info(f"Feature {feature.code}: enabled={enabled}")
+
+        return JsonResponse({
+            'doctor': {
+                'id': str(doctor.id),
+                'first_name': doctor.first_name or '',
+                'last_name': doctor.last_name or '',
+                'patronymic': doctor.patronymic or '',
+                'email': doctor.email,
+            },
+            'features': features_data,
+            'current_permissions': current_features
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting doctor permissions: {str(e)}", exc_info=True)
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["PUT"])
+@csrf_exempt
+def update_doctor_permissions(request, doctor_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    try:
+        data = json.loads(request.body)
+        feature_codes = data.get('features', [])
+
+        logger.info(f"Updating permissions for doctor {doctor_id}")
+        logger.info(f"Patient: {request.user.id}")
+        logger.info(f"Requested features: {feature_codes}")
+
+        from django.db import transaction
+
+        with transaction.atomic():
+            relation, created = DoctorPatient.objects.get_or_create(
+                doctor_id=doctor_id,
+                patient=request.user,
+                defaults={'is_deleted': False}
+            )
+
+            logger.info(f"Relation created: {created}, relation ID: {relation.id}")
+
+            if relation.is_deleted:
+                relation.is_deleted = False
+                relation.save()
+                logger.info("Restored deleted relation")
+
+            # Логируем текущие права перед очисткой
+            current_features = list(relation.features.values_list('code', flat=True))
+            logger.info(f"Current features before clear: {current_features}")
+
+            relation.features.clear()
+            logger.info("Cleared existing features")
+
+            if feature_codes:
+                features = Feature.objects.filter(code__in=feature_codes)
+                found_features = list(features.values_list('code', flat=True))
+                logger.info(f"Found features in DB: {found_features}")
+
+                relation.features.set(features)
+                logger.info(f"Set new features: {found_features}")
+
+                # Проверим что действительно сохранилось
+                saved_features = list(relation.features.values_list('code', flat=True))
+                logger.info(f"Features after save: {saved_features}")
+            else:
+                logger.info("No features to set")
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Права доступа успешно обновлены'
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating doctor permissions: {str(e)}", exc_info=True)
+        return JsonResponse({'error': str(e)}, status=500)

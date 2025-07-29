@@ -12,14 +12,24 @@ import { PatientSettingsComponent } from './patient-settings/patient-settings.co
 import { PatientTrustedPersonComponent } from './patient-trusted-person/patient-trusted-person.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
 
+import {PatientDoctorsListComponent} from "./patient-doctor-list/patient-doctor-list.component";
 import { RoleGuard } from '../../core/guards/role.guard';
 import { SharedModule } from "../../shared/shared.module";
+import {PatientStopAccessDoctorComponent} from "./patient-stop-access-doctor/patient-stop-access-doctor.component";
+import {AuthGuard} from "../../core/guards/auth.guard";
+import {PatientInviteDoctorComponent} from "./patient-invite-doctor/patient-invite-doctor.component";
+import {
+    PatientRestrictDoctorAccessComponent
+} from "./patient-restrict-doctor-access/patient-restrict-doctor-access.component";
+import {
+    PatientRestrictDoctorListComponent
+} from "./patient-restrict-doctor-list/patient-restrict-doctor-list.component";
 
 const routes: Routes = [
     {
         path: '',
         component: PatientLayoutComponent,
-        canActivate: [RoleGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { role: 'PATIENT' },
         children: [
             {
@@ -50,6 +60,26 @@ const routes: Routes = [
             {
                 path: 'profile-settings',
                 component: ProfileSettingsComponent
+            },
+            {
+                path: 'doctors-list',
+                component: PatientDoctorsListComponent
+            },
+            {
+                path: 'stop-access-doctor',
+                component: PatientStopAccessDoctorComponent
+            },
+            {
+                path: 'invite-doctor',
+                component: PatientInviteDoctorComponent
+            },
+            {
+                path: 'restrict-doctor-access/:doctorId',
+                component: PatientRestrictDoctorAccessComponent
+            },
+            {
+                path: 'restrict-doctor-list',
+                component: PatientRestrictDoctorListComponent
             }
         ]
     }
@@ -64,6 +94,11 @@ const routes: Routes = [
         PatientDoctorComponent,
         PatientTrustedPersonComponent,
         PatientSettingsComponent,
+        PatientDoctorsListComponent,
+        PatientStopAccessDoctorComponent,
+        PatientInviteDoctorComponent,
+        PatientRestrictDoctorAccessComponent,
+        PatientRestrictDoctorListComponent,
         ProfileSettingsComponent
     ],
     imports: [

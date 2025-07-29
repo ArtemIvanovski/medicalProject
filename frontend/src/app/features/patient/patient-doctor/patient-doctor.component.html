@@ -5,7 +5,7 @@
         <div class="row">
             <!-- Врачи -->
             <div class="col-lg-6 col-md-6 col-12">
-                <a href="{% url 'doctor_list' %}" class="d-block text-decoration-none text-dark">
+                <a routerLink="/patient/doctor-list" class="d-block text-decoration-none text-dark">
                     <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
                         <div class="icon mb-3">
                             <i class="fas fa-user-md"></i>
@@ -17,7 +17,7 @@
             </div>
             <!-- Пригласить Врача -->
             <div class="col-lg-6 col-md-6 col-12">
-                <a href="{% url 'invite_doctor' %}" class="d-block text-decoration-none text-dark">
+                <a routerLink="/patient/invite-doctor" class="d-block text-decoration-none text-dark">
                     <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
                         <div class="icon mb-3">
                             <i class="fas fa-user-plus"></i>
@@ -29,7 +29,7 @@
             </div>
             <!-- Удалить доступ -->
             <div class="col-lg-6 col-md-6 col-12">
-                <a href="{% url 'stop_access_doctor' %}" class="d-block text-decoration-none text-dark">
+                <a routerLink="/patient/stop-access-doctor" class="d-block text-decoration-none text-dark">
                     <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
                         <div class="icon mb-3">
                             <i class="fas fa-user-times"></i>
@@ -41,7 +41,7 @@
             </div>
             <!-- Ограничить Доступ -->
             <div class="col-lg-6 col-md-6 col-12">
-                <a href="{% url 'doctor_list' %}" class="d-block text-decoration-none text-dark">
+                <a routerLink="/patient/restrict-doctor-list" class="d-block text-decoration-none text-dark">
                     <div class="single-vision-box p-4 mb-4 border rounded shadow-sm">
                         <div class="icon mb-3">
                             <i class="fas fa-ban"></i>

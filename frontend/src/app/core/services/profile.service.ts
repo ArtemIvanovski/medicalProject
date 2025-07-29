@@ -102,4 +102,36 @@ export class ProfileService {
     getAvatarUrl(fileId: string): string {
         return `${environment.patientApiUrl}/avatar/${fileId}/`;
     }
+
+    getPatientDoctors(): Observable<{doctors: any[]}> {
+        return this.http.get<{doctors: any[]}>(`${environment.patientApiUrl}/doctors/`);
+    }
+
+    removeDoctorAccess(doctorId: string): Observable<{success: boolean}> {
+        return this.http.post<{success: boolean}>(`${environment.patientApiUrl}/doctors/${doctorId}/remove/`, {});
+    }
+
+    restrictDoctorAccess(doctorId: string, features: string[]): Observable<{success: boolean}> {
+        return this.http.post<{success: boolean}>(`${environment.patientApiUrl}/doctors/${doctorId}/restrict/`, {
+            features
+        });
+    }
+
+    inviteDoctor(data: {message: string, features: string[]}): Observable<any> {
+        return this.http.post(`${environment.patientApiUrl}/doctors/invite/`, data);
+    }
+
+    getAvailableFeatures(): Observable<{features: any[]}> {
+        return this.http.get<{features: any[]}>(`${environment.patientApiUrl}/features/`);
+    }
+
+    getDoctorPermissions(doctorId: string): Observable<any> {
+        return this.http.get(`${environment.patientApiUrl}/doctors/${doctorId}/permissions/`);
+    }
+
+    updateDoctorPermissions(doctorId: string, features: string[]): Observable<{success: boolean, message: string}> {
+        return this.http.put<{success: boolean, message: string}>(`${environment.patientApiUrl}/doctors/${doctorId}/permissions/update/`, {
+            features
+        });
+    }
 }
