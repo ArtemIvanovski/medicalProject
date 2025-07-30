@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .drive_service import DriveService
-from .models import DoctorPatient, Invite, Feature
+from .models import DoctorPatient, Invite, Feature, TrustedUser
 from .models import UserProfile, Address, Gender, BloodType, Allergy, Diagnosis, DiabetesType
 
 
@@ -484,4 +484,241 @@ def update_doctor_permissions(request, doctor_id):
 
     except Exception as e:
         logger.error(f"Error updating doctor permissions: {str(e)}", exc_info=True)
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def get_patient_trusted_persons(request):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    trusted_relations = TrustedUser.objects.select_related('trusted').filter(
+        patient=request.user,
+        is_deleted=False
+    )
+
+    trusted_data = []
+    for relation in trusted_relations:
+        trusted = relation.trusted
+        trusted_data.append({
+            'id': str(trusted.id),
+            'first_name': trusted.first_name or '',
+            'last_name': trusted.last_name or '',
+            'patronymic': trusted.patronymic or '',
+            'phone_number': trusted.phone_number or '',
+            'email': trusted.email,
+            'avatar_url': f"/api/v1/avatar/{trusted.avatar_drive_id}/" if trusted.avatar_drive_id else None,
+            'created_at': relation.created_at.isoformat()
+        })
+
+    return JsonResponse({'trusted_persons': trusted_data})
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def remove_trusted_access(request, trusted_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        relations = TrustedUser.objects.filter(
+            trusted_id=trusted_id,
+            patient=request.user,
+            is_deleted=False
+        )
+
+        if not relations.exists():
+            return JsonResponse({'error': 'Trusted person not found'}, status=404)
+
+        relations.update(is_deleted=True)
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def invite_trusted_person(request):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+
+        from django.utils import timezone
+        from datetime import timedelta
+
+        invite = Invite.objects.create(
+            kind=Invite.Kind.TRUSTED,
+            created_by=request.user,
+            patient=request.user,
+            message=data.get('message', ''),
+            expires_at=timezone.now() + timedelta(hours=48)
+        )
+
+        feature_codes = data.get('features', [])
+        if feature_codes:
+            features = Feature.objects.filter(code__in=feature_codes)
+            invite.features.set(features)
+
+        invite_link = request.build_absolute_uri(f'/accept-invite/{invite.token}/')
+
+        return JsonResponse({
+            'success': True,
+            'token': str(invite.token),
+            'invite_link': invite_link,
+            'expires_at': invite.expires_at.isoformat()
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def restrict_trusted_access(request, trusted_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        feature_codes = data.get('features', [])
+
+        relation = TrustedUser.objects.filter(
+            trusted_id=trusted_id,
+            patient=request.user,
+            is_deleted=False
+        ).first()
+
+        if not relation:
+            return JsonResponse({'error': 'Trusted person not found'}, status=404)
+
+        if feature_codes:
+            features = Feature.objects.filter(code__in=feature_codes)
+            relation.features.set(features)
+        else:
+            relation.features.clear()
+
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_trusted_permissions(request, trusted_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info(f"Getting permissions for trusted person {trusted_id}, patient {request.user.id}")
+
+        relation = TrustedUser.objects.select_related('trusted').prefetch_related('features').filter(
+            trusted_id=trusted_id,
+            patient=request.user,
+            is_deleted=False
+        ).first()
+
+        if not relation:
+            logger.warning(f"No relation found for trusted person {trusted_id} and patient {request.user.id}")
+            return JsonResponse({'error': 'Trusted person not found'}, status=404)
+
+        trusted = relation.trusted
+        current_features = list(relation.features.values_list('code', flat=True))
+        logger.info(f"Current features for relation: {current_features}")
+
+        all_features = Feature.objects.all()
+        logger.info(f"All available features: {list(all_features.values_list('code', flat=True))}")
+
+        features_data = []
+        for feature in all_features:
+            enabled = feature.code in current_features
+            features_data.append({
+                'id': str(feature.id),
+                'code': feature.code,
+                'name': feature.name,
+                'description': feature.description,
+                'enabled': enabled
+            })
+            logger.info(f"Feature {feature.code}: enabled={enabled}")
+
+        return JsonResponse({
+            'trusted': {
+                'id': str(trusted.id),
+                'first_name': trusted.first_name or '',
+                'last_name': trusted.last_name or '',
+                'patronymic': trusted.patronymic or '',
+                'email': trusted.email,
+            },
+            'features': features_data,
+            'current_permissions': current_features
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting trusted permissions: {str(e)}", exc_info=True)
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["PUT"])
+@csrf_exempt
+def update_trusted_permissions(request, trusted_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    try:
+        data = json.loads(request.body)
+        feature_codes = data.get('features', [])
+
+        logger.info(f"Updating permissions for trusted person {trusted_id}")
+        logger.info(f"Patient: {request.user.id}")
+        logger.info(f"Requested features: {feature_codes}")
+
+        from django.db import transaction
+
+        with transaction.atomic():
+            relation, created = TrustedUser.objects.get_or_create(
+                trusted_id=trusted_id,
+                patient=request.user,
+                defaults={'is_deleted': False}
+            )
+
+            logger.info(f"Relation created: {created}, relation ID: {relation.id}")
+
+            if relation.is_deleted:
+                relation.is_deleted = False
+                relation.save()
+                logger.info("Restored deleted relation")
+
+            current_features = list(relation.features.values_list('code', flat=True))
+            logger.info(f"Current features before clear: {current_features}")
+
+            relation.features.clear()
+            logger.info("Cleared existing features")
+
+            if feature_codes:
+                features = Feature.objects.filter(code__in=feature_codes)
+                found_features = list(features.values_list('code', flat=True))
+                logger.info(f"Found features in DB: {found_features}")
+
+                relation.features.set(features)
+                logger.info(f"Set new features: {found_features}")
+
+                saved_features = list(relation.features.values_list('code', flat=True))
+                logger.info(f"Features after save: {saved_features}")
+            else:
+                logger.info("No features to set")
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Права доступа успешно обновлены'
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating trusted permissions: {str(e)}", exc_info=True)
         return JsonResponse({'error': str(e)}, status=500)

@@ -27,7 +27,8 @@ def main():
 
     services = [
         ("auth-service", 8001, os.path.join(base_dir, "services", "auth-service")),
-        ("patient-service", 8002, os.path.join(base_dir, "services", "patient-service"))
+        ("patient-service", 8002, os.path.join(base_dir, "services", "patient-service")),
+        ("medication-monitor-service", 8003, os.path.join(base_dir, "services", "medication-monitor-service"))
     ]
 
     threads = []

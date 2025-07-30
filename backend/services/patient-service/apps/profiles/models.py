@@ -182,6 +182,21 @@ class DoctorPatient(models.Model):
         return f"{self.doctor.email} -> {self.patient.email}"
 
 
+class TrustedUser(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    trusted = models.ForeignKey(User, on_delete=models.CASCADE, related_name='trusted_patients')
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='trusted_persons')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    features = models.ManyToManyField(Feature, blank=True)
+
+    class Meta:
+        db_table = 'main_app_trusteduser'
+
+    def __str__(self):
+        return f"{self.trusted.email} -> {self.patient.email}"
+
+
 class Invite(models.Model):
     class Kind(models.TextChoices):
         SENSOR = "SENSOR_ACTIVATE", "Sensor activate"

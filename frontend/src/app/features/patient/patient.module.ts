@@ -24,6 +24,15 @@ import {
 import {
     PatientRestrictDoctorListComponent
 } from "./patient-restrict-doctor-list/patient-restrict-doctor-list.component";
+import {PatientTrustedListComponent} from "./patient-trusted-list/patient-trusted-list.component";
+import {PatientStopAccessTrustedComponent} from "./patient-stop-access-trusted/patient-stop-access-trusted.component";
+import {PatientInviteTrustedComponent} from "./patient-invite-trusted/patient-invite-trusted.component";
+import {
+    PatientRestrictTrustedAccessComponent
+} from "./patient-restrict-trusted-access/patient-restrict-trusted-access.component";
+import {
+    PatientRestrictTrustedListComponent
+} from "./patient-restrict-trusted-list/patient-restrict-trusted-list.component";
 
 const routes: Routes = [
     {
@@ -80,6 +89,26 @@ const routes: Routes = [
             {
                 path: 'restrict-doctor-list',
                 component: PatientRestrictDoctorListComponent
+            },
+            {
+                path: 'trusted-persons-list',
+                component: PatientTrustedListComponent
+            },
+            {
+                path: 'stop-access-trusted',
+                component: PatientStopAccessTrustedComponent
+            },
+            {
+                path: 'invite-trusted',
+                component: PatientInviteTrustedComponent
+            },
+            {
+                path: 'restrict-trusted-access/:trustedId',
+                component: PatientRestrictTrustedAccessComponent
+            },
+            {
+                path: 'restrict-trusted-list',
+                component: PatientRestrictTrustedListComponent
             }
         ]
     }
@@ -99,7 +128,12 @@ const routes: Routes = [
         PatientInviteDoctorComponent,
         PatientRestrictDoctorAccessComponent,
         PatientRestrictDoctorListComponent,
-        ProfileSettingsComponent
+        ProfileSettingsComponent,
+        PatientRestrictTrustedListComponent,
+        PatientRestrictTrustedAccessComponent,
+        PatientInviteTrustedComponent,
+        PatientStopAccessTrustedComponent,
+        PatientTrustedListComponent
     ],
     imports: [
         CommonModule,

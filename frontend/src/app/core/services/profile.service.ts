@@ -134,4 +134,32 @@ export class ProfileService {
             features
         });
     }
+
+    getPatientTrustedPersons(): Observable<{trusted_persons: any[]}> {
+        return this.http.get<{trusted_persons: any[]}>(`${environment.patientApiUrl}/trusted/`);
+    }
+
+    removeTrustedAccess(trustedId: string): Observable<{success: boolean}> {
+        return this.http.post<{success: boolean}>(`${environment.patientApiUrl}/trusted/${trustedId}/remove/`, {});
+    }
+
+    restrictTrustedAccess(trustedId: string, features: string[]): Observable<{success: boolean}> {
+        return this.http.post<{success: boolean}>(`${environment.patientApiUrl}/trusted/${trustedId}/restrict/`, {
+            features
+        });
+    }
+
+    inviteTrustedPerson(data: {message: string, features: string[]}): Observable<any> {
+        return this.http.post(`${environment.patientApiUrl}/trusted/invite/`, data);
+    }
+
+    getTrustedPermissions(trustedId: string): Observable<any> {
+        return this.http.get(`${environment.patientApiUrl}/trusted/${trustedId}/permissions/`);
+    }
+
+    updateTrustedPermissions(trustedId: string, features: string[]): Observable<{success: boolean, message: string}> {
+        return this.http.put<{success: boolean, message: string}>(`${environment.patientApiUrl}/trusted/${trustedId}/permissions/update/`, {
+            features
+        });
+    }
 }
