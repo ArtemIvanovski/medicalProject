@@ -109,6 +109,10 @@ const routes: Routes = [
             {
                 path: 'restrict-trusted-list',
                 component: PatientRestrictTrustedListComponent
+            },
+            {
+                path: 'monitoring',
+                loadChildren: () => import('../monitoring/monitoring.module').then(m => m.MonitoringModule)
             }
         ]
     }

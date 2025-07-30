@@ -57,12 +57,13 @@ export interface InvitationValidation {
     providedIn: 'root'
 })
 export class AuthService {
-    private currentUserSubject = new BehaviorSubject<User | null>(null);
-    private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+    private isAuthenticatedSubject = new BehaviorSubject<boolean | null>(null);
+    public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+
+    public currentUserSubject = new BehaviorSubject<User | null>(null);
     private activeRoleSubject = new BehaviorSubject<string | null>(null);
 
     public currentUser$ = this.currentUserSubject.asObservable();
-    public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
     public activeRole$ = this.activeRoleSubject.asObservable();
 
     constructor(
@@ -94,6 +95,7 @@ export class AuthService {
         } else {
             console.log('No valid token, clearing auth state');
             this.clearAuthState();
+            this.isAuthenticatedSubject.next(false);
         }
     }
 
@@ -112,7 +114,6 @@ export class AuthService {
     }
 
     public loadUserData(): void {
-        this.loadCurrentUser();
     }
 
     login(email: string, password: string): Observable<LoginResponse> {
@@ -222,10 +223,10 @@ export class AuthService {
         );
     }
 
-    private loadCurrentUser(): void {
+    loadCurrentUser(): Observable<User> {
         console.log('Loading current user data');
-        this.http.get<User>(`${environment.authApiUrl}/me/`)
-            .subscribe({
+        return this.http.get<User>(`${environment.authApiUrl}/me/`).pipe(
+            tap({
                 next: user => {
                     console.log('User data loaded:', user.email);
                     this.currentUserSubject.next(user);
@@ -238,7 +239,8 @@ export class AuthService {
                         this.clearAuthState();
                     }
                 }
-            });
+            })
+        );
     }
 
     private clearAuthState(): void {

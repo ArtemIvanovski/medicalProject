@@ -20,7 +20,7 @@ export class DebugAuthComponent implements OnInit {
     hasToken = false;
     isTokenExpired = true;
     isAuthenticatedSync = false;
-    isAuthenticatedAsync = false;
+    isAuthenticatedAsync: boolean | null = null; // Изменено на boolean | null
     currentUser: any = null;
     activeRole: string | null = null;
 
@@ -34,7 +34,7 @@ export class DebugAuthComponent implements OnInit {
         });
 
         this.authService.isAuthenticated$.subscribe(isAuth => {
-            this.isAuthenticatedAsync = isAuth;
+            this.isAuthenticatedAsync = isAuth; // Теперь принимает boolean | null
         });
 
         this.authService.activeRole$.subscribe(role => {

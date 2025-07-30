@@ -290,7 +290,7 @@ def medication_stats(request):
         total_intakes=Count('id'),
         total_amount=Sum('amount'),
         avg_amount=Avg('amount'),
-        last_taken=timezone.Max('taken_at')
+        last_taken=models.Max('taken_at')
     ).order_by('-total_intakes')
 
     serializer = MedicationStatsSerializer(stats, many=True)

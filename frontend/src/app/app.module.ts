@@ -13,9 +13,10 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ProfileSelectionComponent } from './features/auth/profile-selection/profile-selection.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { AuthService } from './core/services/auth.service';
 import { DebugAuthComponent } from './debug-auth.component';
+import {AuthService} from "./core/services";
 
+// app.module.ts
 export function initializeApp(authService: AuthService) {
     return () => {
         return new Promise<void>((resolve) => {
@@ -24,13 +25,16 @@ export function initializeApp(authService: AuthService) {
             if (authService.isAuthenticated()) {
                 console.log('APP_INITIALIZER: User is authenticated, initializing state');
                 authService.initializeAuthenticatedState();
-                // Загружаем данные пользователя после инициализации
-                authService.loadUserData();
+
+                // Загружаем данные пользователя
+                authService.loadCurrentUser().subscribe({
+                    next: () => resolve(),
+                    error: () => resolve() // Разрешаем промис даже при ошибке
+                });
             } else {
                 console.log('APP_INITIALIZER: User is not authenticated');
+                resolve();
             }
-
-            resolve();
         });
     };
 }
