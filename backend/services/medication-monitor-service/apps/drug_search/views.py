@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db.models import Count, Sum, Avg
+from django.db.models import Count, Sum, Avg, F
 from django.utils import timezone
 from django.db import models
 from rest_framework import status
@@ -293,7 +293,20 @@ def medication_stats(request):
         last_taken=models.Max('taken_at')
     ).order_by('-total_intakes')
 
-    serializer = MedicationStatsSerializer(stats, many=True)
+    # Преобразуем ключи для соответствия сериализатору
+    stats_data = []
+    for item in stats:
+        stats_data.append({
+            'drug_id': item['drug__id'],
+            'drug_name': item['drug__name'],
+            'drug_form': item['drug__form'],
+            'total_intakes': item['total_intakes'],
+            'total_amount': item['total_amount'],
+            'avg_amount': item['avg_amount'],
+            'last_taken': item['last_taken']
+        })
+
+    serializer = MedicationStatsSerializer(stats_data, many=True)
     return Response({
         'period_days': period_days,
         'stats': serializer.data
@@ -304,7 +317,7 @@ def medication_stats(request):
 @permission_classes([IsAuthenticated])
 def medication_timeline(request):
     days = int(request.GET.get('days', 7))
-    drug_id = request.GET.get('drug_id')
+    drug_name = request.GET.get('drug_name')  # Изменяем название параметра для ясности
 
     queryset = MedicationIntake.objects.filter(
         user=request.user,
@@ -312,15 +325,15 @@ def medication_timeline(request):
         taken_at__gte=timezone.now() - timedelta(days=days)
     ).select_related('drug')
 
-    if drug_id:
-        queryset = queryset.filter(drug_id=drug_id)
+    if drug_name:
+        queryset = queryset.filter(drug__name=drug_name)  # Фильтруем по названию лекарства
 
     intakes = queryset.order_by('-taken_at')
     serializer = MedicationIntakeSerializer(intakes, many=True)
 
     return Response({
         'days': days,
-        'drug_id': drug_id,
+        'drug_name': drug_name,  # Возвращаем название вместо UUID
         'intakes': serializer.data
     })
 

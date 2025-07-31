@@ -10,6 +10,7 @@ import {MedicationHistoryComponent} from "./medication-history/medication-histor
 import {MedicationStatsComponent} from "./medication-stats/medication-stats.component";
 import {MedicationFavoritesComponent} from "./medication-favorites/medication-favorites.component";
 import {MedicationPatternsComponent} from "./medication-patterns/medication-patterns.component";
+import {MedicationRemindersComponent} from "./medication-reminders/medication-reminders.component";
 
 
 const routes: Routes = [
@@ -47,6 +48,12 @@ const routes: Routes = [
         component: MedicationPatternsComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'PATIENT' }
+    },
+    {
+        path: 'medication/reminders',
+        component: MedicationRemindersComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
     }
 ];
 
@@ -54,6 +61,7 @@ const routes: Routes = [
     declarations: [
         MedicationHistoryComponent,
         MedicationStatsComponent,
+        MedicationRemindersComponent,
         MedicationPatternsComponent,
         MedicationFavoritesComponent,
         MedicationOverviewComponent
