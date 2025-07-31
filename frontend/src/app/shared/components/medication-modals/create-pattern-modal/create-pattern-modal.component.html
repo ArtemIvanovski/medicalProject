@@ -1,0 +1,134 @@
+<div class="modal fade" [class.show]="show" [style.display]="show ? 'block' : 'none'" (click)="show && onShow()">
+    <div class="modal-dialog modal-xl" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создать шаблон приема</h5>
+                <button type="button" class="btn-close" (click)="onClose()"></button>
+            </div>
+            <form [formGroup]="patternForm" (ngSubmit)="onSave()">
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Название шаблона</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="name"
+                                       placeholder="Например: Утренний прием">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Описание</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="description"
+                                       placeholder="Краткое описание шаблона">
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6>Лекарства в шаблоне</h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm" (click)="addItem()">
+                            <i class="fas fa-plus"></i> Добавить лекарство
+                        </button>
+                    </div>
+
+                    <div formArrayName="items">
+                        <div *ngFor="let item of itemsArray.controls; let i = index"
+                             [formGroupName]="i"
+                             class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="card-title mb-0">Лекарство {{ i + 1 }}</h6>
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            (click)="removeItem(i)"
+                                            [disabled]="itemsArray.length === 1">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="mb-3 position-relative">
+                                            <label class="form-label">Название лекарства</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   formControlName="drug_name"
+                                                   (input)="onDrugSearch($event, i)"
+                                                   placeholder="Начните вводить название...">
+
+                                            <div *ngIf="drugSearchResults.length > 0 && activeSearchIndex === i"
+                                                 class="search-dropdown">
+                                                <div class="list-group">
+                                                    <button type="button"
+                                                            class="list-group-item list-group-item-action"
+                                                            *ngFor="let drug of drugSearchResults"
+                                                            (click)="selectDrug(drug)">
+                                                        {{ drug }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Форма выпуска</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   formControlName="drug_form"
+                                                   placeholder="таблетки">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label class="form-label">Количество</label>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   formControlName="amount"
+                                                   step="0.1"
+                                                   min="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label class="form-label">Единица</label>
+                                            <select class="form-select" formControlName="unit">
+                                                <option *ngFor="let unit of unitOptions" [value]="unit.value">
+                                                    {{ unit.label }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Заметки</label>
+                                    <textarea class="form-control"
+                                              formControlName="notes"
+                                              rows="2"
+                                              placeholder="Дополнительная информация..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="onClose()">
+                        Отмена
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            [disabled]="patternForm.invalid">
+                        Создать шаблон
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div *ngIf="show" class="modal-backdrop fade show"></div>

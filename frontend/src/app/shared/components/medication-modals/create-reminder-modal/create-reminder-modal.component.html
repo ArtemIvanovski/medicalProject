@@ -1,0 +1,146 @@
+<div class="modal fade" [class.show]="show" [style.display]="show ? 'block' : 'none'" (click)="show && onShow()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создать напоминание</h5>
+                <button type="button" class="btn-close" (click)="onClose()"></button>
+            </div>
+            <form [formGroup]="reminderForm" (ngSubmit)="onSave()">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Название лекарства</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="drug_name"
+                                       (input)="onDrugSearch($event)"
+                                       placeholder="Начните вводить название...">
+
+                                <div *ngIf="drugSearchResults.length > 0" class="search-dropdown">
+                                    <div class="list-group">
+                                        <button type="button"
+                                                class="list-group-item list-group-item-action"
+                                                *ngFor="let drug of drugSearchResults"
+                                                (click)="selectDrug(drug)">
+                                            {{ drug }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Форма выпуска</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="drug_form"
+                                       placeholder="таблетки, капсулы...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Название напоминания</label>
+                        <input type="text"
+                               class="form-control"
+                               formControlName="title"
+                               placeholder="Например: Утренний прием витаминов">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Дозировка</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="amount"
+                                       step="0.1"
+                                       min="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Единица</label>
+                                <select class="form-select" formControlName="unit">
+                                    <option *ngFor="let unit of unitOptions" [value]="unit.value">
+                                        {{ unit.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Время</label>
+                                <input type="time" class="form-control" formControlName="time">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Частота</label>
+                                <select class="form-select" formControlName="frequency" (change)="onFrequencyChange()">
+                                    <option *ngFor="let freq of frequencyOptions" [value]="freq.value">
+                                        {{ freq.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="reminderForm.get('frequency')?.value === 'custom'" class="mb-3">
+                        <label class="form-label">Дни недели</label>
+                        <div class="weekdays-selector">
+                            <label *ngFor="let day of weekdays"
+                                   class="btn btn-outline-primary btn-sm me-2 mb-2"
+                                   [class.active]="isWeekdaySelected(day.value)">
+                                <input type="checkbox"
+                                       [checked]="isWeekdaySelected(day.value)"
+                                       (change)="toggleWeekday(day.value)"
+                                       style="display: none;">
+                                {{ day.label }}
+                            </label>
+                        </div>
+                        <div *ngIf="reminderForm.get('frequency')?.value === 'custom' && reminderForm.get('weekdays')?.value?.length === 0"
+                             class="text-danger small">
+                            Выберите хотя бы один день недели
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Дата начала</label>
+                                <input type="date" class="form-control" formControlName="start_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Дата окончания <small class="text-muted">(необязательно)</small></label>
+                                <input type="date" class="form-control" formControlName="end_date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Примечания</label>
+                        <textarea class="form-control"
+                                  formControlName="notes"
+                                  rows="3"
+                                  placeholder="Дополнительная информация о приеме..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="onClose()">
+                        Отмена
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            [disabled]="!isFormValid()">
+                        Создать напоминание
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div *ngIf="show" class="modal-backdrop fade show"></div>

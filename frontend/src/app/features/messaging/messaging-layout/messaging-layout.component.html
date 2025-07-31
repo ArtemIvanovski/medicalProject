@@ -1,0 +1,28 @@
+<div class="messaging-container">
+    <div class="row h-100">
+        <div class="col-lg-4 col-md-5 chat-list-column">
+            <app-chat-list
+                    [chats]="chats"
+                    [activeChat]="activeChat"
+                    [isLoading]="isLoading"
+                    (chatSelected)="onChatSelected($event)"
+                    (newChat)="onNewChat()">
+            </app-chat-list>
+        </div>
+
+        <div class="col-lg-8 col-md-7 chat-window-column">
+            <app-chat-window
+                    [chat]="activeChat"
+                    *ngIf="activeChat">
+            </app-chat-window>
+
+            <div class="empty-chat-state" *ngIf="!activeChat">
+                <div class="text-center">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Выберите чат для начала общения</h4>
+                    <p class="text-muted">Выберите существующий чат или создайте новый</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

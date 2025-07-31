@@ -208,5 +208,9 @@ class ContactSerializer(serializers.ModelSerializer):
     def get_can_send_message(self, obj):
         request = self.context.get('request')
         if request and request.user:
-            return PermissionService.can_send_message(request.user, obj)
-        return False
+            can_send = PermissionService.can_send_message(request.user, obj)
+            return {
+                'allowed': can_send,
+                'message': 'Вы можете изменить доступ чтобы написать пользователю' if not can_send else None
+            }
+        return {'allowed': False, 'message': 'Not authenticated'}

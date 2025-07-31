@@ -1,0 +1,243 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="medication-sidebar">
+                <h5>Лекарственная терапия</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/history">
+                            <i class="fas fa-history"></i> История приемов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/stats">
+                            <i class="fas fa-chart-bar"></i> Статистика
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/medication/favorites">
+                            <i class="fas fa-star"></i> Избранные
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/patterns">
+                            <i class="fas fa-copy"></i> Шаблоны
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/reminders">
+                            <i class="fas fa-bell"></i> Напоминания
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <button class="btn btn-primary" (click)="toggleAddForm()">
+                    <i class="fas fa-plus"></i>
+                    {{ showAddForm ? 'Отмена' : 'Добавить в избранное' }}
+                </button>
+            </div>
+
+            <!-- Add to Favorites Form -->
+            <div class="row mb-4" *ngIf="showAddForm">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Добавить лекарство в избранное</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Поиск лекарства</label>
+                                    <div class="position-relative">
+                                        <input
+                                                type="text"
+                                                class="form-control"
+                                                placeholder="Начните вводить название лекарства..."
+                                                [(ngModel)]="searchTerm"
+                                                (input)="searchDrugs()">
+
+                                        <div *ngIf="isSearching" class="position-absolute top-50 end-0 translate-middle-y me-3">
+                                            <div class="spinner-border spinner-border-sm"></div>
+                                        </div>
+
+                                        <!-- Search Results Dropdown -->
+                                        <div *ngIf="searchResults.length > 0" class="search-dropdown">
+                                            <div
+                                                    *ngFor="let result of searchResults"
+                                                    class="search-item"
+                                                    (click)="selectDrugFromSearch(result)">
+                                                {{ result }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Форма лекарства</label>
+                                    <select class="form-select" [(ngModel)]="newFavorite.drugForm">
+                                        <option *ngFor="let form of drugForms" [value]="form">{{ form }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3 d-flex align-items-end">
+                                    <button
+                                            class="btn btn-success me-2"
+                                            [disabled]="!newFavorite.drugName.trim()"
+                                            (click)="addToFavorites()">
+                                        <i class="fas fa-star"></i> Добавить
+                                    </button>
+                                    <button class="btn btn-outline-secondary" (click)="resetForm()">
+                                        <i class="fas fa-times"></i> Очистить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favorites List -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Мои избранные лекарства</h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoading" class="text-center py-4">
+                                <div class="spinner-border" role="status"></div>
+                            </div>
+
+                            <div *ngIf="!isLoading && favorites.length === 0" class="text-center py-5">
+                                <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Избранных лекарств пока нет</h5>
+                                <p class="text-muted">Добавьте часто используемые лекарства в избранное для быстрого доступа</p>
+                                <button class="btn btn-primary" (click)="toggleAddForm()">
+                                    <i class="fas fa-plus"></i> Добавить первое лекарство
+                                </button>
+                            </div>
+
+                            <div *ngIf="!isLoading && favorites.length > 0">
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-6 mb-4" *ngFor="let favorite of favorites">
+                                        <div class="card h-100 favorite-card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div class="favorite-icon">
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    </div>
+                                                    <div class="dropdown">
+                                                        <button
+                                                                class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                                type="button"
+                                                                data-bs-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                <a class="dropdown-item" (click)="quickAddIntake(favorite)">
+                                                                    <i class="fas fa-plus text-success"></i> Быстрый прием
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <a class="dropdown-item text-danger" (click)="removeFromFavorites(favorite)">
+                                                                    <i class="fas fa-trash"></i> Удалить из избранного
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                                <h6 class="card-title">{{ favorite.drug_name }}</h6>
+                                                <p class="card-text text-muted">
+                                                    <small>{{ favorite.drug_form }}</small>
+                                                </p>
+
+                                                <div class="mt-auto">
+                                                    <small class="text-muted">
+                                                        Добавлено: {{ favorite.created_at | date:'dd.MM.yyyy' }}
+                                                    </small>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-footer bg-light">
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                                    <button
+                                                            class="btn btn-success btn-sm flex-fill"
+                                                            (click)="quickAddIntake(favorite)">
+                                                        <i class="fas fa-pills"></i> Принял
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Info -->
+            <div class="row mt-4" *ngIf="favorites.length > 0">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="alert-heading">Быстрые действия</h6>
+                                <p class="mb-0">
+                                    Нажмите кнопку <strong>"Принял"</strong> для быстрого добавления записи о приеме лекарства.
+                                    Избранные лекарства также отображаются на главной странице мониторинга для удобного доступа.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна -->
+<app-add-intake-modal
+        [show]="showAddIntakeModal"
+        (close)="closeAddIntakeModal()"
+        (saved)="onIntakeSaved()">
+</app-add-intake-modal>
+
+<app-edit-intake-modal
+        [show]="showEditIntakeModal"
+        [intake]="editingIntake"
+        (close)="closeEditIntakeModal()"
+        (saved)="onIntakeSaved()"
+        (deleted)="onIntakeSaved()">
+</app-edit-intake-modal>
+
+<app-create-reminder-modal
+        [show]="showCreateReminderModal"
+        (close)="closeCreateReminderModal()"
+        (saved)="onReminderSaved()">
+</app-create-reminder-modal>
+
+<app-create-pattern-modal
+        [show]="showCreatePatternModal"
+        (close)="closeCreatePatternModal()"
+        (saved)="onPatternSaved()">
+</app-create-pattern-modal>

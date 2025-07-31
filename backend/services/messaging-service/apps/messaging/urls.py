@@ -13,4 +13,5 @@ urlpatterns = [
     path('chats/<uuid:chat_id>/mark-read/', views.mark_as_read, name='mark-as-read'),
     path('messages/search/', views.search_messages, name='search-messages'),
     path('files/<str:file_id>/', views.get_file, name='get-file'),
+    path('chats/create/', views.create_or_get_chat, name='create-chat'),
 ]

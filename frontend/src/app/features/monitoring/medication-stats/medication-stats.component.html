@@ -1,0 +1,259 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="medication-sidebar">
+                <h5>Лекарственная терапия</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/history">
+                            <i class="fas fa-history"></i> История приемов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/medication/stats">
+                            <i class="fas fa-chart-bar"></i> Статистика
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/favorites">
+                            <i class="fas fa-star"></i> Избранные
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/patterns">
+                            <i class="fas fa-copy"></i> Шаблоны
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/reminders">
+                            <i class="fas fa-bell"></i> Напоминания
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <button class="btn btn-outline-primary" (click)="exportData()">
+                    <i class="fas fa-download"></i> Экспорт данных
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Период анализа</label>
+                                    <select
+                                            class="form-select"
+                                            [(ngModel)]="selectedPeriod"
+                                            (change)="onPeriodChange()">
+                                        <option value="7">За неделю</option>
+                                        <option value="30">За месяц</option>
+                                        <option value="90">За 3 месяца</option>
+                                        <option value="180">За полгода</option>
+                                        <option value="365">За год</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Фильтр по лекарству</label>
+                                    <select
+                                            class="form-select"
+                                            [(ngModel)]="selectedDrug"
+                                            (change)="onDrugChange()">
+                                        <option value="">Все лекарства</option>
+                                        <option *ngFor="let drug of uniqueDrugNames" [value]="drug">{{ drug }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <div *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></div>
+                                    <span class="text-muted">Данные за {{ selectedPeriod }} дней</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-primary">
+                        <div class="card-body text-center">
+                            <div class="display-6 text-primary">{{ totalIntakes }}</div>
+                            <div class="text-muted">Всего приемов</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <div class="display-6 text-success">{{ uniqueDrugs }}</div>
+                            <div class="text-muted">Уникальных лекарств</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <div class="display-6 text-warning">{{ averagePerDay | number:'1.1-1' }}</div>
+                            <div class="text-muted">Среднее в день</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <div class="text-info" style="font-size: 1.2rem;">{{ mostUsedDrug }}</div>
+                            <div class="text-muted">Чаще всего</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <!-- Daily Intake Chart -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Динамика приемов по дням</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas #intakeChart></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drug Distribution Chart -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Распределение по лекарствам</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas #drugsChart></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Timeline Chart -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Распределение приемов по времени суток</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas #timelineChart></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Statistics Table -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Детальная статистика по лекарствам</h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="stats.length === 0 && !isLoading" class="text-center py-4">
+                                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Нет данных для анализа</h5>
+                                <p class="text-muted">Добавьте записи о приеме лекарств для просмотра статистики</p>
+                            </div>
+
+                            <div *ngIf="stats.length > 0" class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Лекарство</th>
+                                        <th>Форма</th>
+                                        <th>Всего приемов</th>
+                                        <th>Общее количество</th>
+                                        <th>Среднее за прием</th>
+                                        <th>Последний прием</th>
+                                        <th>% от общего</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr *ngFor="let stat of stats">
+                                        <td><strong>{{ stat.drug_name }}</strong></td>
+                                        <td>{{ stat.drug_form }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ stat.total_intakes }}</span>
+                                        </td>
+                                        <td>{{ stat.total_amount | number:'1.0-2' }}</td>
+                                        <td>{{ stat.avg_amount | number:'1.0-2' }}</td>
+                                        <td>{{ stat.last_taken | date:'dd.MM.yyyy HH:mm' }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div
+                                                        class="progress-bar"
+                                                        [style.width.%]="(stat.total_intakes / totalIntakes * 100)"
+                                                        [attr.aria-valuenow]="(stat.total_intakes / totalIntakes * 100)"
+                                                        aria-valuemin="0"
+                                                        aria-valuemax="100">
+                                                    {{ (stat.total_intakes / totalIntakes * 100) | number:'1.1-1' }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна -->
+<app-add-intake-modal
+        [show]="showAddIntakeModal"
+        (close)="closeAddIntakeModal()"
+        (saved)="onIntakeSaved()">
+</app-add-intake-modal>
+
+<app-edit-intake-modal
+        [show]="showEditIntakeModal"
+        [intake]="editingIntake"
+        (close)="closeEditIntakeModal()"
+        (saved)="onIntakeSaved()"
+        (deleted)="onIntakeSaved()">
+</app-edit-intake-modal>
+
+<app-create-reminder-modal
+        [show]="showCreateReminderModal"
+        (close)="closeCreateReminderModal()"
+        (saved)="onReminderSaved()">
+</app-create-reminder-modal>
+
+<app-create-pattern-modal
+        [show]="showCreatePatternModal"
+        (close)="closeCreatePatternModal()"
+        (saved)="onPatternSaved()">
+</app-create-pattern-modal>

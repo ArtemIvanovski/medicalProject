@@ -1,0 +1,80 @@
+<section id="team" class="team section single-page">
+    <div class="container">
+        <div class="row">
+            <div *ngIf="isLoading" class="col-12 text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+
+            <ng-container *ngIf="!isLoading && trustedPersons.length > 0">
+                <div class="col-lg-4 col-md-6 col-12" *ngFor="let person of trustedPersons">
+                    <div class="single-team">
+                        <div class="t-head">
+                            <div *ngIf="person.avatar_url; else defaultAvatar">
+                                <img [src]="getAvatarUrl(person)" [alt]="getTrustedFullName(person)"/>
+                            </div>
+                            <ng-template #defaultAvatar>
+                                <div class="mb-4 text-center" style="padding-top: 20px;">
+                                    <i class="fas fa-user-friends" style="font-size: 19.1rem; color: #007bff;"></i>
+                                </div>
+                            </ng-template>
+                            <div class="t-icon">
+                                <a href="#"
+                                   type="button"
+                                   class="btn btn-danger btn-sm js-remove-btn"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#confirmRemoveModal"
+                                   [attr.data-id]="person.id"
+                                   [attr.data-name]="person.first_name + ' ' + person.last_name"
+                                   (click)="openRemoveModal(person); $event.preventDefault()">
+                                    Удалить доступ
+                                </a>
+                            </div>
+                        </div>
+                        <div class="t-bottom">
+                            <h2>
+                                <a href="#">{{ getTrustedFullName(person) }}</a>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <div *ngIf="!isLoading && trustedPersons.length === 0" class="col-12 text-center mt-5">
+                <p class="text-center mt-5">У вас пока нет доверенных лиц.</p>
+                <button (click)="navigateToInviteTrusted()" class="btn btn-primary">
+                    Пригласить доверенное лицо
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="confirmRemoveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Удалить доступ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                Вы уверены, что хотите удалить доступ доверенному лицу<br>
+                <strong *ngIf="selectedTrustedPerson">
+                    {{ getTrustedFullName(selectedTrustedPerson) }}
+                </strong>?
+            </div>
+
+            <div class="modal-footer border-0">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+                <button
+                        class="btn btn-danger"
+                        data-bs-dismiss="modal"
+                        (click)="confirmRemoveAccess()">
+                    Да, удалить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

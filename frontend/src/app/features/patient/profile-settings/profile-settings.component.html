@@ -1,0 +1,321 @@
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Основная информация</h2>
+                <p class="text-muted">Заполните или обновите данные о себе</p>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="first_name" class="form-label">Имя</label>
+                    <input
+                            type="text"
+                            id="first_name"
+                            formControlName="first_name"
+                            class="form-control"
+                            [class.is-invalid]="profileForm.get('first_name')?.invalid && profileForm.get('first_name')?.touched">
+                    <div class="invalid-feedback"
+                         *ngIf="profileForm.get('first_name')?.invalid && profileForm.get('first_name')?.touched">
+                        Имя обязательно для заполнения
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="last_name" class="form-label">Фамилия</label>
+                    <input
+                            type="text"
+                            id="last_name"
+                            formControlName="last_name"
+                            class="form-control"
+                            [class.is-invalid]="profileForm.get('last_name')?.invalid && profileForm.get('last_name')?.touched">
+                    <div class="invalid-feedback"
+                         *ngIf="profileForm.get('last_name')?.invalid && profileForm.get('last_name')?.touched">
+                        Фамилия обязательна для заполнения
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="patronymic" class="form-label">Отчество</label>
+                    <input
+                            type="text"
+                            id="patronymic"
+                            formControlName="patronymic"
+                            class="form-control">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="birth_date" class="form-label">Дата рождения</label>
+                    <input
+                            type="date"
+                            id="birth_date"
+                            formControlName="birth_date"
+                            class="form-control">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-white border-top">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Медицинская информация</h2>
+                <p class="text-muted">Заполните или обновите данные о здоровье</p>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="gender" class="form-label">Пол</label>
+                    <select formControlName="gender" class="nice-select form-control wide">
+                        <option value="">Выберите пол</option>
+                        <option *ngFor="let gender of genders" [value]="gender.name">
+                            {{ gender.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="blood_type" class="form-label">Группа крови</label>
+                    <select formControlName="blood_type" class="nice-select form-control wide">
+                        <option value="">Выберите группу крови</option>
+                        <option *ngFor="let bloodType of bloodTypes" [value]="bloodType.name">
+                            {{ bloodType.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="diabetes_type" class="form-label">Тип диабета</label>
+                    <select formControlName="diabetes_type" class="nice-select form-control wide">
+                        <option value="">Выберите тип диабета</option>
+                        <option *ngFor="let diabetesType of diabetesTypes" [value]="diabetesType.name">
+                            {{ diabetesType.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="height" class="form-label">Рост (см)</label>
+                    <input
+                            type="number"
+                            id="height"
+                            formControlName="height"
+                            class="form-control"
+                            min="0"
+                            max="300">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="weight" class="form-label">Вес (кг)</label>
+                    <input
+                            type="number"
+                            id="weight"
+                            formControlName="weight"
+                            class="form-control"
+                            min="0"
+                            max="500">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="waist_circumference" class="form-label">Обхват талии (см)</label>
+                    <input
+                            type="number"
+                            id="waist_circumference"
+                            formControlName="waist_circumference"
+                            class="form-control"
+                            min="0"
+                            max="200">
+                </div>
+
+                <!-- Аллергии -->
+                <div class="col-md-6">
+                    <label class="form-label">Аллергии</label>
+                    <div class="input-group mb-2">
+                        <select class="nice-select form-control wide" #allergySelector>
+                            <option value="" selected disabled>Выберите аллергию...</option>
+                            <option *ngFor="let allergy of allergies" [value]="allergy.id">
+                                {{ allergy.name }}
+                            </option>
+                        </select>
+                        <button
+                                type="button"
+                                class="btn"
+                                (click)="addAllergy(allergySelector.value); allergySelector.value = ''">
+                            <i class="fas fa-plus me-1"></i>
+                            Добавить
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+        <span
+                *ngFor="let allergy of selectedAllergies"
+                class="badge bg-secondary me-2 mb-2 p-2">
+            {{ allergy.name }}
+            <button
+                    type="button"
+                    class="btn-close btn-close-white ms-2"
+                    (click)="removeAllergy(allergy.id)"
+                    style="font-size: 0.7rem;">
+            </button>
+        </span>
+                        <div *ngIf="selectedAllergies.length === 0" class="text-muted small">
+                            Аллергии не выбраны
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Диагнозы -->
+                <div class="col-md-6">
+                    <label class="form-label">Диагнозы</label>
+                    <div class="input-group mb-2">
+                        <select class="nice-select form-control wide" #diagnosisSelector>
+                            <option value="" selected disabled>Выберите диагноз...</option>
+                            <option *ngFor="let diagnosis of diagnoses" [value]="diagnosis.id">
+                                {{ diagnosis.name }}
+                            </option>
+                        </select>
+                        <button
+                                type="button"
+                                class="btn"
+                                (click)="addDiagnosis(diagnosisSelector.value); diagnosisSelector.value = ''">
+                            <i class="fas fa-plus me-1"></i>
+                            Добавить
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+        <span
+                *ngFor="let diagnosis of selectedDiagnoses"
+                class="badge bg-warning text-dark diagnosis-badge">
+            {{ diagnosis.name }}
+            <button
+                    type="button"
+                    class="btn-close ms-2 ms-2 remove-allergy"
+                    (click)="removeDiagnosis(diagnosis.id)"
+                    style="font-size: 0.7rem;">
+            </button>
+        </span>
+                        <div *ngIf="selectedDiagnoses.length === 0" class="text-muted small">
+                            Диагнозы не выбраны
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light border-top">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Контактная информация</h2>
+                <p class="text-muted">Заполните или обновите данные для связи</p>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label">Фото профиля</label>
+            </div>
+
+            <div class="container text-center single-team">
+                <div class="avatar-box position-relative d-inline-block t-head">
+                    <img
+                            *ngIf="avatarUrl"
+                            [src]="avatarUrl"
+                            class="avatar-img rounded-circle shadow"
+                            alt="Фото профиля"/>
+                    <div
+                            *ngIf="!avatarUrl"
+                            class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="fas fa-user" style="font-size: 4rem; color: #6c757d;"></i>
+                    </div>
+
+                    <div class="avatar-actions d-flex flex-column gap-2">
+                        <label for="avatarInput" class="btn btn-sm btn-primary w-75 m-0">
+                            <i class="fas fa-upload me-1"></i>
+                            {{ avatarUrl ? 'Заменить фото' : 'Загрузить фото' }}
+                        </label>
+                        <button
+                                *ngIf="avatarUrl"
+                                type="button"
+                                (click)="deleteAvatar()"
+                                class="btn btn-sm w-75">
+                            <i class="fas fa-trash me-1"></i>
+                            Удалить фото
+                        </button>
+                    </div>
+
+                    <input
+                            type="file"
+                            id="avatarInput"
+                            #avatarInput
+                            class="d-none"
+                            accept="image/*"
+                            (change)="onAvatarChange($event)">
+                </div>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-12">
+                    <label for="phone_number" class="form-label">Телефон</label>
+                    <input
+                            type="tel"
+                            id="phone_number"
+                            formControlName="phone_number"
+                            class="form-control">
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Адрес</label>
+                    <div class="position-relative">
+                        <input
+                                type="text"
+                                formControlName="address_input"
+                                class="form-control"
+                                placeholder="Начните вводить адрес..."
+                                autocomplete="off"
+                                (input)="onAddressInput($event)"
+                                (blur)="hideSuggestions()">
+
+                        <ul
+                                class="suggestions-list"
+                                [style.display]="showSuggestions ? 'block' : 'none'">
+                            <li
+                                    *ngFor="let suggestion of suggestions"
+                                    (mousedown)="selectAddress(suggestion)"
+                                    style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;">
+                                {{ suggestion.formatted }}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="selected-address mt-3 p-3"
+                         style="background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 5px;">
+                        <strong *ngIf="profileForm.get('formatted')?.value">Выбранный адрес:</strong>
+                        <div *ngIf="profileForm.get('formatted')?.value">{{ profileForm.get('formatted')?.value }}</div>
+                        <div *ngIf="!profileForm.get('formatted')?.value" class="text-muted">Выбранный адрес будет
+                            отображаться здесь
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Кликните по карте чтобы выбрать адрес, или введите адрес в поле выше
+                    </div>
+                    <div
+                        #mapContainer
+                        style="height: 400px; border: 2px solid #dee2e6; border-radius: 8px; cursor: crosshair;">
+                    </div>
+                </div>
+                <div class="col-md-12 text-end">
+                    <button
+                            type="submit"
+                            class="btn btn-primary px-4"
+                            [disabled]="isLoading">
+                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                        {{ isLoading ? 'Сохранение...' : 'Сохранить' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>

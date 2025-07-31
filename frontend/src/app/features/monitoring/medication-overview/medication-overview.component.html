@@ -1,0 +1,252 @@
+<br>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="medication-sidebar">
+                <h5>Лекарственная терапия</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/medication">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/history">
+                            <i class="fas fa-history"></i> История приемов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/stats">
+                            <i class="fas fa-chart-bar"></i> Статистика
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/favorites">
+                            <i class="fas fa-star"></i> Избранные
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/patterns">
+                            <i class="fas fa-copy"></i> Шаблоны
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/reminders">
+                            <i class="fas fa-bell"></i> Напоминания
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Быстрые действия</h5>
+                            <div class="row">
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-success w-100" (click)="openAddIntakeModal()">
+                                        <i class="fas fa-pills"></i><br>
+                                        <small>Принял лекарство</small>
+                                    </button>
+                                </div>
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-info w-100" routerLink="/patient/monitoring/medication/patterns">
+                                        <i class="fas fa-copy"></i><br>
+                                        <small>Применить шаблон</small>
+                                    </button>
+                                </div>
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-warning w-100" routerLink="/patient/monitoring/medication/stats">
+                                        <i class="fas fa-chart-bar"></i><br>
+                                        <small>Статистика</small>
+                                    </button>
+                                </div>
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-secondary w-100" routerLink="/patient/monitoring/medication/reminders">
+                                        <i class="fas fa-bell"></i><br>
+                                        <small>Напоминания</small>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Reminders -->
+            <div class="row mb-4" *ngIf="todayReminders.length > 0">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bell"></i> Напоминания на сегодня
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4 mb-2" *ngFor="let reminder of todayReminders">
+                                    <div class="alert alert-warning mb-2 py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ reminder.time }}</strong> - {{ reminder.drug_name }}
+                                                <br><small>{{ reminder.amount }} {{ reminder.unit }}</small>
+                                            </div>
+                                            <button class="btn btn-sm btn-success" (click)="openAddIntakeModal()">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Content -->
+            <div class="row">
+                <!-- Recent Intakes -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Последние приемы</h5>
+                            <a routerLink="/patient/monitoring/medication/history" class="btn btn-sm btn-outline-primary">
+                                Показать все
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoading" class="text-center">
+                                <div class="spinner-border" role="status"></div>
+                            </div>
+                            <div *ngIf="!isLoading && recentIntakes.length === 0" class="text-center text-muted">
+                                <i class="fas fa-pills fa-3x mb-3"></i>
+                                <p>Записей о приеме лекарств пока нет</p>
+                                <button class="btn btn-primary" (click)="openAddIntakeModal()">
+                                    Добавить первую запись
+                                </button>
+                            </div>
+                            <div *ngIf="!isLoading && recentIntakes.length > 0">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item" *ngFor="let intake of recentIntakes">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">{{ intake.drug_name }}</h6>
+                                                <p class="mb-1 text-muted">
+                                                    {{ intake.amount }} {{ intake.unit }}
+                                                    <span *ngIf="intake.drug_form">({{ intake.drug_form }})</span>
+                                                </p>
+                                                <small class="text-muted">
+                                                    {{ intake.taken_at | date:'dd.MM.yyyy HH:mm' }}
+                                                </small>
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ intake.taken_at | date:'HH:mm' }}
+                                            </small>
+                                        </div>
+                                        <p *ngIf="intake.notes" class="mb-1 mt-2">
+                                            <small><em>{{ intake.notes }}</em></small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Статистика за неделю</h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="weeklyStats.length > 0">
+                                <div class="mb-3" *ngFor="let stat of weeklyStats; last as isLast">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">{{ stat.drug_name }}</h6>
+                                            <small class="text-muted">{{ stat.drug_form }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge bg-primary">{{ stat.total_intakes }}</div>
+                                            <br><small class="text-muted">приемов</small>
+                                        </div>
+                                    </div>
+                                    <hr *ngIf="!isLast">
+                                </div>
+                            </div>
+                            <div *ngIf="weeklyStats.length === 0" class="text-center text-muted">
+                                <p>Нет данных за последнюю неделю</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Patterns -->
+            <div class="row" *ngIf="quickPatterns.length > 0">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Быстрые шаблоны</h5>
+                            <a routerLink="/patient/monitoring/medication/patterns" class="btn btn-primary">
+                                Все шаблоны
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-3 mb-3" *ngFor="let pattern of quickPatterns">
+                                    <div class="card border-secondary h-100">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">{{ pattern.name }}</h6>
+                                            <p class="card-text text-muted">
+                                                <small>{{ pattern.items_count }} лекарств</small>
+                                            </p>
+                                            <button class="btn btn-success btn-sm"
+                                                    (click)="applyQuickPattern(pattern.id, pattern.name)">
+                                                <i class="fas fa-play"></i> Применить
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна -->
+<app-add-intake-modal
+        [show]="showAddIntakeModal"
+        (close)="closeAddIntakeModal()"
+        (saved)="onIntakeSaved()">
+</app-add-intake-modal>
+
+<app-edit-intake-modal
+        [show]="showEditIntakeModal"
+        [intake]="editingIntake"
+        (close)="closeEditIntakeModal()"
+        (saved)="onIntakeSaved()"
+        (deleted)="onIntakeSaved()">
+</app-edit-intake-modal>
+
+<app-create-reminder-modal
+        [show]="showCreateReminderModal"
+        (close)="closeCreateReminderModal()"
+        (saved)="onReminderSaved()">
+</app-create-reminder-modal>
+
+<app-create-pattern-modal
+        [show]="showCreatePatternModal"
+        (close)="closeCreatePatternModal()"
+        (saved)="onPatternSaved()">
+</app-create-pattern-modal>

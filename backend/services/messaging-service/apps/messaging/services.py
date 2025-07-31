@@ -131,34 +131,27 @@ class PermissionService:
 
     @staticmethod
     def get_allowed_contacts(user):
-        send_message_feature = Feature.objects.filter(code='SEND_MESSAGE').first()
-        if not send_message_feature:
-            return User.objects.none()
-
-        doctor_contacts = []
-        trusted_contacts = []
+        all_contacts = []
 
         doctor_relations = DoctorPatient.objects.filter(
             Q(doctor=user) | Q(patient=user),
-            is_deleted=False,
-            features=send_message_feature
+            is_deleted=False
         ).select_related('doctor', 'patient')
 
         for relation in doctor_relations:
             contact = relation.patient if relation.doctor == user else relation.doctor
-            doctor_contacts.append(contact.id)
+            all_contacts.append(contact.id)
 
         trusted_relations = TrustedUser.objects.filter(
             Q(trusted=user) | Q(patient=user),
-            is_deleted=False,
-            features=send_message_feature
+            is_deleted=False
         ).select_related('trusted', 'patient')
 
         for relation in trusted_relations:
             contact = relation.patient if relation.trusted == user else relation.trusted
-            trusted_contacts.append(contact.id)
+            all_contacts.append(contact.id)
 
-        contact_ids = list(set(doctor_contacts + trusted_contacts))
+        contact_ids = list(set(all_contacts))
         return User.objects.filter(id__in=contact_ids, is_deleted=False)
 
 
@@ -201,7 +194,9 @@ class ChatService:
 
     @staticmethod
     def get_user_chats(user):
-        return Chat.objects.filter(
+        existing_chats = Chat.objects.filter(
             participants=user,
             is_deleted=False
         ).prefetch_related('participants', 'messages')
+
+        return existing_chats

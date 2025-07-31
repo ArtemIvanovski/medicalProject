@@ -1,0 +1,184 @@
+.medication-sidebar {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 20px;
+
+  h5 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .nav-link {
+    color: #6c757d;
+    padding: 12px 16px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+
+    i {
+      width: 20px;
+      margin-right: 10px;
+    }
+
+    &:hover {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    &.active {
+      background-color: #007bff;
+      color: white;
+    }
+  }
+}
+
+.card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+
+    h5 {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+  }
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ced4da;
+  border-top: none;
+  border-radius: 0 0 0.375rem 0.375rem;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #f1f3f4;
+  }
+}
+
+.favorite-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #e3e6f0;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+  }
+
+  .favorite-icon {
+    font-size: 1.5rem;
+  }
+
+  .card-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-footer {
+    border-top: 1px solid #e3e6f0;
+    padding: 0.75rem;
+  }
+}
+
+.alert {
+  border-radius: 8px;
+
+  .alert-heading {
+    color: #0c5460;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.dropdown-menu {
+  border: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  border-radius: 8px;
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+
+    i {
+      width: 16px;
+      margin-right: 8px;
+    }
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+
+  .dropdown-divider {
+    margin: 0.25rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .medication-sidebar {
+    position: static;
+    margin-bottom: 30px;
+
+    .nav {
+      flex-direction: row;
+      overflow-x: auto;
+
+      .nav-item {
+        flex: 0 0 auto;
+
+        .nav-link {
+          white-space: nowrap;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+
+  .favorite-card {
+    margin-bottom: 1rem;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .d-md-flex {
+    flex-direction: column !important;
+
+    .btn {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+.position-relative {
+  .search-dropdown {
+    @media (max-width: 576px) {
+      max-height: 150px;
+    }
+  }
+}

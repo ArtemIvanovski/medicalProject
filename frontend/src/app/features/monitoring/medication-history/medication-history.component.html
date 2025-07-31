@@ -1,0 +1,301 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="medication-sidebar">
+                <h5>Лекарственная терапия</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/medication/history">
+                            <i class="fas fa-history"></i> История приемов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/stats">
+                            <i class="fas fa-chart-bar"></i> Статистика
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/favorites">
+                            <i class="fas fa-star"></i> Избранные
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/patterns">
+                            <i class="fas fa-copy"></i> Шаблоны
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/medication/reminders">
+                            <i class="fas fa-bell"></i> Напоминания
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <!-- Filters -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Поиск</label>
+                                    <input
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Поиск по названию или заметкам..."
+                                            [(ngModel)]="searchTerm"
+                                            (input)="applyFilters()">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">Период</label>
+                                    <select
+                                            class="form-select"
+                                            [(ngModel)]="selectedPeriod"
+                                            (change)="applyFilters()">
+                                        <option value="7">За неделю</option>
+                                        <option value="30">За месяц</option>
+                                        <option value="90">За 3 месяца</option>
+                                        <option value="all">Все время</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Лекарство</label>
+                                    <select
+                                            class="form-select"
+                                            [(ngModel)]="selectedDrug"
+                                            (change)="applyFilters()">
+                                        <option value="">Все лекарства</option>
+                                        <option *ngFor="let drug of uniqueDrugs" [value]="drug">{{ drug }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">Сортировка</label>
+                                    <select
+                                            class="form-select"
+                                            [(ngModel)]="sortBy"
+                                            (change)="applyFilters()">
+                                        <option value="taken_at">По времени</option>
+                                        <option value="drug_name">По названию</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">Порядок</label>
+                                    <select
+                                            class="form-select"
+                                            [(ngModel)]="sortOrder"
+                                            (change)="applyFilters()">
+                                        <option value="desc">По убыванию</option>
+                                        <option value="asc">По возрастанию</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+                                        <i class="fas fa-times"></i> Очистить фильтры
+                                    </button>
+                                    <span class="text-muted ms-3">
+                    Найдено записей: <strong>{{ totalItems }}</strong>
+                  </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History List -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Записи о приеме лекарств</h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoading" class="text-center py-4">
+                                <div class="spinner-border" role="status"></div>
+                            </div>
+
+                            <div *ngIf="!isLoading && filteredIntakes.length === 0" class="text-center py-4">
+                                <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Записей не найдено</h5>
+                                <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
+                            </div>
+
+                            <div *ngIf="!isLoading && paginatedIntakes.length > 0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>Дата и время</th>
+                                            <th>Лекарство</th>
+                                            <th>Количество</th>
+                                            <th>Заметки</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr *ngFor="let intake of paginatedIntakes">
+                                            <td>
+                                                <div>
+                                                    <strong>{{ intake.taken_at | date:'dd.MM.yyyy' }}</strong>
+                                                </div>
+                                                <small class="text-muted">{{ intake.taken_at | date:'HH:mm' }}</small>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ intake.drug_name }}</strong>
+                                                </div>
+                                                <small class="text-muted" *ngIf="intake.drug_form">{{ intake.drug_form }}</small>
+                                            </td>
+                                            <td>
+                          <span class="badge bg-primary">
+                            {{ intake.amount }} {{ intake.unit }}
+                          </span>
+                                            </td>
+                                            <td>
+                          <span *ngIf="intake.notes" class="text-truncate d-inline-block" style="max-width: 200px;">
+                            {{ intake.notes }}
+                          </span>
+                                                <span *ngIf="!intake.notes" class="text-muted">—</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button
+                                                            class="btn btn-outline-primary"
+                                                            (click)="openEditIntakeModal(intake)"
+                                                            title="Редактировать">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button
+                                                            class="btn btn-outline-danger"
+                                                            (click)="openDeleteModal(intake)"
+                                                            title="Удалить">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav *ngIf="totalPages > 1" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" [class.disabled]="currentPage === 1">
+                                            <a class="page-link" (click)="onPageChange(currentPage - 1)" href="javascript:void(0)">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+
+                                        <li *ngFor="let page of pages"
+                                            class="page-item"
+                                            [class.active]="page === currentPage">
+                                            <a class="page-link" (click)="onPageChange(page)" href="javascript:void(0)">
+                                                {{ page }}
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                            <a class="page-link" (click)="onPageChange(currentPage + 1)" href="javascript:void(0)">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+
+                                <!-- Items per page -->
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                    <span class="text-muted">
+                      Показано {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, totalItems) }}
+                        из {{ totalItems }}
+                    </span>
+                                    </div>
+                                    <div>
+                                        <label class="form-label me-2">Записей на странице:</label>
+                                        <select
+                                                class="form-select form-select-sm d-inline-block w-auto"
+                                                [(ngModel)]="itemsPerPage"
+                                                (change)="currentPage = 1">
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div *ngIf="showDeleteModal" class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Удалить запись</h5>
+                <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                Вы уверены, что хотите удалить запись о приеме<br>
+                <strong *ngIf="selectedIntakeForDelete">
+                    {{ selectedIntakeForDelete.drug_name }}
+                </strong>?
+            </div>
+
+            <div class="modal-footer border-0">
+                <button class="btn btn-secondary" (click)="closeDeleteModal()">Нет</button>
+                <button
+                        class="btn btn-danger"
+                        (click)="confirmDelete()">
+                    Да, удалить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div *ngIf="showDeleteModal" class="modal-backdrop fade show"></div>
+
+<!-- Модальные окна -->
+<app-add-intake-modal
+        [show]="showAddIntakeModal"
+        (close)="closeAddIntakeModal()"
+        (saved)="onIntakeSaved()">
+</app-add-intake-modal>
+
+<app-edit-intake-modal
+        [show]="showEditIntakeModal"
+        [intake]="editingIntake"
+        (close)="closeEditIntakeModal()"
+        (saved)="onIntakeSaved()"
+        (deleted)="onIntakeSaved()">
+</app-edit-intake-modal>
+
+<app-create-reminder-modal
+        [show]="showCreateReminderModal"
+        (close)="closeCreateReminderModal()"
+        (saved)="onReminderSaved()">
+</app-create-reminder-modal>
+
+<app-create-pattern-modal
+        [show]="showCreatePatternModal"
+        (close)="closeCreatePatternModal()"
+        (saved)="onPatternSaved()">
+</app-create-pattern-modal>

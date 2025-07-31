@@ -1,0 +1,48 @@
+<section id="team" class="team section single-page">
+    <div class="container">
+        <div class="row">
+            <div *ngIf="isLoading" class="col-12 text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+
+            <ng-container *ngIf="!isLoading && doctors.length > 0">
+                <div class="col-lg-4 col-md-6 col-12" *ngFor="let doctor of doctors">
+                    <div class="single-team">
+                        <div class="t-head">
+                            <div *ngIf="doctor.avatar_url; else defaultAvatar">
+                                <img [src]="getAvatarUrl(doctor)" [alt]="getDoctorFullName(doctor)"/>
+                            </div>
+                            <ng-template #defaultAvatar>
+                                <div class="mb-4 text-center" style="padding-top: 20px;">
+                                    <i class="fas fa-user-md" style="font-size: 19.1rem; color: #007bff;"></i>
+                                </div>
+                            </ng-template>
+                            <div class="t-icon">
+                                <a href="#"
+                                   type="button"
+                                   class="btn btn-warning btn-sm"
+                                   (click)="navigateToRestrictAccess(doctor); $event.preventDefault()">
+                                    Ограничить доступ
+                                </a>
+                            </div>
+                        </div>
+                        <div class="t-bottom">
+                            <h2>
+                                <a href="#">{{ getDoctorFullName(doctor) }}</a>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <div *ngIf="!isLoading && doctors.length === 0" class="col-12 text-center mt-5">
+                <p class="text-center mt-5">У вас пока нет закреплённых врачей.</p>
+                <button (click)="navigateToInviteDoctor()" class="btn btn-primary">
+                    Пригласить врача
+                </button>
+            </div>
+        </div>
+    </div>
+</section>

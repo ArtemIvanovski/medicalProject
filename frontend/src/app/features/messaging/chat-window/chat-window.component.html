@@ -1,0 +1,127 @@
+<div class="chat-window" *ngIf="chat">
+    <div class="chat-header">
+        <div class="d-flex align-items-center">
+            <img [src]="chat.companion.avatar_url || 'assets/img/default-avatar.png'"
+                 [alt]="chat.companion.full_name"
+                 class="avatar-img me-3">
+            <div>
+                <h6 class="mb-0">{{ chat.companion.full_name }}</h6>
+                <small class="text-muted">
+                    {{ chat.companion.last_seen ? 'был(а) ' + (chat.companion.last_seen | date:'short') : 'онлайн' }}
+                </small>
+            </div>
+        </div>
+        <div class="chat-actions">
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="messages-container" #messagesContainer>
+        <div class="text-center p-3" *ngIf="isLoading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+
+        <div class="message-wrapper" *ngFor="let message of messages">
+            <div class="message"
+                 [class.message-mine]="isMyMessage(message)"
+                 [class.message-theirs]="!isMyMessage(message)">
+
+                <div class="message-reply" *ngIf="message.reply_to">
+                    <div class="reply-content">
+                        <strong>{{ message.reply_to.sender.full_name }}</strong>
+                        <p>{{ message.reply_to.content }}</p>
+                    </div>
+                </div>
+
+                <div class="message-content">
+                    <div class="message-attachments" *ngIf="message.attachments.length > 0">
+                        <div class="attachment-item" *ngFor="let attachment of message.attachments">
+                            <a [href]="attachment.file_url" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-paperclip me-1"></i>
+                                {{ attachment.file_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="message-text" *ngIf="message.content">
+                        {{ message.content }}
+                    </div>
+
+                    <div class="message-meta">
+                        <span class="message-time">{{ formatMessageTime(message.sent_at) }}</span>
+                        <span class="message-edited" *ngIf="message.is_edited">изм.</span>
+                        <span class="message-status" *ngIf="isMyMessage(message)">
+                            <i class="fas fa-check"
+                               [class.text-muted]="getMessageStatus(message) === 'sent'"
+                               [class.text-primary]="getMessageStatus(message) === 'delivered'"
+                               [class.text-success]="getMessageStatus(message) === 'read'"></i>
+                            <i class="fas fa-check"
+                               *ngIf="getMessageStatus(message) !== 'sent'"
+                               [class.text-primary]="getMessageStatus(message) === 'delivered'"
+                               [class.text-success]="getMessageStatus(message) === 'read'"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="message-actions" *ngIf="isMyMessage(message)">
+                    <button class="btn btn-sm btn-link" (click)="onReplyToMessage(message)">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link" (click)="onEditMessage(message)" *ngIf="message.can_edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link text-danger" (click)="onDeleteMessage(message)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="message-input-container">
+        <div class="reply-preview" *ngIf="replyToMessage">
+            <div class="reply-preview-content">
+                <strong>{{ replyToMessage.sender.full_name }}</strong>
+                <p>{{ replyToMessage.content }}</p>
+            </div>
+            <button class="btn btn-sm btn-link" (click)="onCancelReply()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="file-preview" *ngIf="selectedFiles.length > 0">
+            <div class="selected-files">
+                <div class="file-item" *ngFor="let file of selectedFiles">
+                    <i class="fas fa-paperclip me-1"></i>
+                    {{ file.name }}
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button">
+                <input type="file" class="d-none" #fileInput (change)="onFileSelected($event)" multiple>
+                <i class="fas fa-paperclip" (click)="fileInput.click()"></i>
+            </button>
+
+            <textarea class="form-control"
+                      #messageInput
+                      [(ngModel)]="newMessage"
+                      (keypress)="onKeyPress($event)"
+                      placeholder="Напишите сообщение..."
+                      rows="1"></textarea>
+
+            <button class="btn btn-primary"
+                    type="button"
+                    (click)="onSendMessage()"
+                    [disabled]="isSending || (!newMessage.trim() && selectedFiles.length === 0)">
+                <i class="fas fa-paper-plane" *ngIf="!isSending"></i>
+                <span class="spinner-border spinner-border-sm" *ngIf="isSending"></span>
+            </button>
+        </div>
+    </div>
+</div>

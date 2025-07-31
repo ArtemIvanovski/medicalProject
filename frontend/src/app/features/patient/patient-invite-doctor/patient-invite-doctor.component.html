@@ -1,0 +1,222 @@
+<section class="news-single section" style="padding-top: 0">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-12">
+                <form [formGroup]="inviteForm" (ngSubmit)="onSubmit()" id="invite-form">
+                    <div class="comments-form">
+
+                        <div class="row faq-wrap">
+                            <div class="col-lg-12">
+                                <div class="faq-head">
+                                    <h2>Настройки доступа для приглашения</h2>
+                                </div>
+
+                                <div class="faq-wrap mb-4">
+                                    <ul class="accordion list-unstyled">
+                                        <li>
+                                            <a class="accordion-title"
+                                               [class.active]="isAccordionOpen('sensor')"
+                                               (click)="toggleAccordion('sensor')">
+                                                <span>Доступ к датчику</span>
+                                            </a>
+                                            <div class="accordion-content"
+                                                 [style.display]="isAccordionOpen('sensor') ? 'block' : 'none'">
+                                                <p>Разрешает доктору просматривать основную информацию о вашем датчике и управлять настройками.</p>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="view_sensor">
+                                                        Просмотр датчика
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="manage_sensor">
+                                                        Управление датчиком
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="accordion-title"
+                                               [class.active]="isAccordionOpen('basic')"
+                                               (click)="toggleAccordion('basic')">
+                                                <span>Основные сведения</span>
+                                            </a>
+                                            <div class="accordion-content"
+                                                 [style.display]="isAccordionOpen('basic') ? 'block' : 'none'">
+                                                <p>Разрешает доктору просматривать основные данные по мониторингу глюкозы.</p>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="agp_daily">
+                                                        AGP за день
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="agp_all_time">
+                                                        AGP за все время
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="view_glucose">
+                                                        Просмотр глюкозы
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="daily_profiles">
+                                                        Дневные профили
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="accordion-title"
+                                               [class.active]="isAccordionOpen('additional')"
+                                               (click)="toggleAccordion('additional')">
+                                                <span>Дополнительные сведения</span>
+                                            </a>
+                                            <div class="accordion-content"
+                                                 [style.display]="isAccordionOpen('additional') ? 'block' : 'none'">
+                                                <p>Разрешает доктору просматривать дополнительные данные по вашей физической активности, питанию и лекарственной терапии.</p>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="monitor_nutrition">
+                                                        Мониторинг питания
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="monitor_activity">
+                                                        Мониторинг активности
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="monitor_medication">
+                                                        Мониторинг лекарств
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="accordion-title"
+                                               [class.active]="isAccordionOpen('notifications')"
+                                               (click)="toggleAccordion('notifications')">
+                                                <span>Уведомления</span>
+                                            </a>
+                                            <div class="accordion-content"
+                                                 [style.display]="isAccordionOpen('notifications') ? 'block' : 'none'">
+                                                <p>Разрешает доктору получать или отправлять сообщения Вам.</p>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="send_message">
+                                                        Отправка сообщений
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox mb-2" style="padding: 0px 40px 5px 20px">
+                                                    <label>
+                                                        <input type="checkbox" formControlName="view_alerts">
+                                                        Просмотр уведомлений
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="faq-head">
+                            <h2>Пригласительный текст</h2>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group message">
+                                    <i class="fa fa-pencil"></i>
+                                    <textarea
+                                            formControlName="message"
+                                            placeholder="Введите сообщение для приглашения"
+                                            rows="4"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group button">
+                                    <button
+                                            type="submit"
+                                            class="btn primary"
+                                            [disabled]="isLoading">
+                                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                        <i *ngIf="!isLoading" class="fas fa-paper-plane"></i>Сгенерировать приглашение
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 share-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Пригласительная ссылка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <img
+                        *ngIf="qrBase64"
+                        [src]="'data:image/png;base64,' + qrBase64"
+                        alt="QR Code"
+                        class="img-fluid mb-4"
+                        style="max-width:180px;">
+
+                <div class="form-group mb-3 d-none">
+                    <textarea
+                            id="inviteMessage"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Ваше сообщение…"
+                            [value]="inviteForm.get('message')?.value"></textarea>
+                </div>
+                <div class="mb-3 d-none">
+                    <input
+                            type="text"
+                            readonly
+                            class="form-control text-center"
+                            [value]="inviteLink"
+                            id="inviteLinkFieldModal">
+                </div>
+
+                <ul class="social justify-content-center mb-0">
+                    <li>
+                        <a href="#" (click)="shareTelegram(); $event.preventDefault()">
+                            <i class="icofont-telegram"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" (click)="shareVK(); $event.preventDefault()">
+                            <i class="icofont-vk"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" (click)="shareEmail(); $event.preventDefault()">
+                            <i class="icofont-email"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" (click)="copyLink(); $event.preventDefault()">
+                            <i class="icofont-copy"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

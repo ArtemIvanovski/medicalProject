@@ -8,7 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Chat, Message, MessageAttachment, MessageStatus, UserDeletedMessage
+from .models import Chat, Message, MessageAttachment, MessageStatus, UserDeletedMessage, User
 from .serializers import (
     ChatSerializer, MessageSerializer, SendMessageSerializer,
     EditMessageSerializer, ContactSerializer
@@ -274,3 +274,29 @@ def search_messages(request):
 
     serializer = MessageSerializer(page, many=True, context={'request': request})
     return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_or_get_chat(request):
+    recipient_id = request.data.get('recipient_id')
+
+    if not recipient_id:
+        return Response({'error': 'recipient_id is required'}, status=400)
+
+    try:
+        recipient = User.objects.get(id=recipient_id, is_deleted=False)
+    except User.DoesNotExist:
+        return Response({'error': 'Recipient not found'}, status=404)
+
+    if not PermissionService.can_send_message(request.user, recipient):
+        return Response({
+            'error': 'Вы не можете написать этому пользователю',
+            'message': 'Вы можете изменить доступ чтобы написать пользователю',
+            'can_change_permissions': True
+        }, status=403)
+
+    chat = ChatService.get_or_create_chat(request.user, recipient)
+    serializer = ChatSerializer(chat, context={'request': request})
+
+    return Response(serializer.data, status=201)

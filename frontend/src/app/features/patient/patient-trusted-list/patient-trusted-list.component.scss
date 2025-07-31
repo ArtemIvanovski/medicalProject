@@ -1,0 +1,27 @@
+.share-modal .social {
+  margin-top: 15px;
+}
+
+.share-modal .social li {
+  display: inline-block;
+  margin: 0 8px;
+}
+
+.share-modal .social li a {
+  display: block;
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  text-align: center;
+  border: 1px solid #C8C8C8;
+  border-radius: 6px;
+  color: #555;
+  font-size: 20px;
+  transition: all 0.2s ease;
+}
+
+.share-modal .social li a:hover {
+  background: #1A76D1;
+  color: #fff;
+  border-color: transparent;
+}

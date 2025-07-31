@@ -113,6 +113,10 @@ const routes: Routes = [
             {
                 path: 'monitoring',
                 loadChildren: () => import('../monitoring/monitoring.module').then(m => m.MonitoringModule)
+            },
+            {
+                path: 'messages',
+                loadChildren: () => import('../messaging/messaging.module').then(m => m.MessagingModule)
             }
         ]
     }

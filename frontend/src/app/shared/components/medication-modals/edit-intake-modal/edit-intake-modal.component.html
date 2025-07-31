@@ -1,0 +1,131 @@
+<div class="modal fade" [class.show]="show" [style.display]="show ? 'block' : 'none'">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать прием лекарства</h5>
+                <button type="button" class="btn-close" (click)="onClose()"></button>
+            </div>
+            <form [formGroup]="intakeForm" (ngSubmit)="onSave()">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Название лекарства</label>
+                                <div class="input-group">
+                                    <input type="text"
+                                           class="form-control"
+                                           formControlName="drug_name"
+                                           (input)="onDrugSearch($event)"
+                                           placeholder="Начните вводить название...">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
+                                            (click)="toggleFavorites()"
+                                            [title]="'Избранные лекарства'">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+
+                                <div *ngIf="drugSearchResults.length > 0" class="search-dropdown">
+                                    <div class="list-group">
+                                        <button type="button"
+                                                class="list-group-item list-group-item-action"
+                                                *ngFor="let drug of drugSearchResults"
+                                                (click)="selectDrug(drug)">
+                                            {{ drug }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="showFavorites" class="search-dropdown">
+                                    <div class="list-group">
+                                        <div *ngIf="isLoadingFavorites" class="list-group-item text-center">
+                                            <div class="spinner-border spinner-border-sm"></div>
+                                            Загрузка...
+                                        </div>
+                                        <div *ngIf="!isLoadingFavorites && favoriteDrugs.length === 0"
+                                             class="list-group-item text-muted text-center">
+                                            Нет избранных лекарств
+                                        </div>
+                                        <button type="button"
+                                                class="list-group-item list-group-item-action d-flex justify-content-between"
+                                                *ngFor="let favorite of favoriteDrugs"
+                                                (click)="selectFavoriteDrug(favorite)">
+                                            <span>{{ favorite.drug_name }}</span>
+                                            <small class="text-muted">{{ favorite.drug_form }}</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Форма выпуска</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="drug_form"
+                                       placeholder="таблетки, капсулы...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Количество</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="amount"
+                                       step="0.1"
+                                       min="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Единица измерения</label>
+                                <select class="form-select" formControlName="unit">
+                                    <option *ngFor="let unit of unitOptions" [value]="unit.value">
+                                        {{ unit.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Время приема</label>
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       formControlName="taken_at">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Заметки</label>
+                        <textarea class="form-control"
+                                  formControlName="notes"
+                                  rows="3"
+                                  placeholder="Дополнительная информация о приеме..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-danger me-auto"
+                            (click)="onDelete()"
+                            [disabled]="isDeleting">
+                        <span *ngIf="isDeleting" class="spinner-border spinner-border-sm me-2"></span>
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                    <button type="button" class="btn btn-secondary" (click)="onClose()">
+                        Отмена
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            [disabled]="intakeForm.invalid">
+                        Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div *ngIf="show" class="modal-backdrop fade show"></div>
