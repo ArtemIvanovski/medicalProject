@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {
-  MedicationIntake,
-  MedicationReminder,
-  MedicationService
-} from "../../../core/services";
+import {MedicationService} from "../../../core/services";
+import {MedicationIntake, MedicationReminder} from "../../../core/models";
 
 interface ReminderTab {
   id: string;

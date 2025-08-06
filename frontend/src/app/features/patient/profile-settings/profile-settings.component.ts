@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {Address, ProfileData, ProfileService, ReferenceItem} from "../../../core/services";
+import {Address, ProfileData, PatientService, ReferenceItem} from "../../../core/services";
 
 declare var L: any;
 declare var Swal: any;
@@ -47,7 +47,7 @@ export class ProfileSettingsComponent implements OnInit, AfterViewInit {
 
   constructor(
       private fb: FormBuilder,
-      private profileService: ProfileService
+      private profileService: PatientService
   ) {}
 
   ngOnInit(): void {

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {MedicationService, MedicationPattern, MedicationIntake} from '../../../core/services';
+import {MedicationService} from '../../../core/services';
+import {MedicationIntake, MedicationPattern} from "../../../core/models";
 
 @Component({
   selector: 'app-medication-patterns',

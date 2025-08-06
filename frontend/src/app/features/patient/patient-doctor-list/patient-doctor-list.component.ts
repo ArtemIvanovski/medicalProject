@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {ProfileService} from "../../../core/services";
+import {PatientService} from "../../../core/services";
 
 interface Doctor {
   id: string;
@@ -24,7 +24,7 @@ export class PatientDoctorsListComponent implements OnInit {
   selectedDoctor: Doctor | null = null;
 
   constructor(
-      private profileService: ProfileService,
+      private profileService: PatientService,
       private router: Router
   ) {}
 

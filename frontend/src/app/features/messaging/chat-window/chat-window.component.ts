@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { MessagingService, Chat, Message } from "../../../core/services";
+import { MessagingService } from "../../../core/services";
+import {Chat, Message} from "../../../core/models";
 
 @Component({
   selector: 'app-chat-window',

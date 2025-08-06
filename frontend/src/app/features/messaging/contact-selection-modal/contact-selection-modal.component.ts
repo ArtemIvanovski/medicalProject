@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
-import { MessagingService, MessagingUser } from '../../../core/services';
+import { MessagingService } from '../../../core/services';
+import {MessagingUser} from "../../../core/models";
 
 declare var bootstrap: any;
 

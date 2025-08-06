@@ -2,7 +2,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { Observable, of, map, switchMap, take, filter } from 'rxjs';
-import {AuthService, User} from "../services";
+import {AuthService} from "../services";
+import {User} from "../models";
 
 @Injectable({
     providedIn: 'root'
@@ -21,7 +22,7 @@ export class RoleGuard implements CanActivate {
         const requiredRole = route.data['role'] as string;
 
         return this.authService.currentUser$.pipe(
-            filter(user => user !== null), // Ждем пока данные пользователя загрузятся
+            filter(user => user !== null),
             take(1),
             switchMap((user: User | null) => {
                 if (!user) {

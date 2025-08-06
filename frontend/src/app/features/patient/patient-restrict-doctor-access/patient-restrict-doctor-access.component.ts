@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import {ProfileService} from "../../../core/services";
+import {PatientService} from "../../../core/services";
 
 interface Doctor {
   id: string;
@@ -37,7 +37,7 @@ export class PatientRestrictDoctorAccessComponent implements OnInit {
       private fb: FormBuilder,
       private route: ActivatedRoute,
       private router: Router,
-      private profileService: ProfileService
+      private profileService: PatientService
   ) {}
 
   ngOnInit(): void {

@@ -50,7 +50,7 @@ export interface ReferenceItem {
 @Injectable({
     providedIn: 'root'
 })
-export class ProfileService {
+export class PatientService {
     constructor(private http: HttpClient) {}
 
     getProfile(): Observable<ProfileData> {

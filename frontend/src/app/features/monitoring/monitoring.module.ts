@@ -11,6 +11,7 @@ import {MedicationStatsComponent} from "./medication-stats/medication-stats.comp
 import {MedicationFavoritesComponent} from "./medication-favorites/medication-favorites.component";
 import {MedicationPatternsComponent} from "./medication-patterns/medication-patterns.component";
 import {MedicationRemindersComponent} from "./medication-reminders/medication-reminders.component";
+import {NutritionDashboardComponent} from "./nutrition-dashboard/nutrition-dashboard.component";
 
 
 const routes: Routes = [
@@ -54,7 +55,13 @@ const routes: Routes = [
         component: MedicationRemindersComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'PATIENT' }
-    }
+    },
+    {
+        path: 'nutrition',
+        component: NutritionDashboardComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
+    },
 ];
 
 @NgModule({
@@ -64,7 +71,8 @@ const routes: Routes = [
         MedicationRemindersComponent,
         MedicationPatternsComponent,
         MedicationFavoritesComponent,
-        MedicationOverviewComponent
+        MedicationOverviewComponent,
+        NutritionDashboardComponent
     ],
     imports: [
         CommonModule,

@@ -1,12 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  MedicationIntake,
-  MedicationPattern,
-  MedicationReminder,
-  MedicationService,
-  MedicationStats
-} from "../../../core/services";
+import {MedicationService} from "../../../core/services";
 import {Title} from "@angular/platform-browser";
+import {MedicationIntake, MedicationPattern, MedicationReminder, MedicationStats} from "../../../core/models";
 
 @Component({
   selector: 'app-medication-overview',

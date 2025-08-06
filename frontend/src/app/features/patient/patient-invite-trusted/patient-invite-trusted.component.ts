@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import * as QRCode from 'qrcode';
-import {ProfileService} from "../../../core/services";
+import {PatientService} from "../../../core/services";
 
 interface Feature {
   id: string;
@@ -34,7 +34,7 @@ export class PatientInviteTrustedComponent implements OnInit {
 
   constructor(
       private fb: FormBuilder,
-      private profileService: ProfileService
+      private profileService: PatientService
   ) {}
 
   ngOnInit(): void {

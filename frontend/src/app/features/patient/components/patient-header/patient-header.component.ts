@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import {AuthService, RoleData, User} from "../../../../core/services";
+import {RoleData, User} from "../../../../core/models";
+import {AuthService} from "../../../../core/services";
 
 @Component({
   selector: 'app-patient-header',

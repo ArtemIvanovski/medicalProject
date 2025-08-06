@@ -1,5 +1,6 @@
 import {Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy} from '@angular/core';
-import {MedicationService, MedicationIntake, MedicationStats} from "../../../core/services";
+import {MedicationService} from "../../../core/services";
+import {MedicationIntake, MedicationStats} from "../../../core/models";
 
 declare var Chart: any;
 

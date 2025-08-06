@@ -8,5 +8,5 @@ def health_check(request):
 
 
 urlpatterns = [
-    path('api/auth/', include('apps.authentication.urls')),
+    path('api/v1/', include('apps.authentication.urls')),
 ]

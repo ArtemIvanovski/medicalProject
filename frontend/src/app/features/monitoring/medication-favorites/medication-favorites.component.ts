@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {MedicationService, FavoriteDrug, MedicationIntake} from '../../../core/services';
+import {MedicationService} from '../../../core/services';
+import {FavoriteDrug, MedicationIntake} from "../../../core/models";
 
 @Component({
   selector: 'app-medication-favorites',

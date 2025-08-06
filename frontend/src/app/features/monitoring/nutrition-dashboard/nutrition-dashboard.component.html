@@ -1,0 +1,370 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="nutrition-sidebar">
+                <h5>Питание</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/nutrition">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/search">
+                            <i class="fas fa-search"></i> Поиск продуктов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/my-products">
+                            <i class="fas fa-user"></i> Мои продукты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/products/create">
+                            <i class="fas fa-plus"></i> Создать продукт
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/recipes">
+                            <i class="fas fa-book"></i> Рецепты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/diary">
+                            <i class="fas fa-calendar"></i> Дневник питания
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/analytics">
+                            <i class="fas fa-chart-bar"></i> Аналитика
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Быстрые действия</h5>
+                            <div class="row">
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-success w-100" (click)="openSearchModal()">
+                                        <i class="fas fa-plus"></i><br>
+                                        <small>Добавить продукт</small>
+                                    </button>
+                                </div>
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-info w-100" routerLink="/patient/monitoring/nutrition/recipes">
+                                        <i class="fas fa-book"></i><br>
+                                        <small>Мои рецепты</small>
+                                    </button>
+                                </div>
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-warning w-100" routerLink="/patient/monitoring/nutrition/analytics">
+                                        <i class="fas fa-chart-bar"></i><br>
+                                        <small>Аналитика</small>
+                                    </button>
+                                </div>
+                                <div class="col-md-3 col-6 mb-2">
+                                    <button class="btn btn-outline-secondary w-100" routerLink="/patient/monitoring/nutrition/diary">
+                                        <i class="fas fa-calendar"></i><br>
+                                        <small>Дневник</small>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Content -->
+            <div class="row">
+                <!-- Daily Stats with Circular Progress -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Дневная статистика</h5>
+                            <small class="text-muted">{{ today | date:'dd.MM.yyyy' }}</small>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoading" class="text-center">
+                                <div class="spinner-border" role="status"></div>
+                            </div>
+
+                            <div *ngIf="!isLoading && todayStats && dailyGoal" class="nutrition-stats">
+                                <!-- Calories Circle -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6 text-center">
+                                        <div class="calories-circle">
+                                            <div class="circle-progress" [attr.data-percentage]="getCaloriesPercentage()">
+                                                <div class="circle-inner">
+                                                    <div class="calories-consumed">{{ todayStats.calories || 0 }}</div>
+                                                    <div class="calories-label">съедено</div>
+                                                    <div class="calories-remaining">
+                                                        {{ getCaloriesRemaining() > 0 ? '-' + getCaloriesRemaining() : '+' + abs(getCaloriesRemaining()) }}
+                                                    </div>
+                                                    <div class="calories-goal">{{ dailyGoal.calories_goal }} ккал цель</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="macros-breakdown">
+                                            <!-- Protein -->
+                                            <div class="macro-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="macro-label">
+                                                        <span class="macro-dot protein"></span>
+                                                        Белки
+                                                    </span>
+                                                    <span class="macro-values">{{ todayStats.protein || 0 }} / {{ dailyGoal.protein_goal }}г</span>
+                                                </div>
+                                                <div class="progress macro-progress">
+                                                    <div class="progress-bar protein-bar" [style.width.%]="getProteinPercentage()"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Fat -->
+                                            <div class="macro-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="macro-label">
+                                                        <span class="macro-dot fat"></span>
+                                                        Жиры
+                                                    </span>
+                                                    <span class="macro-values">{{ todayStats.fat || 0 }} / {{ dailyGoal.fat_goal }}г</span>
+                                                </div>
+                                                <div class="progress macro-progress">
+                                                    <div class="progress-bar fat-bar" [style.width.%]="getFatPercentage()"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Carbs -->
+                                            <div class="macro-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="macro-label">
+                                                        <span class="macro-dot carbs"></span>
+                                                        Углеводы
+                                                    </span>
+                                                    <span class="macro-values">{{ todayStats.carbohydrate || 0 }} / {{ dailyGoal.carbohydrate_goal }}г</span>
+                                                </div>
+                                                <div class="progress macro-progress">
+                                                    <div class="progress-bar carbs-bar" [style.width.%]="getCarbohydratePercentage()"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="!isLoading && (!todayStats || !dailyGoal)" class="text-center text-muted">
+                                <i class="fas fa-utensils fa-3x mb-3"></i>
+                                <p>Нет данных о питании на сегодня</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Intakes -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Последние приемы</h5>
+                            <a routerLink="/patient/monitoring/nutrition/diary" class="btn btn-sm btn-outline-primary">
+                                Показать все
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoading" class="text-center">
+                                <div class="spinner-border" role="status"></div>
+                            </div>
+                            <div *ngIf="!isLoading && recentIntakes.length === 0" class="text-center text-muted">
+                                <i class="fas fa-utensils fa-3x mb-3"></i>
+                                <p>Записей о приеме пищи пока нет</p>
+                                <button class="btn btn-primary" (click)="openSearchModal()">
+                                    Добавить первую запись
+                                </button>
+                            </div>
+                            <div *ngIf="!isLoading && recentIntakes.length > 0">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item" *ngFor="let intake of recentIntakes">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">{{ intake.product_name }}</h6>
+                                                <p class="mb-1 text-muted">
+                                                    {{ intake.amount }}{{ intake.unit }} • {{ intake.calories_consumed }}ккал
+                                                </p>
+                                                <small class="text-muted">
+                                                    {{ intake.consumed_at | date:'dd.MM.yyyy HH:mm' }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="macros-mini mt-2" *ngIf="intake.protein_consumed || intake.fat_consumed || intake.carbohydrate_consumed">
+                                            <span class="macro-mini protein">Б: {{ intake.protein_consumed }}г</span>
+                                            <span class="macro-mini fat">Ж: {{ intake.fat_consumed }}г</span>
+                                            <span class="macro-mini carbs">У: {{ intake.carbohydrate_consumed }}г</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div *ngIf="showSearchModal" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Поиск продуктов</h5>
+                <button type="button" class="btn-close" (click)="closeSearchModal()"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Input -->
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Найти продукты, рецепты..."
+                           [(ngModel)]="searchQuery" (input)="onSearchInput($event)" autocomplete="off">
+                </div>
+
+                <!-- Search Results -->
+                <div *ngIf="isSearching" class="text-center">
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                </div>
+
+                <div *ngIf="searchResults && !isSearching" class="search-results-modal">
+                    <!-- Products -->
+                    <div *ngIf="searchResults.products.length > 0" class="mb-3">
+                        <h6 class="text-muted mb-2">Продукты</h6>
+                        <div *ngFor="let product of searchResults.products"
+                             class="search-item-modal"
+                             (click)="selectProduct(product, 'product')">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="product-name">{{ product.name }}</div>
+                                    <small class="text-muted">
+                                        {{ product.calories || 0 }}ккал •
+                                        Б:{{ product.protein || 0 }}г •
+                                        Ж:{{ product.fat || 0 }}г •
+                                        У:{{ product.carbohydrate || 0 }}г
+                                    </small>
+                                </div>
+                                <button class="btn btn-sm btn-success">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Products -->
+                    <div *ngIf="searchResults.user_products.length > 0" class="mb-3">
+                        <h6 class="text-muted mb-2">Мои продукты</h6>
+                        <div *ngFor="let product of searchResults.user_products"
+                             class="search-item-modal"
+                             (click)="selectProduct(product, 'user_product')">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="product-name">{{ product.name }}</div>
+                                    <small class="text-muted">
+                                        {{ product.calories || 0 }}ккал •
+                                        Б:{{ product.protein || 0 }}г •
+                                        Ж:{{ product.fat || 0 }}г •
+                                        У:{{ product.carbohydrate || 0 }}г
+                                    </small>
+                                </div>
+                                <button class="btn btn-sm btn-success">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipes -->
+                    <div *ngIf="searchResults.recipes.length > 0" class="mb-3">
+                        <h6 class="text-muted mb-2">Рецепты</h6>
+                        <div *ngFor="let recipe of searchResults.recipes"
+                             class="search-item-modal"
+                             (click)="selectProduct(recipe, 'recipe')">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="product-name">{{ recipe.name }}</div>
+                                    <small class="text-muted">
+                                        {{ recipe.calories_per_100g || 0 }}ккал/100г •
+                                        Б:{{ recipe.protein_per_100g || 0 }}г •
+                                        Ж:{{ recipe.fat_per_100g || 0 }}г •
+                                        У:{{ recipe.carbohydrate_per_100g || 0 }}г
+                                    </small>
+                                </div>
+                                <button class="btn btn-sm btn-success">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Intake Modal -->
+<div *ngIf="showAddIntakeModal" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить в дневник</h5>
+                <button type="button" class="btn-close" (click)="closeAddIntakeModal()"></button>
+            </div>
+            <form [formGroup]="addIntakeForm" (ngSubmit)="addIntake()">
+                <div class="modal-body">
+                    <div *ngIf="selectedProduct" class="selected-product mb-3 p-3 bg-light rounded">
+                        <h6 class="mb-2">{{ getProductName() }}</h6>
+                        <small class="text-muted">
+                            На 100г: {{ getProductCalories() }}ккал,
+                            Б: {{ getProductProtein() }}г,
+                            Ж: {{ getProductFat() }}г,
+                            У: {{ getProductCarbohydrate() }}г
+                        </small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label for="amount" class="form-label">Количество</label>
+                            <input type="number" id="amount" class="form-control"
+                                   formControlName="amount" min="1" step="0.1">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="unit" class="form-label">Единица</label>
+                            <select id="unit" class="form-select" formControlName="unit">
+                                <option value="g">граммы</option>
+                                <option value="ml">мл</option>
+                                <option value="pieces">штуки</option>
+                                <option value="tbsp">ст.л.</option>
+                                <option value="tsp">ч.л.</option>
+                                <option value="cup">стаканы</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeAddIntakeModal()">
+                        Отмена
+                    </button>
+                    <button type="submit" class="btn btn-primary" [disabled]="addIntakeForm.invalid">
+                        <i class="fas fa-plus me-1"></i>
+                        Добавить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

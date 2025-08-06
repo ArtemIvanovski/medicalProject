@@ -78,7 +78,7 @@ class Product(models.Model):
     isdeleted = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'products'
+        db_table = 'nutrition_products'
 
     def __str__(self):
         return self.name

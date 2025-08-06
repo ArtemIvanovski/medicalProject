@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Chat, MessagingService, MessagingUser } from "../../../core/services";
+import { MessagingService } from "../../../core/services";
 import { ContactSelectionModalComponent } from '../contact-selection-modal/contact-selection-modal.component';
+import {Chat, MessagingUser} from "../../../core/models";
 
 @Component({
   selector: 'app-messaging-layout',
