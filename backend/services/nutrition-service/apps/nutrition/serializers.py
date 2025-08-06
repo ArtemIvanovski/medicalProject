@@ -17,13 +17,20 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class UserProductSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProduct
         fields = [
             'id', 'name', 'protein', 'fat', 'carbohydrate',
-            'calories', 'composition', 'manufacturer', 'created_at', 'updated_at'
+            'calories', 'composition', 'manufacturer', 'image_url', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_image_url(self, obj):
+        if obj.image_drive_id:
+            return f"/api/v1/nutrition/product-image/{obj.image_drive_id}/"
+        return None
 
 
 class CreateUserProductSerializer(serializers.ModelSerializer):

@@ -75,6 +75,7 @@ class Product(models.Model):
     country = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    isdeleted = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'products'
@@ -96,6 +97,7 @@ class UserProduct(models.Model):
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image_drive_id = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         db_table = 'nutrition_user_product'

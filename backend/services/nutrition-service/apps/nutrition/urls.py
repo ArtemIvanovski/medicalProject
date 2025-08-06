@@ -27,4 +27,8 @@ urlpatterns = [
     path('stats/top-products/', views.top_products, name='top-products'),
 
     path('dashboard/', views.nutrition_dashboard, name='nutrition-dashboard'),
+
+    path('user-products/<uuid:product_id>/image/', views.upload_product_image, name='upload-product-image'),
+    path('user-products/<uuid:product_id>/image/delete/', views.delete_product_image, name='delete-product-image'),
+    path('product-image/<str:file_id>/', views.get_product_image, name='get-product-image'),
 ]

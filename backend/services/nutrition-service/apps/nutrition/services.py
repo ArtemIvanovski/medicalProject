@@ -32,14 +32,15 @@ class ProductSearchService:
         if include_favorites:
             favorite_products = Product.objects.filter(
                 product_id__in=FavoriteProduct.objects.filter(user=user).values_list('product_id', flat=True),
-                name__icontains=search_query
+                name__icontains=search_query,
+                isdeleted=False
             )[:limit // 4]
             results['favorites'] = list(favorite_products)
 
         products_query = Product.objects.filter(
             Q(name__icontains=search_query) |
             Q(manufacturer__icontains=search_query)
-        ).exclude(
+        ).filter(isdeleted=False).exclude(
             product_id__in=[p.product_id for p in results['favorites']]
         )[:limit // 2]
         results['products'] = list(products_query)

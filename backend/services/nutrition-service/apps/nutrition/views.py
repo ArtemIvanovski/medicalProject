@@ -1,6 +1,9 @@
 from datetime import datetime
-from django.db import models
+
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -8,10 +11,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .drive_service import DriveService
 from .models import (
-    Product, UserProduct, Recipe, RecipeIngredient,
-    FavoriteProduct, DailyGoal, FoodIntake
+    Recipe, FavoriteProduct, DailyGoal, FoodIntake
 )
+from .models import UserProduct
 from .serializers import (
     ProductSerializer, UserProductSerializer, CreateUserProductSerializer,
     RecipeSerializer, CreateRecipeSerializer, FavoriteProductSerializer,
@@ -20,9 +24,78 @@ from .serializers import (
     NutritionTimelineSerializer
 )
 from .services import (
-    ProductSearchService, NutritionCalculatorService,
-    NutritionStatsService, RecipeService
+    ProductSearchService, NutritionStatsService, RecipeService
 )
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def upload_product_image(request, product_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No file provided'}, status=400)
+
+    try:
+        user_product = UserProduct.objects.get(
+            id=product_id,
+            user=request.user,
+            is_deleted=False
+        )
+    except UserProduct.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)
+
+    file = request.FILES['image']
+    drive_service = DriveService()
+
+    try:
+        file_id = drive_service.upload_product_image(file, user_product.image_drive_id)
+        user_product.image_drive_id = file_id
+        user_product.save()
+        return JsonResponse({'success': True, 'file_id': file_id})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["DELETE"])
+@csrf_exempt
+def delete_product_image(request, product_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        user_product = UserProduct.objects.get(
+            id=product_id,
+            user=request.user,
+            is_deleted=False
+        )
+    except UserProduct.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)
+
+    if not user_product.image_drive_id:
+        return JsonResponse({'error': 'No image to delete'}, status=400)
+
+    drive_service = DriveService()
+
+    try:
+        drive_service.remove_file(user_product.image_drive_id)
+        user_product.image_drive_id = None
+        user_product.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_product_image(request, file_id):
+    drive_service = DriveService()
+
+    try:
+        file_content = drive_service.get_file_content(file_id)
+        return HttpResponse(file_content, content_type='image/jpeg')
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=404)
 
 
 class ProductSearchView(APIView):
@@ -80,6 +153,13 @@ class UserProductDetailView(RetrieveUpdateDestroyAPIView):
         return UserProduct.objects.filter(user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance):
+        if instance.image_drive_id:
+            from .drive_service import DriveService
+            drive_service = DriveService()
+            try:
+                drive_service.remove_file(instance.image_drive_id)
+            except Exception:
+                pass
         instance.is_deleted = True
         instance.save()
 
@@ -118,6 +198,13 @@ class RecipeDetailView(RetrieveUpdateDestroyAPIView):
         return Recipe.objects.filter(user=self.request.user, is_deleted=False).prefetch_related('ingredients')
 
     def perform_destroy(self, instance):
+        if instance.image_drive_id:
+            from .drive_service import DriveService
+            drive_service = DriveService()
+            try:
+                drive_service.remove_file(instance.image_drive_id)
+            except Exception:
+                pass
         instance.is_deleted = True
         instance.save()
 
@@ -216,6 +303,13 @@ class FoodIntakeDetailView(RetrieveUpdateDestroyAPIView):
         return FoodIntake.objects.filter(user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance):
+        if instance.image_drive_id:
+            from .drive_service import DriveService
+            drive_service = DriveService()
+            try:
+                drive_service.remove_file(instance.image_drive_id)
+            except Exception:
+                pass
         instance.is_deleted = True
         instance.save()
 
