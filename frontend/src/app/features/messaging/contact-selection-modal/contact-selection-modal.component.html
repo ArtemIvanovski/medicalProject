@@ -1,0 +1,43 @@
+<div class="modal fade" id="contactSelectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Выберите собеседника</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="search-container mb-3">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Поиск контактов..."
+                           [(ngModel)]="searchQuery">
+                </div>
+
+                <div class="contacts-list">
+                    <div class="contact-item"
+                         *ngFor="let contact of filteredContacts"
+                         (click)="onContactSelected(contact)"
+                         [class.disabled]="!contact.can_send_message.allowed">
+                        <img [src]="messagingService.getAvatarUrl(contact.avatar_url)"
+                             class="contact-avatar">
+                        <div class="contact-info">
+                            <div class="contact-name">{{ contact.full_name }}</div>
+                            <div class="contact-status" *ngIf="!contact.can_send_message.allowed">
+                                {{ contact.can_send_message.message }}
+                            </div>
+                        </div>
+                        <i class="fas fa-lock text-muted" *ngIf="!contact.can_send_message.allowed"></i>
+                    </div>
+                </div>
+
+                <div class="text-center py-4" *ngIf="isLoading">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+
+                <div class="text-center py-4" *ngIf="!isLoading && filteredContacts.length === 0">
+                    <p class="text-muted">Контакты не найдены</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

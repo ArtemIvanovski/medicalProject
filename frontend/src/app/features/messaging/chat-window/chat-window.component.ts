@@ -21,7 +21,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   private subscriptions = new Subscription();
   private shouldScrollToBottom = false;
 
-  constructor(private messagingService: MessagingService) {}
+  constructor(public messagingService: MessagingService) {}
 
   ngOnInit(): void {
     if (this.chat) {

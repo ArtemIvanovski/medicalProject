@@ -9,6 +9,7 @@ import { RoleGuard } from '../../core/guards/role.guard';
 import { MessagingLayoutComponent } from './messaging-layout/messaging-layout.component';
 import { ChatListComponent } from './chat-list/chat-list.component';
 import { ChatWindowComponent } from './chat-window/chat-window.component';
+import {ContactSelectionModalComponent} from "./contact-selection-modal/contact-selection-modal.component";
 
 const routes: Routes = [
     {
@@ -23,7 +24,8 @@ const routes: Routes = [
     declarations: [
         MessagingLayoutComponent,
         ChatListComponent,
-        ChatWindowComponent
+        ChatWindowComponent,
+        ContactSelectionModalComponent
     ],
     imports: [
         CommonModule,

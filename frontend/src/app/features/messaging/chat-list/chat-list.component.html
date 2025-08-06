@@ -34,7 +34,7 @@
              (click)="onChatClick(chat)">
 
             <div class="chat-avatar">
-                <img [src]="chat.companion.avatar_url || 'assets/img/default-avatar.png'"
+                <img [src]="messagingService.getAvatarUrl(chat.companion.avatar_url)"
                      [alt]="chat.companion.full_name"
                      class="avatar-img">
             </div>

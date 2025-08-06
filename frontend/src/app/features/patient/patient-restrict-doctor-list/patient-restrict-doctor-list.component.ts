@@ -59,7 +59,7 @@ export class PatientRestrictDoctorListComponent implements OnInit {
         return this.profileService.getAvatarUrl(match[1]);
       }
     }
-    return 'assets/img/default-doctor.png';
+    return 'assets/img/default-avatar.png';
   }
 
   getDoctorFullName(doctor: Doctor): string {

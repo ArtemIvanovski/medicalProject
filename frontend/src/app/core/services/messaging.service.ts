@@ -11,7 +11,10 @@ export interface MessagingUser {
     full_name: string;
     avatar_url?: string;
     last_seen?: string;
-    can_send_message: boolean;
+    can_send_message: {
+        allowed: boolean;
+        message?: string;
+    };
 }
 
 export interface MessageAttachment {
@@ -130,5 +133,29 @@ export class MessagingService {
 
     getActiveChat(): Chat | null {
         return this.activeChat.value;
+    }
+
+    createOrGetChat(recipientId: string): Observable<Chat> {
+        return this.http.post<Chat>(`${environment.messagingApiUrl}/chats/create/`, {
+            recipient_id: recipientId
+        });
+    }
+
+    getAvatarUrl(avatarUrl: string | undefined): string {
+        if (!avatarUrl) {
+            return 'assets/img/default-avatar.png';
+        }
+
+        if (avatarUrl.startsWith('http')) {
+            return avatarUrl;
+        }
+
+        // Обработка нового формата URL для аватаров
+        if (avatarUrl.startsWith('/api/v1/files/')) {
+            const fileId = avatarUrl.split('/')[4]; // Извлекаем ID файла из пути
+            return `${environment.patientApiUrl}/avatar/${fileId}/`;
+        }
+
+        return avatarUrl;
     }
 }

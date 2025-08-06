@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import {Chat} from "../../../core/services";
+import {Chat, MessagingService} from "../../../core/services";
 
 @Component({
   selector: 'app-chat-list',
@@ -14,6 +14,8 @@ export class ChatListComponent {
   @Output() newChat = new EventEmitter<void>();
 
   searchQuery = '';
+
+  constructor(public messagingService: MessagingService) {}
 
   get filteredChats(): Chat[] {
     if (!this.searchQuery.trim()) {

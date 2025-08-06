@@ -47,3 +47,22 @@
     }
   }
 }
+
+.mobile-header {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  span {
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .messaging-container {
+    height: calc(100vh - 100px);
+  }
+}

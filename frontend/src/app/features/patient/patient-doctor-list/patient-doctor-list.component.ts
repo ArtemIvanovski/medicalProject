@@ -84,7 +84,7 @@ export class PatientDoctorsListComponent implements OnInit {
         return this.profileService.getAvatarUrl(match[1]);
       }
     }
-    return 'assets/img/default-doctor.png';
+    return 'assets/img/default-avatar.png';
   }
 
   private showAlert(message: string, type: 'success' | 'error'): void {
