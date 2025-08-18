@@ -1,5 +1,6 @@
 import uuid
 from decimal import Decimal
+from datetime import date
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.db.models import Sum
@@ -59,6 +60,37 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_authenticated(self):
         return True
+
+
+class Gender(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        db_table = 'main_app_gender'
+        managed = False  # This table is managed by another service
+
+    def __str__(self):
+        return self.name
+
+
+class UserProfile(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    height = models.FloatField(null=True, blank=True)
+    weight = models.FloatField(null=True, blank=True)
+    waist_circumference = models.FloatField(null=True, blank=True)
+    address_home_id = models.BigIntegerField(null=True, blank=True)
+    blood_type_id = models.BigIntegerField(null=True, blank=True)
+    diabetes_type_id = models.BigIntegerField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'main_app_userprofile'
+        managed = False  # This table is managed by another service
+
+    def __str__(self):
+        return f"Profile of {self.user.email}"
 
 
 class Product(models.Model):

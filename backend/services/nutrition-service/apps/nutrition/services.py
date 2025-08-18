@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from django.db.models import Q, Sum, Avg, Count, F
 from django.utils import timezone
-from .models import Product, UserProduct, Recipe, FoodIntake, FavoriteProduct, DailyGoal
+from .models import Product, UserProduct, Recipe, FoodIntake, FavoriteProduct, DailyGoal, UserProfile, Gender
 
 
 class ProductSearchService:
@@ -89,6 +89,135 @@ class NutritionCalculatorService:
         }
 
 
+class DailyGoalService:
+    @staticmethod
+    def get_or_create_daily_goal(user):
+        """
+        Get or create a daily goal for the user based on their profile data.
+        If user profile data is available, use it. Otherwise, use default values.
+        """
+        try:
+            daily_goal = DailyGoal.objects.get(user=user)
+            # Check if we need to update based on user profile changes
+            DailyGoalService.update_goal_from_profile(daily_goal)
+            return daily_goal
+        except DailyGoal.DoesNotExist:
+            return DailyGoalService.create_daily_goal_from_profile(user)
+
+    @staticmethod
+    def create_daily_goal_from_profile(user):
+        """
+        Create a daily goal based on user profile data or default values.
+        """
+        try:
+            profile = UserProfile.objects.select_related('gender').get(user=user)
+            
+            # Calculate age from birth_date
+            age = 25  # default age
+            if user.birth_date:
+                today = date.today()
+                age = today.year - user.birth_date.year - ((today.month, today.day) < (user.birth_date.month, user.birth_date.day))
+            
+            # Get profile data with defaults
+            weight = profile.weight or 70.0  # default weight
+            height = profile.height or 170.0  # default height
+            gender_name = 'male'  # default gender
+            
+            if profile.gender:
+                gender_name = profile.gender.name.lower()
+                # Map common gender names to our expected values
+                if gender_name in ['мужской', 'м', 'мужчина']:
+                    gender_name = 'male'
+                elif gender_name in ['женский', 'ж', 'женщина']:
+                    gender_name = 'female'
+            
+            # Create daily goal
+            daily_goal = DailyGoal.objects.create(
+                user=user,
+                weight=Decimal(str(weight)),
+                height=int(height),
+                age=age,
+                gender=gender_name,
+                activity_level=Decimal('1.2'),
+                calories_goal=Decimal('2000'),  # temporary values
+                protein_goal=Decimal('100'),
+                fat_goal=Decimal('60'),
+                carbohydrate_goal=Decimal('250')
+            )
+            
+            # Calculate proper goals
+            daily_goal.calculate_goals()
+            return daily_goal
+            
+        except UserProfile.DoesNotExist:
+            # Create with default values if no profile exists
+            age = 25
+            if user.birth_date:
+                today = date.today()
+                age = today.year - user.birth_date.year - ((today.month, today.day) < (user.birth_date.month, user.birth_date.day))
+            
+            daily_goal = DailyGoal.objects.create(
+                user=user,
+                weight=Decimal('70.0'),
+                height=170,
+                age=age,
+                gender='male',
+                activity_level=Decimal('1.2'),
+                calories_goal=Decimal('2000'),
+                protein_goal=Decimal('100'),
+                fat_goal=Decimal('60'),
+                carbohydrate_goal=Decimal('250')
+            )
+            
+            daily_goal.calculate_goals()
+            return daily_goal
+
+    @staticmethod
+    def update_goal_from_profile(daily_goal):
+        """
+        Update existing daily goal if profile data has changed.
+        """
+        try:
+            profile = UserProfile.objects.select_related('gender').get(user=daily_goal.user)
+            
+            # Check if we need to update
+            needs_update = False
+            
+            if profile.weight and abs(float(daily_goal.weight) - profile.weight) > 0.1:
+                daily_goal.weight = Decimal(str(profile.weight))
+                needs_update = True
+            
+            if profile.height and abs(daily_goal.height - profile.height) > 1:
+                daily_goal.height = int(profile.height)
+                needs_update = True
+                
+            if profile.gender:
+                gender_name = profile.gender.name.lower()
+                # Map common gender names to our expected values
+                if gender_name in ['мужской', 'м', 'мужчина']:
+                    gender_name = 'male'
+                elif gender_name in ['женский', 'ж', 'женщина']:
+                    gender_name = 'female'
+                
+                if daily_goal.gender != gender_name:
+                    daily_goal.gender = gender_name
+                    needs_update = True
+            
+            # Update age from birth_date
+            if daily_goal.user.birth_date:
+                today = date.today()
+                age = today.year - daily_goal.user.birth_date.year - ((today.month, today.day) < (daily_goal.user.birth_date.month, daily_goal.user.birth_date.day))
+                if daily_goal.age != age:
+                    daily_goal.age = age
+                    needs_update = True
+            
+            if needs_update:
+                daily_goal.calculate_goals()
+                
+        except UserProfile.DoesNotExist:
+            pass  # No profile to update from
+
+
 class NutritionStatsService:
     @staticmethod
     def get_daily_stats(user, target_date=None):
@@ -104,16 +233,20 @@ class NutritionStatsService:
             consumed_at__gte=start_datetime,
             consumed_at__lt=end_datetime
         ).aggregate(
-            total_calories=Sum('calories_consumed') or Decimal('0'),
-            total_protein=Sum('protein_consumed') or Decimal('0'),
-            total_fat=Sum('fat_consumed') or Decimal('0'),
-            total_carbohydrate=Sum('carbohydrate_consumed') or Decimal('0')
+            total_calories=Sum('calories_consumed'),
+            total_protein=Sum('protein_consumed'),
+            total_fat=Sum('fat_consumed'),
+            total_carbohydrate=Sum('carbohydrate_consumed')
         )
+        
+        # Handle None values from aggregation
+        intakes['total_calories'] = intakes['total_calories'] or Decimal('0')
+        intakes['total_protein'] = intakes['total_protein'] or Decimal('0')
+        intakes['total_fat'] = intakes['total_fat'] or Decimal('0')
+        intakes['total_carbohydrate'] = intakes['total_carbohydrate'] or Decimal('0')
 
-        try:
-            daily_goal = DailyGoal.objects.get(user=user)
-        except DailyGoal.DoesNotExist:
-            daily_goal = None
+        # Get or create daily goal from user profile
+        daily_goal = DailyGoalService.get_or_create_daily_goal(user)
 
         if daily_goal:
             calories_percentage = (intakes[

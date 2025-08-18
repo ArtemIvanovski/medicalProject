@@ -59,11 +59,33 @@ export class NutritionDashboardComponent implements OnInit {
     loadDashboard(): void {
         this.isLoading = true;
         this.nutritionService.getDashboard().subscribe({
-            next: (data) => {
+            next: (data: any) => {
+                console.log('Dashboard API response:', data);
                 this.dashboardData = data;
-                this.todayStats = data.today_stats;
-                this.dailyGoal = data.goal;
-                this.recentIntakes = data.recent_intakes;
+                // Маппинг данных из API в ожидаемую структуру
+                this.todayStats = data.today ? {
+                    date: data.today.date,
+                    calories: parseFloat(data.today.total_calories) || 0,
+                    protein: parseFloat(data.today.total_protein) || 0,
+                    fat: parseFloat(data.today.total_fat) || 0,
+                    carbohydrate: parseFloat(data.today.total_carbohydrate) || 0
+                } : null;
+                
+                this.dailyGoal = data.daily_goal ? {
+                    id: '1',
+                    calories_goal: parseFloat(data.daily_goal.calories_goal) || 0,
+                    protein_goal: parseFloat(data.daily_goal.protein_goal) || 0,
+                    fat_goal: parseFloat(data.daily_goal.fat_goal) || 0,
+                    carbohydrate_goal: parseFloat(data.daily_goal.carbohydrate_goal) || 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                } : null;
+                
+                this.recentIntakes = data.recent_intakes || [];
+                
+                console.log('Mapped todayStats:', this.todayStats);
+                console.log('Mapped dailyGoal:', this.dailyGoal);
+                
                 this.isLoading = false;
                 this.updateCaloriesCircle();
             },
@@ -90,7 +112,7 @@ export class NutritionDashboardComponent implements OnInit {
         }
 
         this.isSearching = true;
-        this.nutritionService.searchProducts(query, 10).subscribe({
+        this.nutritionService.searchProducts(query, 30).subscribe({
             next: (results) => {
                 this.searchResults = results;
                 this.showSearchResults = true;
@@ -137,7 +159,7 @@ export class NutritionDashboardComponent implements OnInit {
             this.nutritionService.quickAddIntake(requestData).subscribe({
                 next: () => {
                     this.closeAddIntakeModal();
-                    this.closeSearchModal(); // добавить эту строку
+                    this.closeSearchModal();
                     this.loadDashboard();
                     this.showSuccessMessage('Продукт добавлен в дневник');
                 },
@@ -173,22 +195,22 @@ export class NutritionDashboardComponent implements OnInit {
     }
 
     getCaloriesPercentage(): number {
-        if (!this.todayStats || !this.dailyGoal) return 0;
+        if (!this.todayStats || !this.dailyGoal || this.dailyGoal.calories_goal === 0) return 0;
         return Math.round((this.todayStats.calories / this.dailyGoal.calories_goal) * 100);
     }
 
     getProteinPercentage(): number {
-        if (!this.todayStats || !this.dailyGoal) return 0;
+        if (!this.todayStats || !this.dailyGoal || this.dailyGoal.protein_goal === 0) return 0;
         return Math.round((this.todayStats.protein / this.dailyGoal.protein_goal) * 100);
     }
 
     getFatPercentage(): number {
-        if (!this.todayStats || !this.dailyGoal) return 0;
+        if (!this.todayStats || !this.dailyGoal || this.dailyGoal.fat_goal === 0) return 0;
         return Math.round((this.todayStats.fat / this.dailyGoal.fat_goal) * 100);
     }
 
     getCarbohydratePercentage(): number {
-        if (!this.todayStats || !this.dailyGoal) return 0;
+        if (!this.todayStats || !this.dailyGoal || this.dailyGoal.carbohydrate_goal === 0) return 0;
         return Math.round((this.todayStats.carbohydrate / this.dailyGoal.carbohydrate_goal) * 100);
     }
 
@@ -260,7 +282,7 @@ export class NutritionDashboardComponent implements OnInit {
     }
 
     getCaloriesRemaining(): number {
-        if (!this.todayStats || !this.dailyGoal) return 0;
+        if (!this.todayStats || !this.dailyGoal || this.dailyGoal.calories_goal === 0) return 0;
         return this.dailyGoal.calories_goal - this.todayStats.calories;
     }
 
@@ -274,4 +296,35 @@ export class NutritionDashboardComponent implements OnInit {
         }, 100);
     }
 
+    getIntakeImageUrl(intake: FoodIntake): string | null {
+        if (intake.product_info) {
+            if ('image_url' in intake.product_info) {
+                return (intake.product_info as Product | UserProduct).image_url || null;
+            }
+        }
+        return null;
+    }
+
+    getIntakeIcon(intake: FoodIntake): string {
+        if (intake.recipe) {
+            return 'fa-utensils';
+        } else if (intake.user_product) {
+            return 'fa-user-plus';
+        } else {
+            return 'fa-apple-alt';
+        }
+    }
+
+    getUnitDisplay(unit: string): string {
+        const unitMap: {[key: string]: string} = {
+            'g': 'г',
+            'ml': 'мл',
+            'pieces': 'шт',
+            'tbsp': 'ст.л.',
+            'tsp': 'ч.л.',
+            'cup': 'стак.',
+            'serving': 'порц.'
+        };
+        return unitMap[unit] || unit;
+    }
 }

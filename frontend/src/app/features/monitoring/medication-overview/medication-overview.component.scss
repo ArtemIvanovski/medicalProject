@@ -38,7 +38,7 @@
 
 .card {
   border: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 
   .card-header {
@@ -98,4 +98,100 @@
       padding: 10px 5px;
     }
   }
+}
+
+// Product Images in Search
+.product-image-wrapper {
+  flex-shrink: 0;
+
+  .product-search-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  }
+
+  .product-placeholder-image {
+    width: 48px;
+    height: 48px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 1.2rem;
+  }
+}
+
+.product-manufacturer {
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.search-results-modal {
+  h6 {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 8px 0;
+    margin: 0 -15px;
+    padding-left: 15px;
+    border-bottom: 1px solid #f1f3f4;
+    z-index: 10;
+  }
+}
+
+// Button improvements
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 0.8rem;
+  }
+}
+
+// Input group styling
+.input-group {
+  .btn-outline-secondary {
+    border-left: none;
+
+    &:hover {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+    }
+  }
+}
+
+// Recent intakes images
+.recent-intake-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.recent-intake-placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
 }

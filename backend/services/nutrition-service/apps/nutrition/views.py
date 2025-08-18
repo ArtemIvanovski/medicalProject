@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from .drive_service import DriveService
 from .models import (
-    Recipe, FavoriteProduct, DailyGoal, FoodIntake
+    Recipe, FavoriteProduct, DailyGoal, FoodIntake, UserProfile, Gender
 )
 from .models import UserProduct
 from .serializers import (
@@ -24,7 +24,7 @@ from .serializers import (
     NutritionTimelineSerializer
 )
 from .services import (
-    ProductSearchService, NutritionStatsService, RecipeService
+    ProductSearchService, NutritionStatsService, RecipeService, DailyGoalService
 )
 
 
@@ -238,31 +238,30 @@ class DailyGoalView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            daily_goal = DailyGoal.objects.get(user=request.user)
+        # Always get or create daily goal from user profile
+        daily_goal = DailyGoalService.get_or_create_daily_goal(request.user)
+        if daily_goal:
             serializer = DailyGoalSerializer(daily_goal)
             return Response(serializer.data)
-        except DailyGoal.DoesNotExist:
-            return Response({'error': 'Daily goal not set'}, status=404)
+        else:
+            return Response({'error': 'Unable to create daily goal'}, status=500)
 
     def post(self, request):
+        # Get or create daily goal first to ensure it's synced with profile
+        daily_goal = DailyGoalService.get_or_create_daily_goal(request.user)
+        
         serializer = UpdateDailyGoalSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 
-        daily_goal, created = DailyGoal.objects.get_or_create(
-            user=request.user,
-            defaults=serializer.validated_data
-        )
-
-        if not created:
-            for key, value in serializer.validated_data.items():
-                setattr(daily_goal, key, value)
+        # Update only the allowed fields
+        for key, value in serializer.validated_data.items():
+            setattr(daily_goal, key, value)
 
         daily_goal.calculate_goals()
 
-        serializer = DailyGoalSerializer(daily_goal)
-        return Response(serializer.data, status=201 if created else 200)
+        response_serializer = DailyGoalSerializer(daily_goal)
+        return Response(response_serializer.data, status=200)
 
 
 class FoodIntakeListCreateView(ListCreateAPIView):
@@ -410,16 +409,14 @@ def nutrition_dashboard(request):
     week_stats = NutritionStatsService.get_period_stats(request.user, 7)
     top_products_week = NutritionStatsService.get_top_products(request.user, 7, 5)
 
-    try:
-        daily_goal = DailyGoal.objects.get(user=request.user)
-        goal_data = DailyGoalSerializer(daily_goal).data
-    except DailyGoal.DoesNotExist:
-        goal_data = None
+    # Get or create daily goal from user profile
+    daily_goal = DailyGoalService.get_or_create_daily_goal(request.user)
+    goal_data = DailyGoalSerializer(daily_goal).data if daily_goal else None
 
     recent_intakes = FoodIntake.objects.filter(
         user=request.user,
         is_deleted=False
-    ).order_by('-consumed_at')[:10]
+    ).order_by('-consumed_at')[:2]
 
     return Response({
         'today': NutritionStatsSerializer(today_stats).data,

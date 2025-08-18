@@ -19,7 +19,7 @@ export class NutritionService {
     constructor(private http: HttpClient) {
     }
 
-    searchProducts(query: string, limit: number = 20): Observable<SearchResults> {
+    searchProducts(query: string, limit: number = 30): Observable<SearchResults> {
         const params = {query, limit: limit.toString()};
         return this.http.get<SearchResults>(`${environment.nutritionApiUrl}/search/`, {params});
     }
