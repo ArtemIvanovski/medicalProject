@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import {MedicationService} from "../../../core/services";
 import {MedicationIntake} from "../../../core/models";
 
@@ -31,9 +32,13 @@ export class MedicationHistoryComponent implements OnInit {
 
   uniqueDrugs: string[] = [];
 
-  constructor(private medicationService: MedicationService) {}
+  constructor(
+    private medicationService: MedicationService,
+    private titleService: Title
+  ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('История лекарств');
     this.loadHistory();
   }
 

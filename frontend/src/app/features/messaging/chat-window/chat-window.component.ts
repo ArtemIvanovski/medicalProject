@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { MessagingService } from "../../../core/services";
 import {Chat, Message} from "../../../core/models";
@@ -22,9 +23,14 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   private subscriptions = new Subscription();
   private shouldScrollToBottom = false;
 
-  constructor(public messagingService: MessagingService) {}
+  constructor(
+    public messagingService: MessagingService,
+    private titleService: Title
+  ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Чат');
+    
     if (this.chat) {
       this.loadMessages();
       this.markAsRead();

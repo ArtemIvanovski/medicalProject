@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { NutritionService } from "../../../core/services";
 import { Product, UserProduct, Recipe, SearchResults } from "../../../core/models";
 
@@ -49,10 +50,13 @@ export class NutritionSearchComponent implements OnInit {
     toastMessage = '';
     toastType: 'success' | 'error' = 'success';
     
-    constructor(private nutritionService: NutritionService) {}
+    constructor(
+        private nutritionService: NutritionService,
+        private titleService: Title
+    ) {}
 
     ngOnInit(): void {
-        // Initial empty state
+        this.titleService.setTitle('Поиск продуктов');
     }
 
     onSearch(): void {

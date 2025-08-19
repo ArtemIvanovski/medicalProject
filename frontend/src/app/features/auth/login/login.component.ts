@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.titleService.setTitle('Авторизация');
+    this.titleService.setTitle('Вход');
 
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

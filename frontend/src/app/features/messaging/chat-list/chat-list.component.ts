@@ -1,4 +1,5 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import {MessagingService} from "../../../core/services";
 import {Chat} from "../../../core/models";
 
@@ -7,7 +8,7 @@ import {Chat} from "../../../core/models";
     templateUrl: './chat-list.component.html',
     styleUrls: ['./chat-list.component.scss']
 })
-export class ChatListComponent {
+export class ChatListComponent implements OnInit {
     @Input() chats: Chat[] = [];
     @Input() activeChat: Chat | null = null;
     @Input() isLoading = false;
@@ -16,7 +17,13 @@ export class ChatListComponent {
 
     searchQuery = '';
 
-    constructor(public messagingService: MessagingService) {
+    constructor(
+        public messagingService: MessagingService,
+        private titleService: Title
+    ) {}
+
+    ngOnInit(): void {
+        this.titleService.setTitle('Список чатов');
     }
 
     get filteredChats(): Chat[] {

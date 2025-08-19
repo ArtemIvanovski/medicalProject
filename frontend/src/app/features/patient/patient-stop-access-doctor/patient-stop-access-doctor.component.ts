@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import {PatientService} from "../../../core/services";
 
@@ -25,10 +26,12 @@ export class PatientStopAccessDoctorComponent implements OnInit {
 
   constructor(
       private profileService: PatientService,
+      private titleService: Title,
       private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Отзыв доступа врача');
     this.loadDoctors();
   }
 

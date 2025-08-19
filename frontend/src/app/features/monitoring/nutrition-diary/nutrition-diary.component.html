@@ -1,0 +1,428 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="nutrition-sidebar">
+                <h5>Питание</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/search">
+                            <i class="fas fa-search"></i> Поиск продуктов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/my-products">
+                            <i class="fas fa-user"></i> Мои продукты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/products/create">
+                            <i class="fas fa-plus"></i> Создать продукт
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/recipes">
+                            <i class="fas fa-book"></i> Рецепты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/nutrition/diary">
+                            <i class="fas fa-calendar"></i> Дневник питания
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/analytics">
+                            <i class="fas fa-chart-bar"></i> Аналитика
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <div class="nutrition-content">
+                <!-- Header -->
+                <div class="page-header">
+                    <h2>Дневник питания</h2>
+                    <p class="text-muted">Просматривайте и редактируйте свой дневник питания</p>
+                </div>
+
+                <!-- Date and Period Selection -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Выберите дату:</label>
+                                        <div class="date-navigation">
+                                            <button class="btn btn-outline-primary btn-sm" (click)="previousDate()">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </button>
+                                            <input 
+                                                type="date" 
+                                                class="form-control mx-2" 
+                                                [value]="formatDate(selectedDate)"
+                                                (change)="onDateChange($event)"
+                                                style="width: auto; display: inline-block;">
+                                            <button class="btn btn-outline-primary btn-sm" (click)="nextDate()">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Период:</label>
+                                        <div class="btn-group w-100" role="group">
+                                            <button 
+                                                type="button" 
+                                                class="btn"
+                                                [class.btn-primary]="selectedPeriod === 'day'"
+                                                [class.btn-outline-primary]="selectedPeriod !== 'day'"
+                                                (click)="onPeriodChange('day')">
+                                                День
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                class="btn"
+                                                [class.btn-primary]="selectedPeriod === 'week'"
+                                                [class.btn-outline-primary]="selectedPeriod !== 'week'"
+                                                (click)="onPeriodChange('week')">
+                                                Неделя
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {{ selectedPeriod === 'day' ? 'Дневная статистика' : 'Недельная статистика' }}
+                                </h5>
+                                <small class="text-muted">
+                                    {{ selectedPeriod === 'day' ? (selectedDate | date:'dd.MM.yyyy') : 
+                                       ('Неделя с ' + (selectedDate | date:'dd.MM.yyyy')) }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div class="row mb-4">
+                    <div class="col-lg-7 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    {{ selectedPeriod === 'day' ? 'Дневная статистика' : 'Недельная статистика' }}
+                                </h5>
+                                <small class="text-muted">
+                                    {{ selectedPeriod === 'day' ? (selectedDate | date:'dd.MM.yyyy') : 
+                                       ('Неделя с ' + (selectedDate | date:'dd.MM.yyyy')) }}
+                                </small>
+                            </div>
+                            <div class="card-body">
+                                <div *ngIf="isLoading" class="text-center">
+                                    <div class="spinner-border" role="status"></div>
+                                </div>
+
+                                <div *ngIf="!isLoading && dailyStats" class="nutrition-stats">
+                                    <!-- Calories Circle -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6 text-center">
+                                            <div class="calories-circle">
+                                                <div class="circle-progress"
+                                                     [attr.data-percentage]="getCaloriesPercentage()">
+                                                    <div class="circle-inner">
+                                                        <div class="calories-consumed">{{ formatNumber(dailyStats.calories || 0) }}</div>
+                                                        <div class="calories-label">съедено</div>
+                                                        <div class="calories-remaining" *ngIf="dailyGoal">
+                                                            {{ getCaloriesRemaining() > 0 ? '-' + formatNumber(getCaloriesRemaining()) : '+' + formatNumber(abs(getCaloriesRemaining())) }}
+                                                        </div>
+                                                        <div class="calories-goal" *ngIf="dailyGoal">{{ formatNumber(dailyGoal.calories_goal) }} ккал цель</div>
+                                                        <div class="calories-goal" *ngIf="!dailyGoal">Цель не установлена</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="macros-breakdown">
+                                                <!-- Protein -->
+                                                <div class="macro-item">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="macro-label">
+                                                            <span class="macro-dot protein"></span>
+                                                            Белки
+                                                        </span>
+                                                        <span class="macro-values">{{ formatNumber(dailyStats.protein || 0) }}
+                                                            <span *ngIf="dailyGoal">/ {{ formatNumber(dailyGoal.protein_goal) }}г</span>
+                                                            <span *ngIf="!dailyGoal">г</span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="progress macro-progress" *ngIf="dailyGoal">
+                                                        <div class="progress-bar protein-bar"
+                                                             [style.width.%]="getProteinPercentage()"></div>
+                                                    </div>
+                                                    <div class="progress macro-progress" *ngIf="!dailyGoal">
+                                                        <div class="progress-bar protein-bar" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Fat -->
+                                                <div class="macro-item">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="macro-label">
+                                                            <span class="macro-dot fat"></span>
+                                                            Жиры
+                                                        </span>
+                                                        <span class="macro-values">{{ formatNumber(dailyStats.fat || 0) }}
+                                                            <span *ngIf="dailyGoal">/ {{ formatNumber(dailyGoal.fat_goal) }}г</span>
+                                                            <span *ngIf="!dailyGoal">г</span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="progress macro-progress" *ngIf="dailyGoal">
+                                                        <div class="progress-bar fat-bar"
+                                                             [style.width.%]="getFatPercentage()"></div>
+                                                    </div>
+                                                    <div class="progress macro-progress" *ngIf="!dailyGoal">
+                                                        <div class="progress-bar fat-bar" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Carbs -->
+                                                <div class="macro-item">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="macro-label">
+                                                            <span class="macro-dot carbs"></span>
+                                                            Углеводы
+                                                        </span>
+                                                        <span class="macro-values">{{ formatNumber(dailyStats.carbohydrate || 0) }}
+                                                            <span *ngIf="dailyGoal">/ {{ formatNumber(dailyGoal.carbohydrate_goal) }}г</span>
+                                                            <span *ngIf="!dailyGoal">г</span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="progress macro-progress" *ngIf="dailyGoal">
+                                                        <div class="progress-bar carbs-bar"
+                                                             [style.width.%]="getCarbohydratePercentage()"></div>
+                                                    </div>
+                                                    <div class="progress macro-progress" *ngIf="!dailyGoal">
+                                                        <div class="progress-bar carbs-bar" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="!isLoading && !dailyStats" class="text-center text-muted">
+                                    <i class="fas fa-utensils fa-3x mb-3"></i>
+                                    <p>Нет данных о питании на выбранную дату</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="col-lg-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Информация</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar text-primary"></i>
+                                    <span>Дата: {{ selectedDate | date:'dd.MM.yyyy' }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-utensils text-success"></i>
+                                    <span>Приемов пищи: {{ foodIntakes.length }}</span>
+                                </div>
+                                <div class="info-item" *ngIf="dailyStats">
+                                    <i class="fas fa-fire text-warning"></i>
+                                    <span>Калорий: {{ formatNumber(dailyStats.calories) }}</span>
+                                </div>
+                                <div class="info-item" *ngIf="selectedPeriod === 'week'">
+                                    <i class="fas fa-chart-line text-info"></i>
+                                    <span>Период: 7 дней</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Food Diary List -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Дневник питания</h5>
+                                <span class="badge bg-primary">{{ foodIntakes.length }} записей</span>
+                            </div>
+                            <div class="card-body">
+                                <div *ngIf="isLoading" class="text-center">
+                                    <div class="spinner-border" role="status"></div>
+                                </div>
+
+                                <div *ngIf="!isLoading && foodIntakes.length === 0" class="text-center text-muted py-5">
+                                    <i class="fas fa-utensils fa-3x mb-3"></i>
+                                    <h5>Нет записей в дневнике</h5>
+                                    <p>На выбранную дату нет записей о приемах пищи</p>
+                                    <a routerLink="/patient/monitoring/nutrition/search" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Добавить продукт
+                                    </a>
+                                </div>
+
+                                <div *ngIf="!isLoading && foodIntakes.length > 0" class="diary-list">
+                                    <div class="diary-item" *ngFor="let intake of foodIntakes">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-1 text-center">
+                                                <div class="product-icon">
+                                                    <img *ngIf="getIntakeImageUrl(intake)" 
+                                                         [src]="getIntakeImageUrl(intake)" 
+                                                         alt="{{ intake.product_name }}"
+                                                         class="product-image">
+                                                    <i *ngIf="!getIntakeImageUrl(intake)" 
+                                                       class="fas {{ getIntakeIcon(intake) }} fa-2x"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6 class="mb-1">{{ intake.product_name }}</h6>
+                                                <small class="text-muted">
+                                                    {{ formatNumber(intake.amount) }} {{ getUnitDisplay(intake.unit) }}
+                                                </small>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ intake.consumed_at | date:'HH:mm' }}
+                                                </small>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="nutrition-info">
+                                                    <span class="nutrition-item">
+                                                        <strong>{{ formatNumber(intake.calories_consumed) }}</strong> ккал
+                                                    </span>
+                                                    <span class="nutrition-item">
+                                                        Б: <strong>{{ formatNumber(intake.protein_consumed) }}</strong>г
+                                                    </span>
+                                                    <span class="nutrition-item">
+                                                        Ж: <strong>{{ formatNumber(intake.fat_consumed) }}</strong>г
+                                                    </span>
+                                                    <span class="nutrition-item">
+                                                        У: <strong>{{ formatNumber(intake.carbohydrate_consumed) }}</strong>г
+                                                    </span>
+                                                </div>
+                                                <div *ngIf="intake.notes" class="notes mt-1">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-sticky-note"></i> {{ intake.notes }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 text-end">
+                                                <div class="action-buttons">
+                                                    <button class="btn btn-sm btn-outline-primary me-1" 
+                                                            (click)="editIntake(intake)"
+                                                            title="Редактировать">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                            (click)="deleteIntake(intake)"
+                                                            title="Удалить">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div *ngIf="error" class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" 
+     tabindex="-1" role="dialog" *ngIf="showEditModal">
+    <div class="modal-backdrop fade show" (click)="closeEditModal()"></div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать прием пищи</h5>
+                <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+            </div>
+            <form [formGroup]="editForm" (ngSubmit)="saveIntake()">
+                <div class="modal-body">
+                    <div *ngIf="selectedIntake" class="mb-3">
+                        <h6>{{ selectedIntake.product_name }}</h6>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Количество</label>
+                        <input type="number" class="form-control" formControlName="amount" 
+                               placeholder="Введите количество" min="1" step="0.1">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Единица измерения</label>
+                        <select class="form-select" formControlName="unit">
+                            <option value="g">граммы</option>
+                            <option value="ml">миллилитры</option>
+                            <option value="pieces">штуки</option>
+                            <option value="tbsp">столовые ложки</option>
+                            <option value="tsp">чайные ложки</option>
+                            <option value="cup">стаканы</option>
+                            <option value="serving">порция</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Время приема</label>
+                        <input type="datetime-local" class="form-control" formControlName="consumed_at">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Заметки (необязательно)</label>
+                        <textarea class="form-control" formControlName="notes" rows="3" 
+                                  placeholder="Добавьте заметки о приеме пищи"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div *ngIf="showToast" 
+     class="toast-notification"
+     [class.toast-success]="toastType === 'success'"
+     [class.toast-error]="toastType === 'error'">
+    <div class="toast-content">
+        <i *ngIf="toastType === 'success'" class="fas fa-check-circle"></i>
+        <i *ngIf="toastType === 'error'" class="fas fa-exclamation-circle"></i>
+        <span>{{ toastMessage }}</span>
+        <button class="toast-close" (click)="hideToast()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>

@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {Address, ProfileData, PatientService, ReferenceItem} from "../../../core/services";
 
@@ -47,10 +48,12 @@ export class ProfileSettingsComponent implements OnInit, AfterViewInit {
 
   constructor(
       private fb: FormBuilder,
-      private profileService: PatientService
+      private profileService: PatientService,
+      private titleService: Title
   ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Настройки профиля');
     this.initializeForm();
     this.loadReferenceData();
     this.loadProfile();

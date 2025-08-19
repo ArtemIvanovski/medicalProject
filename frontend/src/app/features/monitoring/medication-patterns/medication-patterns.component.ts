@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import {MedicationService} from '../../../core/services';
 import {MedicationIntake, MedicationPattern} from "../../../core/models";
 
@@ -63,9 +64,13 @@ export class MedicationPatternsComponent implements OnInit {
 
   searchTerms: string[] = [];
 
-  constructor(private medicationService: MedicationService) {}
+  constructor(
+    private medicationService: MedicationService,
+    private titleService: Title
+  ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Паттерны приема');
     this.loadPatterns();
     this.initializeSearchTerms();
   }

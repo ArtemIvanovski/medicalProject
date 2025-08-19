@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 
 declare var Chart: any;
 
@@ -66,6 +67,8 @@ export class PatientDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('dailyChart', { static: false }) dailyChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('chatMessagesContainer', { static: false }) chatMessagesRef!: ElementRef;
 
+  constructor(private titleService: Title) {}
+
   currentGlucose: GlucoseData = {
     value: 8.2,
     unit: 'ммоль/л',
@@ -121,6 +124,7 @@ export class PatientDashboardComponent implements OnInit, AfterViewInit {
   newMessage = '';
 
   ngOnInit(): void {
+    this.titleService.setTitle('Панель пациента');
     this.loadPatientData();
   }
 

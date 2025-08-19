@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NutritionService } from "../../../core/services";
 import { UserProduct } from "../../../core/models";
@@ -38,6 +39,7 @@ export class NutritionMyProductsComponent implements OnInit {
 
     constructor(
         private nutritionService: NutritionService,
+        private titleService: Title,
         private fb: FormBuilder
     ) {
         this.editProductForm = this.fb.group({
@@ -61,6 +63,7 @@ export class NutritionMyProductsComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.titleService.setTitle('Мои продукты');
         this.loadProducts();
     }
 

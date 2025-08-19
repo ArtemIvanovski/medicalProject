@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NutritionService } from '../../../core/services';
@@ -21,6 +22,7 @@ export class NutritionProductCreateComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private nutritionService: NutritionService,
+        private titleService: Title,
         private router: Router
     ) {
         this.createProductForm = this.fb.group({
@@ -39,7 +41,7 @@ export class NutritionProductCreateComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // Component initialization
+        this.titleService.setTitle('Создание продукта');
     }
 
     createProduct(): void {
@@ -299,7 +301,6 @@ export class NutritionProductCreateComponent implements OnInit {
         return this.getNutritionTotalWeight() <= 100;
     }
 
-    // Navigation helpers
     goToMyProducts(): void {
         this.router.navigate(['/patient/monitoring/nutrition/my-products']);
     }
@@ -311,9 +312,18 @@ export class NutritionProductCreateComponent implements OnInit {
         return true;
     }
 
-    // Auto-calculate calories when macros change
     private updateCalculatedCalories(): void {
-        // This will trigger the template to show updated calculated calories
-        // Calories are automatically calculated in getCalculatedCaloriesFromMacros()
+        const calculatedCalories = this.getCalculatedCaloriesFromMacros();
+        
+        const currentCalories = Number(this.createProductForm.get('calories')?.value) || 0;
+        
+        if (Math.abs(currentCalories - calculatedCalories) > 0.1) {
+            this.createProductForm.get('calories')?.setValue(
+                Math.round(calculatedCalories * 10) / 10, 
+                { emitEvent: false }
+            );
+        }
+        
+        this.createProductForm.get('calories')?.updateValueAndValidity();
     }
 }

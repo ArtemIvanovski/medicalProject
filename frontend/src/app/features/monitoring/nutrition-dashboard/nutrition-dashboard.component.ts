@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {
     DailyGoal,
@@ -41,6 +42,7 @@ export class NutritionDashboardComponent implements OnInit {
 
     constructor(
         private nutritionService: NutritionService,
+        private titleService: Title,
         private fb: FormBuilder
     ) {
         this.addIntakeForm = this.fb.group({
@@ -52,6 +54,7 @@ export class NutritionDashboardComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.titleService.setTitle('Панель питания');
         this.loadDashboard();
         this.updateCaloriesCircle();
     }

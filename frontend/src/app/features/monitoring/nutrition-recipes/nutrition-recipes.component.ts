@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { NutritionService } from "../../../core/services";
 import { Product, Recipe, UserProduct, RecipeIngredient } from "../../../core/models";
+import {Title} from "@angular/platform-browser";
 
 @Component({
     selector: 'app-nutrition-recipes',
@@ -43,8 +44,10 @@ export class NutritionRecipesComponent implements OnInit {
 
     constructor(
         private nutritionService: NutritionService,
+        private titleService: Title,
         private fb: FormBuilder
     ) {
+        this.titleService.setTitle('Рецепты');
         this.createRecipeForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(2)]],
             description: [''],

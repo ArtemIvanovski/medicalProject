@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {MedicationService} from "../../../core/services";
 import {MedicationIntake, MedicationReminder} from "../../../core/models";
@@ -63,12 +64,14 @@ export class MedicationRemindersComponent implements OnInit {
 
   constructor(
       private medicationService: MedicationService,
+      private titleService: Title,
       private fb: FormBuilder
   ) {
     this.initForm();
   }
 
   ngOnInit(): void {
+    this.titleService.setTitle('Напоминания о лекарствах');
     this.loadReminders();
   }
 

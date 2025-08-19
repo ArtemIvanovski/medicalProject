@@ -136,4 +136,13 @@ export class NutritionService {
     deleteRecipeImage(recipeId: string): Observable<any> {
         return this.http.delete<any>(`${environment.nutritionApiUrl}/recipes/${recipeId}/image/delete/`);
     }
+
+    // Food Intake management methods
+    updateFoodIntake(id: string, data: any): Observable<FoodIntake> {
+        return this.http.put<FoodIntake>(`${environment.nutritionApiUrl}/intakes/${id}/`, data);
+    }
+
+    deleteFoodIntake(id: string): Observable<any> {
+        return this.http.delete<any>(`${environment.nutritionApiUrl}/intakes/${id}/`);
+    }
 }

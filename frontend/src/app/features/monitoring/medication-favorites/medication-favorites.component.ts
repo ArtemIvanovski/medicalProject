@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import {MedicationService} from '../../../core/services';
 import {FavoriteDrug, MedicationIntake} from "../../../core/models";
 
@@ -39,9 +40,13 @@ export class MedicationFavoritesComponent implements OnInit {
     'свечи'
   ];
 
-  constructor(private medicationService: MedicationService) {}
+  constructor(
+    private medicationService: MedicationService,
+    private titleService: Title
+  ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Избранные лекарства');
     this.loadFavorites();
   }
 

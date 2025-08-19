@@ -1,4 +1,5 @@
 import {Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy} from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import {MedicationService} from "../../../core/services";
 import {MedicationIntake, MedicationStats} from "../../../core/models";
 
@@ -38,10 +39,13 @@ export class MedicationStatsComponent implements OnInit, AfterViewInit, OnDestro
     drugDistribution: any[] = [];
     dailyAverages: any[] = [];
 
-    constructor(private medicationService: MedicationService) {
-    }
+    constructor(
+        private medicationService: MedicationService,
+        private titleService: Title
+    ) {}
 
     ngOnInit(): void {
+        this.titleService.setTitle('Статистика лекарств');
         this.loadStatistics();
     }
 

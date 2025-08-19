@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import * as QRCode from 'qrcode';
 import {PatientService} from "../../../core/services";
@@ -34,10 +35,12 @@ export class PatientInviteTrustedComponent implements OnInit {
 
   constructor(
       private fb: FormBuilder,
-      private profileService: PatientService
+      private profileService: PatientService,
+      private titleService: Title
   ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Приглашение доверенного');
     this.initializeForm();
     this.loadFeatures();
   }

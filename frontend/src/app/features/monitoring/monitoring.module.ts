@@ -16,6 +16,7 @@ import {NutritionRecipesComponent} from "./nutrition-recipes/nutrition-recipes.c
 import {NutritionSearchComponent} from "./nutrition-search/nutrition-search.component";
 import {NutritionProductCreateComponent} from "./nutrition-product-create/nutrition-product-create.component";
 import {NutritionMyProductsComponent} from "./nutrition-my-products/nutrition-my-products.component";
+import {NutritionDiaryComponent} from "./nutrition-diary/nutrition-diary.component";
 
 
 const routes: Routes = [
@@ -90,6 +91,12 @@ const routes: Routes = [
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'PATIENT' }
     },
+    {
+        path: 'nutrition/diary',
+        component: NutritionDiaryComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
+    },
 ];
 
 @NgModule({
@@ -104,7 +111,8 @@ const routes: Routes = [
         NutritionSearchComponent,
         NutritionRecipesComponent,
         NutritionProductCreateComponent,
-        NutritionMyProductsComponent
+        NutritionMyProductsComponent,
+        NutritionDiaryComponent
     ],
     imports: [
         CommonModule,
