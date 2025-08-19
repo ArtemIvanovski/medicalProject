@@ -1,0 +1,536 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="nutrition-sidebar">
+                <h5>Питание</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/nutrition/search">
+                            <i class="fas fa-search"></i> Поиск продуктов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/my-products">
+                            <i class="fas fa-user"></i> Мои продукты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/products/create">
+                            <i class="fas fa-plus"></i> Создать продукт
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/recipes">
+                            <i class="fas fa-book"></i> Рецепты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/diary">
+                            <i class="fas fa-calendar"></i> Дневник питания
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/analytics">
+                            <i class="fas fa-chart-bar"></i> Аналитика
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <!-- Header Section -->
+            <div class="search-header mb-4">
+                <div class="row align-items-center">
+                    <div class="col-12">
+                        <h2><i class="fas fa-search me-2"></i>Поиск продуктов</h2>
+                        <p class="text-muted">Найдите продукты, рецепты и добавьте их в свой рацион</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section mb-4">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text"
+                           class="form-control search-input"
+                           placeholder="Введите название продукта, рецепта или ингредиента..."
+                           [(ngModel)]="searchQuery"
+                           (input)="onSearchInputChange()"
+                           (keyup.enter)="onSearch()">
+                    <button *ngIf="searchQuery"
+                            class="btn clear-btn"
+                            (click)="clearSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="btn btn-primary search-btn"
+                            [disabled]="isSearching || !searchQuery.trim()"
+                            (click)="onSearch()">
+                        <i class="fas fa-search" *ngIf="!isSearching"></i>
+                        <i class="fas fa-spinner fa-spin" *ngIf="isSearching"></i>
+                        <span class="d-none d-md-inline">{{ isSearching ? 'Поиск...' : 'Найти' }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Results Stats -->
+            <div class="row mb-4" *ngIf="hasSearched && searchResults">
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getTotalResults() }}</h3>
+                            <p>Всего результатов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon favorites">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getFavoritesCount() }}</h3>
+                            <p>Избранных</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon products">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getProductsCount() + getUserProductsCount() }}</h3>
+                            <p>Продуктов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon recipes">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getRecipesCount() }}</h3>
+                            <p>Рецептов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Sorting -->
+            <div class="filters-section mb-4" *ngIf="hasSearched && searchResults">
+                <div class="row">
+                    <div class="col-lg-8 col-md-12 mb-3 mb-lg-0">
+                        <div class="filter-tabs">
+                            <label class="filter-label">Показать:</label>
+                            <div class="filter-buttons">
+                                <button class="filter-btn" 
+                                        [class.active]="showFavorites"
+                                        (click)="showFavorites = !showFavorites; onFilterChange()">
+                                    <i class="fas fa-heart"></i>
+                                    <span>Избранные</span>
+                                    <span class="badge" *ngIf="filteredFavorites.length > 0">{{ filteredFavorites.length }}</span>
+                                </button>
+                                <button class="filter-btn" 
+                                        [class.active]="showProducts"
+                                        (click)="showProducts = !showProducts; onFilterChange()">
+                                    <i class="fas fa-apple-alt"></i>
+                                    <span>Продукты</span>
+                                    <span class="badge" *ngIf="filteredProducts.length > 0">{{ filteredProducts.length }}</span>
+                                </button>
+                                <button class="filter-btn" 
+                                        [class.active]="showUserProducts"
+                                        (click)="showUserProducts = !showUserProducts; onFilterChange()">
+                                    <i class="fas fa-user"></i>
+                                    <span>Мои продукты</span>
+                                    <span class="badge" *ngIf="filteredUserProducts.length > 0">{{ filteredUserProducts.length }}</span>
+                                </button>
+                                <button class="filter-btn" 
+                                        [class.active]="showRecipes"
+                                        (click)="showRecipes = !showRecipes; onFilterChange()">
+                                    <i class="fas fa-book"></i>
+                                    <span>Рецепты</span>
+                                    <span class="badge" *ngIf="filteredRecipes.length > 0">{{ filteredRecipes.length }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <div class="sort-controls">
+                            <label class="sort-label">Сортировка:</label>
+                            <div class="sort-options">
+                                <select class="form-select sort-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+                                    <option value="name">По названию</option>
+                                    <option value="calories">По калориям</option>
+                                    <option value="protein">По белкам</option>
+                                </select>
+                                <button class="btn btn-outline-secondary sort-order-btn" (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; onSortChange()">
+                                    <i class="fas" [ngClass]="sortOrder === 'asc' ? 'fa-sort-amount-up' : 'fa-sort-amount-down'"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination Info -->
+                <div class="pagination-info" *ngIf="getTotalResults() > 0">
+                    <span class="results-info">
+                        Показано {{ Math.min(itemsPerPage, getTotalResults()) }} из {{ getTotalResults() }} результатов
+                        (страница {{ currentPage }} из {{ totalPages }})
+                    </span>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            </div>
+
+            <!-- Empty State (No Search Yet) -->
+            <div *ngIf="!hasSearched && !isSearching" class="empty-state">
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4>Начните поиск продуктов</h4>
+                    <p>Введите название продукта или рецепта в строку поиска выше, чтобы найти нужную информацию о питании</p>
+                    <div class="search-tips">
+                        <h6>Подсказки для поиска:</h6>
+                        <ul>
+                            <li>Попробуйте "гречка", "курица", "салат"</li>
+                            <li>Ищите по категориям: "молочные", "овощи"</li>
+                            <li>Используйте частичные названия</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results State -->
+            <div *ngIf="hasSearched && searchResults && getTotalResults() === 0" class="no-results">
+                <div class="no-results-content">
+                    <div class="no-results-icon">
+                        <i class="fas fa-search-minus"></i>
+                    </div>
+                    <h4>Ничего не найдено</h4>
+                    <p>По запросу "{{ searchQuery }}" ничего не найдено. Попробуйте изменить поисковый запрос или создать собственный продукт.</p>
+                    <button class="btn btn-primary" routerLink="/patient/monitoring/nutrition/products/create">
+                        <i class="fas fa-plus me-2"></i>Создать свой продукт
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div *ngIf="hasSearched && searchResults && getTotalResults() > 0">
+                
+                <!-- Results Grid -->
+                <div class="results-grid mb-4">
+                    <div class="row">
+                        <!-- Favorites -->
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let product of paginatedFavorites">
+                            <div class="product-card favorite">
+                                <div class="product-header">
+                                    <h6 class="product-name" [title]="product.name">{{ product.name }}</h6>
+                                    <div class="product-badge">
+                                        <span class="badge bg-warning"><i class="fas fa-heart"></i> Избранное</span>
+                                    </div>
+                                </div>
+                                <div class="product-image">
+                                    <img *ngIf="product.image_url" 
+                                         [src]="product.image_url" 
+                                         [alt]="product.name" 
+                                         class="img-fluid"
+                                         loading="lazy"
+                                         (load)="onImageLoad($event)"
+                                         (error)="onImageError($event)">
+                                    <div class="product-image-placeholder" [style.display]="product.image_url ? 'none' : 'flex'">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <div class="nutrition-info">
+                                        <div class="nutrition-item">
+                                            <span class="label">Калории:</span>
+                                            <span class="value">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Белки:</span>
+                                            <span class="value">{{ formatNumber(product.protein || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Жиры:</span>
+                                            <span class="value">{{ formatNumber(product.fat || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Углеводы:</span>
+                                            <span class="value">{{ formatNumber(product.carbohydrate || 0) }} г</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-meta" *ngIf="product.manufacturer">
+                                        <small class="text-muted"><i class="fas fa-industry"></i> {{ product.manufacturer }}</small>
+                                    </div>
+                                </div>
+                                <div class="product-footer">
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            (click)="removeFromFavorites(product)"
+                                            title="Удалить из избранного">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" (click)="quickAddToIntake(product)">
+                                        <i class="fas fa-plus me-1"></i>Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products -->
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let product of paginatedProducts">
+                            <div class="product-card">
+                                <div class="product-header">
+                                    <h6 class="product-name" [title]="product.name">{{ product.name }}</h6>
+                                    <div class="product-badge">
+                                        <span class="badge bg-success"><i class="fas fa-apple-alt"></i> Продукт</span>
+                                    </div>
+                                </div>
+                                <div class="product-image">
+                                    <img *ngIf="product.image_url" 
+                                         [src]="product.image_url" 
+                                         [alt]="product.name" 
+                                         class="img-fluid"
+                                         loading="lazy"
+                                         (load)="onImageLoad($event)"
+                                         (error)="onImageError($event)">
+                                    <div class="product-image-placeholder" [style.display]="product.image_url ? 'none' : 'flex'">
+                                        <i class="fas fa-apple-alt"></i>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <div class="nutrition-info">
+                                        <div class="nutrition-item">
+                                            <span class="label">Калории:</span>
+                                            <span class="value">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Белки:</span>
+                                            <span class="value">{{ formatNumber(product.protein || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Жиры:</span>
+                                            <span class="value">{{ formatNumber(product.fat || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Углеводы:</span>
+                                            <span class="value">{{ formatNumber(product.carbohydrate || 0) }} г</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-meta" *ngIf="product.manufacturer">
+                                        <small class="text-muted"><i class="fas fa-industry"></i> {{ product.manufacturer }}</small>
+                                    </div>
+                                </div>
+                                <div class="product-footer">
+                                    <button class="btn btn-sm btn-outline-warning" 
+                                            (click)="addToFavorites(product)"
+                                            *ngIf="!isProductInFavorites(product)"
+                                            title="Добавить в избранное">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" 
+                                            (click)="removeFromFavorites(product)"
+                                            *ngIf="isProductInFavorites(product)"
+                                            title="Удалить из избранного">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" (click)="quickAddToIntake(product)">
+                                        <i class="fas fa-plus me-1"></i>Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Products -->
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let product of paginatedUserProducts">
+                            <div class="product-card user-product">
+                                <div class="product-header">
+                                    <h6 class="product-name" [title]="product.name">{{ product.name }}</h6>
+                                    <div class="product-badge">
+                                        <span class="badge bg-info"><i class="fas fa-user"></i> Мой продукт</span>
+                                    </div>
+                                </div>
+                                <div class="product-image">
+                                    <img *ngIf="product.image_url" 
+                                         [src]="product.image_url" 
+                                         [alt]="product.name" 
+                                         class="img-fluid"
+                                         loading="lazy"
+                                         (load)="onImageLoad($event)"
+                                         (error)="onImageError($event)">
+                                    <div class="product-image-placeholder" [style.display]="product.image_url ? 'none' : 'flex'">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <div class="nutrition-info">
+                                        <div class="nutrition-item">
+                                            <span class="label">Калории:</span>
+                                            <span class="value">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Белки:</span>
+                                            <span class="value">{{ formatNumber(product.protein || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Жиры:</span>
+                                            <span class="value">{{ formatNumber(product.fat || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Углеводы:</span>
+                                            <span class="value">{{ formatNumber(product.carbohydrate || 0) }} г</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-meta" *ngIf="product.manufacturer">
+                                        <small class="text-muted"><i class="fas fa-industry"></i> {{ product.manufacturer }}</small>
+                                    </div>
+                                </div>
+                                <div class="product-footer">
+                                    <button class="btn btn-sm btn-primary" (click)="quickAddToIntake(product)">
+                                        <i class="fas fa-plus me-1"></i>Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recipes -->
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let recipe of paginatedRecipes">
+                            <div class="product-card recipe">
+                                <div class="product-header">
+                                    <h6 class="product-name" [title]="recipe.name">{{ recipe.name }}</h6>
+                                    <div class="product-badge">
+                                        <span class="badge bg-secondary"><i class="fas fa-book"></i> Рецепт</span>
+                                    </div>
+                                </div>
+                                <div class="product-image">
+                                    <img *ngIf="recipe.image_url" 
+                                         [src]="recipe.image_url" 
+                                         [alt]="recipe.name" 
+                                         class="img-fluid"
+                                         loading="lazy"
+                                         (load)="onImageLoad($event)"
+                                         (error)="onImageError($event)">
+                                    <div class="product-image-placeholder" [style.display]="recipe.image_url ? 'none' : 'flex'">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <div class="recipe-meta mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-users"></i> {{ recipe.servings }} порций
+                                            <span *ngIf="recipe.ingredients_count" class="ms-2">
+                                                <i class="fas fa-list"></i> {{ recipe.ingredients_count }} ингр.
+                                            </span>
+                                        </small>
+                                    </div>
+                                    <div class="nutrition-info">
+                                        <div class="nutrition-item">
+                                            <span class="label">Калории:</span>
+                                            <span class="value">{{ formatNumber(recipe.calories_per_100g || 0) }} ккал/100г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Белки:</span>
+                                            <span class="value">{{ formatNumber(recipe.protein_per_100g || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Жиры:</span>
+                                            <span class="value">{{ formatNumber(recipe.fat_per_100g || 0) }} г</span>
+                                        </div>
+                                        <div class="nutrition-item">
+                                            <span class="label">Углеводы:</span>
+                                            <span class="value">{{ formatNumber(recipe.carbohydrate_per_100g || 0) }} г</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-description" *ngIf="recipe.description">
+                                        <small class="text-muted">{{ recipe.description | slice:0:50 }}<span *ngIf="recipe.description.length > 50">...</span></small>
+                                    </div>
+                                </div>
+                                <div class="product-footer">
+                                    <button class="btn btn-sm btn-outline-secondary" routerLink="/patient/monitoring/nutrition/recipes">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" (click)="quickAddToIntake(recipe)">
+                                        <i class="fas fa-plus me-1"></i>Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-section" *ngIf="totalPages > 1">
+                    <nav aria-label="Search results pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" [class.disabled]="currentPage === 1">
+                                <button class="page-link" (click)="changePage(1)" [disabled]="currentPage === 1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </button>
+                            </li>
+                            <li class="page-item" [class.disabled]="currentPage === 1">
+                                <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+                                    <i class="fas fa-angle-left"></i>
+                                </button>
+                            </li>
+                            
+                            <li class="page-item" 
+                                *ngFor="let page of getPageNumbers()" 
+                                [class.active]="page === currentPage">
+                                <button class="page-link" (click)="changePage(page)">{{ page }}</button>
+                            </li>
+                            
+                            <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                <button class="page-link" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+                                    <i class="fas fa-angle-right"></i>
+                                </button>
+                            </li>
+                            <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                <button class="page-link" (click)="changePage(totalPages)" [disabled]="currentPage === totalPages">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container">
+    <div class="toast" 
+         [class.show]="showToast" 
+         [class.toast-success]="toastType === 'success'"
+         [class.toast-error]="toastType === 'error'">
+        <div class="toast-content">
+            <div class="toast-icon">
+                <i class="fas fa-check-circle" *ngIf="toastType === 'success'"></i>
+                <i class="fas fa-exclamation-circle" *ngIf="toastType === 'error'"></i>
+            </div>
+            <div class="toast-message">{{ toastMessage }}</div>
+            <button class="toast-close" (click)="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>

@@ -14,10 +14,20 @@ export interface Product {
 export interface UserProduct {
     id: string;
     name: string;
+    description?: string;
     protein: number;
     fat: number;
     carbohydrate: number;
     calories: number;
+    fiber?: number;
+    sugar?: number;
+    sodium?: number;
+    potassium?: number;
+    cholesterol?: number;
+    vitamin_a?: number;
+    vitamin_c?: number;
+    calcium?: number;
+    iron?: number;
     composition?: string;
     manufacturer?: string;
     image_url?: string;
@@ -36,8 +46,23 @@ export interface Recipe {
     fat_per_100g: number;
     carbohydrate_per_100g: number;
     ingredients_count: number;
+    ingredients?: RecipeIngredient[];
+    image_url?: string;
     created_at: string;
     updated_at: string;
+}
+
+export interface RecipeIngredient {
+    id?: string;
+    product_id?: number;
+    user_product_id?: string;
+    product_name?: string;
+    amount: number;
+    unit: string;
+    order?: number;
+    product?: Product;
+    user_product?: UserProduct;
+    product_info?: Product | UserProduct;
 }
 
 export interface SearchResults {

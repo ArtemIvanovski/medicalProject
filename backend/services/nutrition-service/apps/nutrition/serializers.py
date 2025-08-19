@@ -29,14 +29,15 @@ class UserProductSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         if obj.image_drive_id:
-            return f"/api/v1/nutrition/product-image/{obj.image_drive_id}/"
+            return f"http://localhost:8005/api/v1/product-image/{obj.image_drive_id}/"
         return None
 
 
 class CreateUserProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProduct
-        fields = ['name', 'protein', 'fat', 'carbohydrate', 'calories', 'composition', 'manufacturer']
+        fields = ['id', 'name', 'protein', 'fat', 'carbohydrate', 'calories', 'composition', 'manufacturer']
+        read_only_fields = ['id']
 
     def validate_calories(self, value):
         if value < 0:
@@ -96,6 +97,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     ingredients_count = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -103,7 +105,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'total_weight', 'servings',
             'calories_per_100g', 'protein_per_100g', 'fat_per_100g',
             'carbohydrate_per_100g', 'ingredients', 'ingredients_count',
-            'created_at', 'updated_at'
+            'image_url', 'created_at', 'updated_at'
         ]
         read_only_fields = [
             'id', 'calories_per_100g', 'protein_per_100g', 'fat_per_100g',
@@ -112,6 +114,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_ingredients_count(self, obj):
         return obj.ingredients.count()
+
+    def get_image_url(self, obj):
+        if obj.image_drive_id:
+            return f"http://localhost:8005/api/v1/recipe-image/{obj.image_drive_id}/"
+        return None
 
 
 class CreateRecipeSerializer(serializers.Serializer):

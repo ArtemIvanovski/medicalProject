@@ -31,4 +31,8 @@ urlpatterns = [
     path('user-products/<uuid:product_id>/image/', views.upload_product_image, name='upload-product-image'),
     path('user-products/<uuid:product_id>/image/delete/', views.delete_product_image, name='delete-product-image'),
     path('product-image/<str:file_id>/', views.get_product_image, name='get-product-image'),
+    
+    path('recipes/<uuid:recipe_id>/image/', views.upload_recipe_image, name='upload-recipe-image'),
+    path('recipes/<uuid:recipe_id>/image/delete/', views.delete_recipe_image, name='delete-recipe-image'),
+    path('recipe-image/<str:file_id>/', views.get_recipe_image, name='get-recipe-image'),
 ]

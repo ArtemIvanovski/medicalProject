@@ -109,12 +109,12 @@
                                             <div class="circle-progress"
                                                  [attr.data-percentage]="getCaloriesPercentage()">
                                                 <div class="circle-inner">
-                                                    <div class="calories-consumed">{{ todayStats.calories || 0 }}</div>
+                                                    <div class="calories-consumed">{{ formatNumber(todayStats.calories || 0) }}</div>
                                                     <div class="calories-label">съедено</div>
                                                     <div class="calories-remaining" *ngIf="dailyGoal">
-                                                        {{ getCaloriesRemaining() > 0 ? '-' + getCaloriesRemaining() : '+' + abs(getCaloriesRemaining()) }}
+                                                        {{ getCaloriesRemaining() > 0 ? '-' + formatNumber(getCaloriesRemaining()) : '+' + formatNumber(abs(getCaloriesRemaining())) }}
                                                     </div>
-                                                    <div class="calories-goal" *ngIf="dailyGoal">{{ dailyGoal.calories_goal }} ккал цель</div>
+                                                    <div class="calories-goal" *ngIf="dailyGoal">{{ formatNumber(dailyGoal.calories_goal) }} ккал цель</div>
                                                     <div class="calories-goal" *ngIf="!dailyGoal">Цель не установлена</div>
                                                 </div>
                                             </div>
@@ -129,8 +129,8 @@
                                                         <span class="macro-dot protein"></span>
                                                         Белки
                                                     </span>
-                                                    <span class="macro-values">{{ todayStats.protein || 0 }}
-                                                        <span *ngIf="dailyGoal">/ {{ dailyGoal.protein_goal }}г</span>
+                                                    <span class="macro-values">{{ formatNumber(todayStats.protein || 0) }}
+                                                        <span *ngIf="dailyGoal">/ {{ formatNumber(dailyGoal.protein_goal) }}г</span>
                                                         <span *ngIf="!dailyGoal">г</span>
                                                     </span>
                                                 </div>
@@ -150,8 +150,8 @@
                                                         <span class="macro-dot fat"></span>
                                                         Жиры
                                                     </span>
-                                                    <span class="macro-values">{{ todayStats.fat || 0 }}
-                                                        <span *ngIf="dailyGoal">/ {{ dailyGoal.fat_goal }}г</span>
+                                                    <span class="macro-values">{{ formatNumber(todayStats.fat || 0) }}
+                                                        <span *ngIf="dailyGoal">/ {{ formatNumber(dailyGoal.fat_goal) }}г</span>
                                                         <span *ngIf="!dailyGoal">г</span>
                                                     </span>
                                                 </div>
@@ -171,8 +171,8 @@
                                                         <span class="macro-dot carbs"></span>
                                                         Углеводы
                                                     </span>
-                                                    <span class="macro-values">{{ todayStats.carbohydrate || 0 }}
-                                                        <span *ngIf="dailyGoal">/ {{ dailyGoal.carbohydrate_goal }}г</span>
+                                                    <span class="macro-values">{{ formatNumber(todayStats.carbohydrate || 0) }}
+                                                        <span *ngIf="dailyGoal">/ {{ formatNumber(dailyGoal.carbohydrate_goal) }}г</span>
                                                         <span *ngIf="!dailyGoal">г</span>
                                                     </span>
                                                 </div>
@@ -238,8 +238,8 @@
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-1">{{ intake.product_name }}</h6>
                                                 <p class="mb-1 text-muted">
-                                                    {{ intake.amount }}{{ getUnitDisplay(intake.unit) }}
-                                                    • {{ intake.calories_consumed }}ккал
+                                                    {{ formatNumber(intake.amount) }}{{ getUnitDisplay(intake.unit) }}
+                                                    • {{ formatNumber(intake.calories_consumed) }}ккал
                                                 </p>
                                                 <small class="text-muted">
                                                     {{ intake.consumed_at | date:'dd.MM.yyyy HH:mm' }}
@@ -247,9 +247,9 @@
                                                 <div class="macros-mini mt-2"
                                                      *ngIf="intake.protein_consumed || intake.fat_consumed || intake.carbohydrate_consumed">
                                                     <div class="d-flex flex-wrap gap-1">
-                                                        <span class="macro-mini protein">Б: {{ intake.protein_consumed | number:'1.0-1' }}г</span>
-                                                        <span class="macro-mini fat">Ж: {{ intake.fat_consumed | number:'1.0-1' }}г</span>
-                                                        <span class="macro-mini carbs">У: {{ intake.carbohydrate_consumed | number:'1.0-1' }}г</span>
+                                                        <span class="macro-mini protein">Б: {{ formatNumber(intake.protein_consumed) }}г</span>
+                                                        <span class="macro-mini fat">Ж: {{ formatNumber(intake.fat_consumed) }}г</span>
+                                                        <span class="macro-mini carbs">У: {{ formatNumber(intake.carbohydrate_consumed) }}г</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -265,151 +265,342 @@
     </div>
 </div>
 
-<!-- Search Modal -->
-<div *ngIf="showSearchModal" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);"
-     (click)="closeSearchModal()">
-    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Поиск продуктов</h5>
-                <button type="button" class="btn-close" (click)="closeSearchModal()"></button>
+<!-- Modern Search Modal -->
+<div *ngIf="showSearchModal" class="modern-search-modal-overlay" (click)="closeSearchModal()">
+    <div class="modern-search-modal" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modern-search-header">
+            <div class="search-header-content">
+                <h4 class="search-title">
+                    <i class="fas fa-search me-2"></i>
+                    Поиск продуктов
+                </h4>
+                <p class="search-subtitle">Найдите продукты, рецепты и добавьте их в свой дневник питания</p>
             </div>
-            <div class="modal-body">
-                <!-- Search Input -->
-                <div class="mb-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Найти продукты, рецепты..."
-                               [(ngModel)]="searchQuery" (input)="onSearchInput($event)" autocomplete="off">
-                        <button *ngIf="searchQuery" class="btn btn-outline-secondary" type="button"
-                                (click)="clearSearch()">
-                            <i class="fas fa-times"></i>
-                        </button>
+            <button type="button" class="modern-close-btn" (click)="closeSearchModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Search Input Section -->
+        <div class="modern-search-input-section">
+            <div class="modern-search-input-wrapper">
+                <i class="fas fa-search search-input-icon"></i>
+                <input type="text" 
+                       class="modern-search-input" 
+                       placeholder="Введите название продукта, рецепта или производителя..."
+                       [(ngModel)]="searchQuery" 
+                       (input)="onSearchInput($event)" 
+                       autocomplete="off"
+                       #searchInput>
+                <button *ngIf="searchQuery" 
+                        class="clear-search-btn" 
+                        type="button"
+                        (click)="clearSearch(); searchInput.focus()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Search Stats -->
+            <div *ngIf="searchResults && !isSearching" class="search-stats">
+                <span class="search-stats-text">
+                    Найдено: {{ getTotalResults() }} результатов
+                    <span *ngIf="searchResults.products.length > 0" class="stats-item">
+                        • {{ searchResults.products.length }} продуктов
+                    </span>
+                    <span *ngIf="searchResults.user_products.length > 0" class="stats-item">
+                        • {{ searchResults.user_products.length }} ваших продуктов
+                    </span>
+                    <span *ngIf="searchResults.recipes.length > 0" class="stats-item">
+                        • {{ searchResults.recipes.length }} рецептов
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modern-search-body">
+            <!-- Loading State -->
+            <div *ngIf="isSearching" class="search-loading-state">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+                <p class="loading-text">Ищем продукты...</p>
+            </div>
+
+            <!-- Initial State -->
+            <div *ngIf="!searchQuery && !searchResults" class="search-initial-state">
+                <div class="initial-state-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h5>Начните поиск</h5>
+                <p>Введите название продукта, рецепта или производителя для поиска</p>
+                <div class="search-tips">
+                    <h6>Советы для поиска:</h6>
+                    <ul>
+                        <li>Используйте конкретные названия продуктов</li>
+                        <li>Попробуйте различные варианты написания</li>
+                        <li>Ищите по производителю или бренду</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div *ngIf="searchResults && !isSearching" class="modern-search-results">
+                <!-- Favorites Section -->
+                <div *ngIf="searchResults.favorites && searchResults.favorites.length > 0" class="results-section">
+                    <div class="section-header">
+                        <i class="fas fa-star section-icon favorites"></i>
+                        <h6 class="section-title">Избранные продукты</h6>
+                        <span class="section-count">{{ searchResults.favorites.length }}</span>
+                    </div>
+                    <div class="results-grid">
+                        <div *ngFor="let product of searchResults.favorites" class="modern-product-card favorites-card">
+                            <div class="product-card-content">
+                                <div class="product-image-section">
+                                    <img *ngIf="product.image_url" 
+                                         [src]="product.image_url"
+                                         [alt]="product.name" 
+                                         class="modern-product-image">
+                                    <div *ngIf="!product.image_url" class="modern-product-placeholder">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="product-info-section">
+                                    <h6 class="modern-product-name">{{ product.name }}</h6>
+                                    <div class="product-meta">
+                                        <span class="calories-badge">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                        <span class="portion-text">на 100г</span>
+                                    </div>
+                                    <div class="nutrition-grid">
+                                        <div class="nutrition-item protein">
+                                            <span class="nutrition-label">Б</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.protein || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item fat">
+                                            <span class="nutrition-label">Ж</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.fat || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item carbs">
+                                            <span class="nutrition-label">У</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.carbohydrate || 0) }}г</span>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="product.manufacturer" class="product-manufacturer">
+                                        <i class="fas fa-industry me-1"></i>
+                                        {{ product.manufacturer }}
+                                    </div>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="modern-action-btn add-btn"
+                                            (click)="selectProduct(product, 'product')"
+                                            title="Добавить в дневник">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Добавить</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Search Results -->
-                <div *ngIf="isSearching" class="text-center">
-                    <div class="spinner-border spinner-border-sm" role="status"></div>
-                    <span class="ms-2">Поиск...</span>
-                </div>
-
-                <div *ngIf="searchResults && !isSearching" class="search-results-modal">
-                    <!-- Products -->
-                    <div *ngIf="searchResults.products.length > 0" class="mb-3">
-                        <h6 class="text-muted mb-2">Продукты ({{ searchResults.products.length }})</h6>
-                        <div *ngFor="let product of searchResults.products" class="search-item-modal">
-                            <div class="d-flex align-items-center">
-                                <div class="product-image-wrapper me-3">
-                                    <img *ngIf="product.image_url" [src]="product.image_url"
-                                         [alt]="product.name" class="product-search-image">
-                                    <div *ngIf="!product.image_url" class="product-placeholder-image">
+                <!-- Products Section -->
+                <div *ngIf="searchResults.products.length > 0" class="results-section">
+                    <div class="section-header">
+                        <i class="fas fa-apple-alt section-icon products"></i>
+                        <h6 class="section-title">Продукты</h6>
+                        <span class="section-count">{{ searchResults.products.length }}</span>
+                    </div>
+                    <div class="results-grid">
+                        <div *ngFor="let product of searchResults.products" class="modern-product-card">
+                            <div class="product-card-content">
+                                <div class="product-image-section">
+                                    <img *ngIf="product.image_url" 
+                                         [src]="product.image_url"
+                                         [alt]="product.name" 
+                                         class="modern-product-image">
+                                    <div *ngIf="!product.image_url" class="modern-product-placeholder">
                                         <i class="fas fa-apple-alt"></i>
                                     </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="product-name">{{ product.name }}</div>
-                                    <small class="text-muted">
-                                        {{ product.calories || 0 }}ккал • 
-                                        <span class="macro-mini protein">Б:{{ product.protein || 0 }}г</span> • 
-                                        <span class="macro-mini fat">Ж:{{ product.fat || 0 }}г</span> • 
-                                        <span class="macro-mini carbs">У:{{ product.carbohydrate || 0 }}г</span>
-                                    </small>
+                                <div class="product-info-section">
+                                    <h6 class="modern-product-name">{{ product.name }}</h6>
+                                    <div class="product-meta">
+                                        <span class="calories-badge">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                        <span class="portion-text">на 100г</span>
+                                    </div>
+                                    <div class="nutrition-grid">
+                                        <div class="nutrition-item protein">
+                                            <span class="nutrition-label">Б</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.protein || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item fat">
+                                            <span class="nutrition-label">Ж</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.fat || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item carbs">
+                                            <span class="nutrition-label">У</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.carbohydrate || 0) }}г</span>
+                                        </div>
+                                    </div>
                                     <div *ngIf="product.manufacturer" class="product-manufacturer">
-                                        <small class="text-muted">{{ product.manufacturer }}</small>
+                                        <i class="fas fa-industry me-1"></i>
+                                        {{ product.manufacturer }}
                                     </div>
                                 </div>
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-sm btn-outline-warning py-1"
+                                <div class="product-actions">
+                                    <button class="modern-action-btn favorite-btn"
                                             (click)="addToFavorites(product)"
                                             title="Добавить в избранное">
                                         <i class="fas fa-star"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-success py-1"
+                                    <button class="modern-action-btn add-btn"
                                             (click)="selectProduct(product, 'product')"
                                             title="Добавить в дневник">
                                         <i class="fas fa-plus"></i>
+                                        <span>Добавить</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- User Products -->
-                    <div *ngIf="searchResults.user_products.length > 0" class="mb-3">
-                        <h6 class="text-muted mb-2">Мои продукты ({{ searchResults.user_products.length }})</h6>
-                        <div *ngFor="let product of searchResults.user_products" class="search-item-modal">
-                            <div class="d-flex align-items-center">
-                                <div class="product-image-wrapper me-3">
-                                    <img *ngIf="product.image_url" [src]="product.image_url"
-                                         [alt]="product.name" class="product-search-image">
-                                    <div *ngIf="!product.image_url" class="product-placeholder-image">
+                <!-- User Products Section -->
+                <div *ngIf="searchResults.user_products.length > 0" class="results-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-plus section-icon user-products"></i>
+                        <h6 class="section-title">Мои продукты</h6>
+                        <span class="section-count">{{ searchResults.user_products.length }}</span>
+                    </div>
+                    <div class="results-grid">
+                        <div *ngFor="let product of searchResults.user_products" class="modern-product-card user-card">
+                            <div class="product-card-content">
+                                <div class="product-image-section">
+                                    <img *ngIf="product.image_url" 
+                                         [src]="product.image_url"
+                                         [alt]="product.name" 
+                                         class="modern-product-image">
+                                    <div *ngIf="!product.image_url" class="modern-product-placeholder">
                                         <i class="fas fa-user-plus"></i>
                                     </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="product-name">{{ product.name }}</div>
-                                    <small class="text-muted">
-                                        {{ product.calories || 0 }}ккал • 
-                                        <span class="macro-mini protein">Б:{{ product.protein || 0 }}г</span> • 
-                                        <span class="macro-mini fat">Ж:{{ product.fat || 0 }}г</span> • 
-                                        <span class="macro-mini carbs">У:{{ product.carbohydrate || 0 }}г</span>
-                                    </small>
+                                <div class="product-info-section">
+                                    <h6 class="modern-product-name">{{ product.name }}</h6>
+                                    <div class="product-meta">
+                                        <span class="calories-badge">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                        <span class="portion-text">на 100г</span>
+                                    </div>
+                                    <div class="nutrition-grid">
+                                        <div class="nutrition-item protein">
+                                            <span class="nutrition-label">Б</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.protein || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item fat">
+                                            <span class="nutrition-label">Ж</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.fat || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item carbs">
+                                            <span class="nutrition-label">У</span>
+                                            <span class="nutrition-value">{{ formatNumber(product.carbohydrate || 0) }}г</span>
+                                        </div>
+                                    </div>
                                     <div *ngIf="product.manufacturer" class="product-manufacturer">
-                                        <small class="text-muted">{{ product.manufacturer }}</small>
+                                        <i class="fas fa-industry me-1"></i>
+                                        {{ product.manufacturer }}
                                     </div>
                                 </div>
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-sm btn-success py-1"
+                                <div class="product-actions">
+                                    <button class="modern-action-btn add-btn"
                                             (click)="selectProduct(product, 'user_product')"
                                             title="Добавить в дневник">
                                         <i class="fas fa-plus"></i>
+                                        <span>Добавить</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Recipes -->
-                    <div *ngIf="searchResults.recipes.length > 0" class="mb-3">
-                        <h6 class="text-muted mb-2">Рецепты ({{ searchResults.recipes.length }})</h6>
-                        <div *ngFor="let recipe of searchResults.recipes" class="search-item-modal">
-                            <div class="d-flex align-items-center">
-                                <div class="product-image-wrapper me-3">
-                                    <div class="product-placeholder-image">
+                <!-- Recipes Section -->
+                <div *ngIf="searchResults.recipes.length > 0" class="results-section">
+                    <div class="section-header">
+                        <i class="fas fa-utensils section-icon recipes"></i>
+                        <h6 class="section-title">Рецепты</h6>
+                        <span class="section-count">{{ searchResults.recipes.length }}</span>
+                    </div>
+                    <div class="results-grid">
+                        <div *ngFor="let recipe of searchResults.recipes" class="modern-product-card recipe-card">
+                            <div class="product-card-content">
+                                <div class="product-image-section">
+                                    <div class="modern-product-placeholder">
                                         <i class="fas fa-utensils"></i>
                                     </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="product-name">{{ recipe.name }}</div>
-                                    <small class="text-muted">
-                                        {{ recipe.calories_per_100g || 0 }}ккал/100г • 
-                                        <span class="macro-mini protein">Б:{{ recipe.protein_per_100g || 0 }}г</span> • 
-                                        <span class="macro-mini fat">Ж:{{ recipe.fat_per_100g || 0 }}г</span> • 
-                                        <span class="macro-mini carbs">У:{{ recipe.carbohydrate_per_100g || 0 }}г</span>
-                                    </small>
-                                    <div *ngIf="recipe.description" class="product-manufacturer">
-                                        <small class="text-muted">{{ recipe.description }}</small>
+                                <div class="product-info-section">
+                                    <h6 class="modern-product-name">{{ recipe.name }}</h6>
+                                    <div class="product-meta">
+                                        <span class="calories-badge">{{ formatNumber(recipe.calories_per_100g || 0) }} ккал</span>
+                                        <span class="portion-text">на 100г</span>
+                                    </div>
+                                    <div class="nutrition-grid">
+                                        <div class="nutrition-item protein">
+                                            <span class="nutrition-label">Б</span>
+                                            <span class="nutrition-value">{{ formatNumber(recipe.protein_per_100g || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item fat">
+                                            <span class="nutrition-label">Ж</span>
+                                            <span class="nutrition-value">{{ formatNumber(recipe.fat_per_100g || 0) }}г</span>
+                                        </div>
+                                        <div class="nutrition-item carbs">
+                                            <span class="nutrition-label">У</span>
+                                            <span class="nutrition-value">{{ formatNumber(recipe.carbohydrate_per_100g || 0) }}г</span>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="recipe.description" class="product-description">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        {{ recipe.description | slice:0:50 }}<span *ngIf="recipe.description.length > 50">...</span>
+                                    </div>
+                                    <div class="recipe-meta">
+                                        <span class="recipe-servings">
+                                            <i class="fas fa-users me-1"></i>
+                                            {{ recipe.servings }} порций
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-sm btn-success py-1"
+                                <div class="product-actions">
+                                    <button class="modern-action-btn add-btn"
                                             (click)="selectProduct(recipe, 'recipe')"
                                             title="Добавить в дневник">
                                         <i class="fas fa-plus"></i>
+                                        <span>Добавить</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- No Results -->
-                    <div *ngIf="searchResults.products.length === 0 &&
-                                searchResults.user_products.length === 0 &&
-                                searchResults.recipes.length === 0"
-                         class="text-center text-muted">
-                        <i class="fas fa-search fa-3x mb-3"></i>
-                        <p>По запросу "{{ searchQuery }}" ничего не найдено</p>
-                        <p>Попробуйте изменить поисковый запрос</p>
+                <!-- No Results -->
+                <div *ngIf="searchResults.products.length === 0 &&
+                            searchResults.user_products.length === 0 &&
+                            searchResults.recipes.length === 0 &&
+                            (!searchResults.favorites || searchResults.favorites.length === 0)"
+                     class="no-results-state">
+                    <div class="no-results-icon">
+                        <i class="fas fa-search-minus"></i>
+                    </div>
+                    <h5>Ничего не найдено</h5>
+                    <p>По запросу "<strong>{{ searchQuery }}</strong>" результатов не найдено</p>
+                    <div class="search-suggestions">
+                        <h6>Попробуйте:</h6>
+                        <ul>
+                            <li>Проверить правильность написания</li>
+                            <li>Использовать более общие термины</li>
+                            <li>Попробовать синонимы</li>
+                            <li>Создать собственный продукт</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -417,55 +608,163 @@
     </div>
 </div>
 
-<!-- Add Intake Modal -->
-<div *ngIf="showAddIntakeModal" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Добавить в дневник</h5>
-                <button type="button" class="btn-close" (click)="closeAddIntakeModal()"></button>
+<!-- Modern Add Intake Modal -->
+<div *ngIf="showAddIntakeModal" class="modern-add-modal-overlay" (click)="closeAddIntakeModal()">
+    <div class="modern-add-modal" (click)="$event.stopPropagation()">
+        <div class="modern-add-header">
+            <div class="add-header-content">
+                <h4 class="add-title">
+                    <i class="fas fa-plus me-2"></i>
+                    Добавить в дневник питания
+                </h4>
+                <p class="add-subtitle">Укажите количество и единицы измерения</p>
             </div>
-            <form [formGroup]="addIntakeForm" (ngSubmit)="addIntake()">
-                <div class="modal-body">
-                    <div *ngIf="selectedProduct" class="selected-product mb-3 p-3 bg-light rounded">
-                        <h6 class="mb-2">{{ getProductName() }}</h6>
-                        <small class="text-muted">
-                            На 100г: {{ getProductCalories() }}ккал,
-                            Б: {{ getProductProtein() }}г,
-                            Ж: {{ getProductFat() }}г,
-                            У: {{ getProductCarbohydrate() }}г
-                        </small>
-                    </div>
+            <button type="button" class="modern-close-btn" (click)="closeAddIntakeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
-                    <div class="row">
-                        <div class="col-md-8">
-                            <label for="amount" class="form-label">Количество</label>
-                            <input type="number" id="amount" class="form-control"
-                                   formControlName="amount" min="1" step="0.1">
+        <form [formGroup]="addIntakeForm" (ngSubmit)="addIntake()">
+            <div class="modern-add-body">
+                <!-- Selected Product Info -->
+                <div *ngIf="selectedProduct" class="modern-selected-product">
+                    <div class="product-summary">
+                        <div class="product-summary-header">
+                            <h5 class="product-summary-name">{{ getProductName() }}</h5>
+                            <span class="product-type-badge" [ngClass]="selectedProductType">
+                                <i class="fas" [class]="getProductTypeIcon()"></i>
+                                {{ getProductTypeLabel() }}
+                            </span>
                         </div>
-                        <div class="col-md-4">
-                            <label for="unit" class="form-label">Единица</label>
-                            <select id="unit" class="form-select" formControlName="unit">
-                                <option value="g">граммы</option>
-                                <option value="ml">мл</option>
-                                <option value="pieces">штуки</option>
-                                <option value="tbsp">ст.л.</option>
-                                <option value="tsp">ч.л.</option>
-                                <option value="cup">стаканы</option>
+                        
+                        <div class="nutrition-summary">
+                            <div class="nutrition-summary-grid">
+                                <div class="nutrition-summary-item calories">
+                                    <span class="nutrition-summary-value">{{ formatNumber(getProductCalories()) }}</span>
+                                    <span class="nutrition-summary-label">ккал</span>
+                                </div>
+                                <div class="nutrition-summary-item protein">
+                                    <span class="nutrition-summary-value">{{ formatNumber(getProductProtein()) }}г</span>
+                                    <span class="nutrition-summary-label">Белки</span>
+                                </div>
+                                <div class="nutrition-summary-item fat">
+                                    <span class="nutrition-summary-value">{{ formatNumber(getProductFat()) }}г</span>
+                                    <span class="nutrition-summary-label">Жиры</span>
+                                </div>
+                                <div class="nutrition-summary-item carbs">
+                                    <span class="nutrition-summary-value">{{ formatNumber(getProductCarbohydrate()) }}г</span>
+                                    <span class="nutrition-summary-label">Углеводы</span>
+                                </div>
+                            </div>
+                            <div class="nutrition-summary-note">На 100г продукта</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount and Unit Input -->
+                <div class="amount-input-section">
+                    <h6 class="section-title">Количество и единицы</h6>
+                    <div class="amount-input-grid">
+                        <div class="amount-input-group">
+                            <label for="amount" class="modern-form-label">
+                                <i class="fas fa-weight me-1"></i>
+                                Количество
+                            </label>
+                            <input type="number" 
+                                   id="amount" 
+                                   class="modern-form-control"
+                                   formControlName="amount" 
+                                   min="0.1" 
+                                   step="0.1"
+                                   placeholder="Введите количество">
+                            <div *ngIf="addIntakeForm.get('amount')?.invalid && addIntakeForm.get('amount')?.touched" 
+                                 class="form-error">
+                                Введите корректное количество
+                            </div>
+                        </div>
+                        
+                        <div class="unit-input-group">
+                            <label for="unit" class="modern-form-label">
+                                <i class="fas fa-ruler me-1"></i>
+                                Единица измерения
+                            </label>
+                            <select id="unit" class="modern-form-select" formControlName="unit">
+                                <option value="g">граммы (г)</option>
+                                <option value="ml">миллилитры (мл)</option>
+                                <option value="pieces">штуки (шт)</option>
+                                <option value="tbsp">столовые ложки (ст.л.)</option>
+                                <option value="tsp">чайные ложки (ч.л.)</option>
+                                <option value="cup">стаканы (стак.)</option>
+                                <option value="serving" *ngIf="selectedProductType === 'recipe'">порции</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" (click)="closeAddIntakeModal()">
-                        Отмена
-                    </button>
-                    <button type="submit" class="btn btn-primary" [disabled]="addIntakeForm.invalid">
-                        <i class="fas fa-plus me-1"></i>
-                        Добавить
-                    </button>
+
+                <!-- Consumption Time -->
+                <div class="consumption-time-section">
+                    <h6 class="section-title">Время приема</h6>
+                    <div class="time-input-group">
+                        <label for="consumed_at" class="modern-form-label">
+                            <i class="fas fa-clock me-1"></i>
+                            Время употребления
+                        </label>
+                        <input type="datetime-local" 
+                               id="consumed_at" 
+                               class="modern-form-control"
+                               formControlName="consumed_at"
+                               [max]="getCurrentDateTime()">
+                        <small class="form-hint">Укажите точное время употребления продукта</small>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <!-- Calculated Nutrition -->
+                <div *ngIf="addIntakeForm.get('amount')?.value > 0" class="calculated-nutrition">
+                    <h6 class="section-title">Пищевая ценность порции</h6>
+                    <div class="calculated-grid">
+                        <div class="calculated-item calories">
+                            <div class="calculated-value">{{ getCalculatedCalories() }}</div>
+                            <div class="calculated-label">ккал</div>
+                        </div>
+                        <div class="calculated-item protein">
+                            <div class="calculated-value">{{ getCalculatedProtein() }}г</div>
+                            <div class="calculated-label">Белки</div>
+                        </div>
+                        <div class="calculated-item fat">
+                            <div class="calculated-value">{{ getCalculatedFat() }}г</div>
+                            <div class="calculated-label">Жиры</div>
+                        </div>
+                        <div class="calculated-item carbs">
+                            <div class="calculated-value">{{ getCalculatedCarbohydrate() }}г</div>
+                            <div class="calculated-label">Углеводы</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="notes-section">
+                    <label for="notes" class="modern-form-label">
+                        <i class="fas fa-sticky-note me-1"></i>
+                        Заметки (необязательно)
+                    </label>
+                    <textarea id="notes" 
+                              class="modern-form-control" 
+                              formControlName="notes"
+                              placeholder="Добавьте заметку о приеме пищи..."
+                              rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="modern-add-footer">
+                <button type="button" class="modern-btn secondary" (click)="closeAddIntakeModal()">
+                    <i class="fas fa-times me-1"></i>
+                    Отмена
+                </button>
+                <button type="submit" class="modern-btn primary" [disabled]="addIntakeForm.invalid">
+                    <i class="fas fa-plus me-1"></i>
+                    Добавить в дневник
+                </button>
+            </div>
+        </form>
     </div>
 </div>

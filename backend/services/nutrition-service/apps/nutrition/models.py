@@ -150,6 +150,7 @@ class Recipe(models.Model):
     protein_per_100g = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     fat_per_100g = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     carbohydrate_per_100g = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    image_drive_id = models.CharField(max_length=128, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

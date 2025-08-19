@@ -46,7 +46,7 @@ export class NutritionDashboardComponent implements OnInit {
         this.addIntakeForm = this.fb.group({
             amount: [100, [Validators.required, Validators.min(1)]],
             unit: ['g', Validators.required],
-            meal_type: ['breakfast', Validators.required],
+            consumed_at: [this.getCurrentDateTime(), Validators.required],
             notes: ['']
         });
     }
@@ -137,35 +137,62 @@ export class NutritionDashboardComponent implements OnInit {
         if (this.addIntakeForm.valid && this.selectedProduct) {
             const formData = this.addIntakeForm.value;
 
+            // Prepare request data according to backend API requirements
             let requestData: any = {
-                amount: formData.amount,
-                unit: formData.unit,
-                consumed_at: new Date().toISOString(),
-                notes: formData.notes
+                amount: Number(formData.amount), // Ensure amount is a number
+                unit: formData.unit || 'g', // Default unit if not specified
+                consumed_at: formData.consumed_at || new Date().toISOString(),
+                notes: formData.notes || '' // Default empty string if no notes
             };
 
+            // Add the specific product identifier based on type
             switch (this.selectedProductType) {
                 case 'product':
                     requestData.product_id = (this.selectedProduct as Product).product_id;
+                    // Remove any conflicting IDs
+                    delete requestData.user_product_id;
+                    delete requestData.recipe_id;
                     break;
                 case 'user_product':
                     requestData.user_product_id = (this.selectedProduct as UserProduct).id;
+                    // Remove any conflicting IDs
+                    delete requestData.product_id;
+                    delete requestData.recipe_id;
                     break;
                 case 'recipe':
                     requestData.recipe_id = (this.selectedProduct as Recipe).id;
+                    // Remove any conflicting IDs
+                    delete requestData.product_id;
+                    delete requestData.user_product_id;
                     break;
             }
 
+            console.log('Sending request data:', requestData); // Debug log
+
             this.nutritionService.quickAddIntake(requestData).subscribe({
-                next: () => {
+                next: (response) => {
+                    console.log('Add intake success:', response); // Debug log
                     this.closeAddIntakeModal();
                     this.closeSearchModal();
-                    this.loadDashboard();
+                    this.loadDashboard(); // Reload dashboard to show updated stats
                     this.showSuccessMessage('Продукт добавлен в дневник');
                 },
                 error: (error) => {
                     console.error('Add intake error:', error);
-                    this.showErrorMessage('Ошибка добавления продукта');
+                    let errorMessage = 'Ошибка добавления продукта';
+                    
+                    // Handle specific error cases
+                    if (error.error && error.error.message) {
+                        errorMessage = error.error.message;
+                    } else if (error.error && typeof error.error === 'object') {
+                        // Handle field validation errors
+                        const fieldErrors = Object.values(error.error).flat();
+                        if (fieldErrors.length > 0) {
+                            errorMessage = fieldErrors.join(', ');
+                        }
+                    }
+                    
+                    this.showErrorMessage(errorMessage);
                 }
             });
         }
@@ -177,7 +204,7 @@ export class NutritionDashboardComponent implements OnInit {
         this.addIntakeForm.reset({
             amount: 100,
             unit: 'g',
-            meal_type: 'breakfast',
+            consumed_at: this.getCurrentDateTime(),
             notes: ''
         });
     }
@@ -326,5 +353,87 @@ export class NutritionDashboardComponent implements OnInit {
             'serving': 'порц.'
         };
         return unitMap[unit] || unit;
+    }
+
+    getTotalResults(): number {
+        if (!this.searchResults) return 0;
+        return (this.searchResults.products?.length || 0) +
+               (this.searchResults.user_products?.length || 0) +
+               (this.searchResults.recipes?.length || 0) +
+               (this.searchResults.favorites?.length || 0);
+    }
+
+    getProductTypeIcon(): string {
+        switch (this.selectedProductType) {
+            case 'product':
+                return 'fa-apple-alt';
+            case 'user_product':
+                return 'fa-user-plus';
+            case 'recipe':
+                return 'fa-utensils';
+            default:
+                return 'fa-question';
+        }
+    }
+
+    getProductTypeLabel(): string {
+        switch (this.selectedProductType) {
+            case 'product':
+                return 'Продукт';
+            case 'user_product':
+                return 'Мой продукт';
+            case 'recipe':
+                return 'Рецепт';
+            default:
+                return 'Неизвестно';
+        }
+    }
+
+    getCalculatedCalories(): number {
+        if (!this.selectedProduct || !this.addIntakeForm.get('amount')?.value) return 0;
+        const amount = Number(this.addIntakeForm.get('amount')?.value);
+        const calories = this.getProductCalories();
+        return Math.round((calories * amount) / 100 * 10) / 10; // Round to 1 decimal place
+    }
+
+    getCalculatedProtein(): number {
+        if (!this.selectedProduct || !this.addIntakeForm.get('amount')?.value) return 0;
+        const amount = Number(this.addIntakeForm.get('amount')?.value);
+        const protein = this.getProductProtein();
+        return Math.round((protein * amount) / 100 * 10) / 10; // Round to 1 decimal place
+    }
+
+    getCalculatedFat(): number {
+        if (!this.selectedProduct || !this.addIntakeForm.get('amount')?.value) return 0;
+        const amount = Number(this.addIntakeForm.get('amount')?.value);
+        const fat = this.getProductFat();
+        return Math.round((fat * amount) / 100 * 10) / 10; // Round to 1 decimal place
+    }
+
+    getCalculatedCarbohydrate(): number {
+        if (!this.selectedProduct || !this.addIntakeForm.get('amount')?.value) return 0;
+        const amount = Number(this.addIntakeForm.get('amount')?.value);
+        const carbohydrate = this.getProductCarbohydrate();
+        return Math.round((carbohydrate * amount) / 100 * 10) / 10; // Round to 1 decimal place
+    }
+
+    getCurrentDateTime(): string {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    formatNumber(value: number | string | null | undefined): string {
+        if (value === null || value === undefined || value === '') return '0';
+        
+        const num = typeof value === 'string' ? parseFloat(value) : value;
+        if (isNaN(num)) return '0';
+        
+        // Округляем до 1 знака после запятой и удаляем лишние нули
+        return Number(num.toFixed(1)).toString();
     }
 }

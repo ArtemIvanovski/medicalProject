@@ -92,9 +92,85 @@ def get_product_image(request, file_id):
     drive_service = DriveService()
 
     try:
+        print(f"Attempting to get product image with file_id: {file_id}")
         file_content = drive_service.get_file_content(file_id)
+        print(f"Successfully retrieved file content, size: {len(file_content)} bytes")
         return HttpResponse(file_content, content_type='image/jpeg')
     except Exception as e:
+        print(f"Error getting product image: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=404)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def upload_recipe_image(request, recipe_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No file provided'}, status=400)
+
+    try:
+        recipe = Recipe.objects.get(
+            id=recipe_id,
+            user=request.user,
+            is_deleted=False
+        )
+    except Recipe.DoesNotExist:
+        return JsonResponse({'error': 'Recipe not found'}, status=404)
+
+    file = request.FILES['image']
+    drive_service = DriveService()
+
+    try:
+        file_id = drive_service.upload_product_image(file, recipe.image_drive_id)
+        recipe.image_drive_id = file_id
+        recipe.save()
+        return JsonResponse({'success': True, 'file_id': file_id})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["DELETE"])
+@csrf_exempt
+def delete_recipe_image(request, recipe_id):
+    if request.user.is_anonymous:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        recipe = Recipe.objects.get(
+            id=recipe_id,
+            user=request.user,
+            is_deleted=False
+        )
+    except Recipe.DoesNotExist:
+        return JsonResponse({'error': 'Recipe not found'}, status=404)
+
+    if not recipe.image_drive_id:
+        return JsonResponse({'error': 'No image to delete'}, status=400)
+
+    drive_service = DriveService()
+
+    try:
+        drive_service.remove_file(recipe.image_drive_id)
+        recipe.image_drive_id = None
+        recipe.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_recipe_image(request, file_id):
+    drive_service = DriveService()
+
+    try:
+        print(f"Attempting to get recipe image with file_id: {file_id}")
+        file_content = drive_service.get_file_content(file_id)
+        print(f"Successfully retrieved file content, size: {len(file_content)} bytes")
+        return HttpResponse(file_content, content_type='image/jpeg')
+    except Exception as e:
+        print(f"Error getting recipe image: {str(e)}")
         return JsonResponse({'error': str(e)}, status=404)
 
 
@@ -144,6 +220,18 @@ class UserProductListCreateView(ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Return the created object using UserProductSerializer to include all fields
+        instance = serializer.instance
+        response_serializer = UserProductSerializer(instance)
+        headers = self.get_success_headers(serializer.data)
+        
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class UserProductDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
@@ -192,13 +280,38 @@ class RecipeListCreateView(ListCreateAPIView):
 
 class RecipeDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = RecipeSerializer
 
     def get_queryset(self):
         return Recipe.objects.filter(user=self.request.user, is_deleted=False).prefetch_related('ingredients')
 
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return CreateRecipeSerializer
+        return RecipeSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        name = serializer.validated_data['name']
+        description = serializer.validated_data.get('description', '')
+        servings = serializer.validated_data.get('servings', 1)
+        ingredients_data = serializer.validated_data['ingredients']
+
+        updated_recipe = RecipeService.update_recipe_with_ingredients(
+            recipe_id=instance.id,
+            user=request.user,
+            recipe_data={'name': name, 'description': description, 'servings': servings},
+            ingredients_data=ingredients_data
+        )
+
+        return Response(RecipeSerializer(updated_recipe).data, status=status.HTTP_200_OK)
+
     def perform_destroy(self, instance):
-        if instance.image_drive_id:
+        if hasattr(instance, 'image_drive_id') and instance.image_drive_id:
             from .drive_service import DriveService
             drive_service = DriveService()
             try:

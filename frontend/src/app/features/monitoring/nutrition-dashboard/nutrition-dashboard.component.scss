@@ -505,3 +505,1299 @@
   --light-color: #f8f9fa;
   --dark-color: #2c3e50;
 }
+
+// Modern Search Modal Styles
+.modern-search-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalOverlayFadeIn 0.3s ease-out;
+}
+
+@keyframes modalOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modern-search-modal {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 1100px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+// Modern Search Header
+.modern-search-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+  padding: 25px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid #3498db;
+
+  .search-header-content {
+    flex: 1;
+    z-index: 1;
+
+    .search-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      line-height: 1.2;
+
+      i {
+        font-size: 1.5rem;
+        opacity: 0.9;
+      }
+    }
+
+    .search-subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .modern-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    i {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+// Modern Search Input Section
+.modern-search-input-section {
+  padding: 30px 30px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+
+  .modern-search-input-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+
+    .search-input-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      font-size: 1.1rem;
+      z-index: 2;
+    }
+
+    .modern-search-input {
+      width: 100%;
+      padding: 18px 20px 18px 55px;
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      background: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        transform: translateY(-1px);
+      }
+
+      &::placeholder {
+        color: #adb5bd;
+        font-weight: 400;
+      }
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #6c757d;
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #495057;
+        transform: translateY(-50%) scale(1.1);
+      }
+    }
+  }
+
+  .search-stats {
+    .search-stats-text {
+      font-size: 0.95rem;
+      color: #6c757d;
+      font-weight: 500;
+
+      .stats-item {
+        color: #495057;
+      }
+    }
+  }
+}
+
+// Modern Search Body
+.modern-search-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  background: white;
+}
+
+// Loading State
+.search-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+
+  .loading-spinner {
+    margin-bottom: 20px;
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  .loading-text {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Initial State
+.search-initial-state {
+  text-align: center;
+  padding: 60px 30px;
+  color: #6c757d;
+
+  .initial-state-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 20px;
+  }
+
+  h5 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+
+  .search-tips {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: left;
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+
+    h6 {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// No Results State
+.no-results-state {
+  text-align: center;
+  padding: 60px 30px;
+  color: #6c757d;
+
+  .no-results-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 20px;
+  }
+
+  h5 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+
+  .search-suggestions {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: left;
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+
+    h6 {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Modern Search Results
+.modern-search-results {
+  padding: 0;
+}
+
+.results-section {
+  padding: 30px;
+  border-bottom: 1px solid #f1f3f4;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f3f4;
+
+    .section-icon {
+      font-size: 1.3rem;
+      margin-right: 12px;
+      width: 30px;
+      text-align: center;
+
+      &.favorites {
+        color: #ffc107;
+      }
+
+      &.products {
+        color: #28a745;
+      }
+
+      &.user-products {
+        color: #17a2b8;
+      }
+
+      &.recipes {
+        color: #6f42c1;
+      }
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0;
+      flex: 1;
+    }
+
+    .section-count {
+      background: #e9ecef;
+      color: #495057;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+}
+
+// Results Grid
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+// Modern Product Card
+.modern-product-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &.favorites-card {
+    border-left: 4px solid #f39c12;
+    background: #fefefe;
+
+    &:hover {
+      border-color: #f39c12;
+      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.15);
+    }
+  }
+
+  &.user-card {
+    border-left: 4px solid #3498db;
+    background: #fefefe;
+
+    &:hover {
+      border-color: #3498db;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    }
+  }
+
+  &.recipe-card {
+    border-left: 4px solid #9b59b6;
+    background: #fefefe;
+
+    &:hover {
+      border-color: #9b59b6;
+      box-shadow: 0 4px 12px rgba(155, 89, 182, 0.15);
+    }
+  }
+
+  .product-card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .product-image-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+
+    .modern-product-image {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: 2px solid #e9ecef;
+    }
+
+    .modern-product-placeholder {
+      width: 120px;
+      height: 120px;
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+      font-size: 2.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  .product-info-section {
+    flex: 1;
+    text-align: center;
+    margin-bottom: 15px;
+
+    .modern-product-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      line-height: 1.3;
+      height: 2.6rem;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .product-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .calories-badge {
+        background: #2c3e50;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      .portion-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+      }
+    }
+
+    .nutrition-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .nutrition-item {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 8px 6px;
+        text-align: center;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        &.protein {
+          border-left: 3px solid #3498db;
+        }
+
+        &.fat {
+          border-left: 3px solid #f39c12;
+        }
+
+        &.carbs {
+          border-left: 3px solid #27ae60;
+        }
+
+        .nutrition-label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #495057;
+          display: block;
+          margin-bottom: 2px;
+        }
+
+        .nutrition-value {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #2c3e50;
+        }
+      }
+    }
+
+    .product-manufacturer,
+    .product-description,
+    .recipe-meta {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+
+      i {
+        opacity: 0.7;
+      }
+    }
+
+    .recipe-servings {
+      background: #f8f9fa;
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+
+  .product-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+
+    .modern-action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 15px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &.favorite-btn {
+        background: #f39c12;
+        color: white;
+        min-width: 40px;
+        justify-content: center;
+
+        &:hover {
+          background: #e67e22;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+        }
+      }
+
+      &.add-btn {
+        background: #27ae60;
+        color: white;
+        flex: 1;
+
+        &:hover {
+          background: #229954;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        span {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design for Modern Modal
+@media (max-width: 1200px) {
+  .modern-search-modal {
+    max-width: 95vw;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-search-modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .modern-search-modal {
+    max-height: calc(100vh - 40px);
+    border-radius: 15px;
+  }
+
+  .modern-search-header {
+    padding: 20px;
+
+    .search-header-content {
+      .search-title {
+        font-size: 1.4rem;
+      }
+
+      .search-subtitle {
+        font-size: 0.9rem;
+      }
+    }
+
+    .modern-close-btn {
+      width: 35px;
+      height: 35px;
+    }
+  }
+
+  .modern-search-input-section {
+    padding: 20px;
+
+    .modern-search-input-wrapper {
+      .modern-search-input {
+        padding: 15px 20px 15px 50px;
+        font-size: 1rem;
+      }
+
+      .search-input-icon {
+        left: 18px;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .results-section {
+    padding: 20px;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .modern-product-card {
+    padding: 15px;
+
+    .product-info-section {
+      .modern-product-name {
+        font-size: 1rem;
+      }
+
+      .nutrition-grid {
+        gap: 6px;
+
+        .nutrition-item {
+          padding: 6px 4px;
+
+          .nutrition-label {
+            font-size: 0.7rem;
+          }
+
+          .nutrition-value {
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    .product-actions {
+      .modern-action-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+
+        &.add-btn span {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+
+  .search-initial-state,
+  .no-results-state {
+    padding: 40px 20px;
+
+    .initial-state-icon,
+    .no-results-icon {
+      font-size: 3rem;
+    }
+
+    h5 {
+      font-size: 1.2rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+
+    .search-tips,
+    .search-suggestions {
+      padding: 20px;
+    }
+  }
+}
+
+// Modern Add Intake Modal Styles
+.modern-add-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalOverlayFadeIn 0.3s ease-out;
+}
+
+.modern-add-modal {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+// Modern Add Header
+.modern-add-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%);
+  color: white;
+  padding: 25px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid #27ae60;
+
+  .add-header-content {
+    flex: 1;
+    z-index: 1;
+
+    .add-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      display: flex;
+      align-items: center;
+      line-height: 1.2;
+
+      i {
+        font-size: 1.3rem;
+        opacity: 0.9;
+      }
+    }
+
+    .add-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .modern-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// Modern Add Body
+.modern-add-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background: white;
+  max-height: calc(90vh - 200px); // Ensure space for header and footer
+}
+
+// Modern Selected Product
+.modern-selected-product {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+
+  .product-summary {
+    .product-summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+
+      .product-summary-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+        flex: 1;
+        line-height: 1.3;
+      }
+
+      .product-type-badge {
+        background: #6c757d;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-left: 15px;
+
+        &.product {
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        &.user_product {
+          background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+        }
+
+        &.recipe {
+          background: linear-gradient(135deg, #6f42c1 0%, #8a63d2 100%);
+        }
+      }
+    }
+
+    .nutrition-summary {
+      .nutrition-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 12px;
+
+        .nutrition-summary-item {
+          background: white;
+          border-radius: 10px;
+          padding: 15px 10px;
+          text-align: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+          }
+
+          &.calories {
+            border-top: 3px solid #007bff;
+          }
+
+          &.protein {
+            border-top: 3px solid #17a2b8;
+          }
+
+          &.fat {
+            border-top: 3px solid #ffc107;
+          }
+
+          &.carbs {
+            border-top: 3px solid #28a745;
+          }
+
+          .nutrition-summary-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 4px;
+          }
+
+          .nutrition-summary-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .nutrition-summary-note {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-style: italic;
+      }
+    }
+  }
+}
+
+// Section Styles
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: 2px;
+  }
+}
+
+// Amount Input Section
+.amount-input-section {
+  margin-bottom: 25px;
+
+  .amount-input-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+}
+
+// Consumption Time Section
+.consumption-time-section {
+  margin-bottom: 25px;
+
+  .time-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-hint {
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 5px;
+  }
+}
+
+// Form Styles
+.modern-form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  i {
+    color: #6c757d;
+  }
+}
+
+.modern-form-control,
+.modern-form-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  &:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &::placeholder {
+    color: #adb5bd;
+    font-weight: 400;
+  }
+}
+
+.form-error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+// Calculated Nutrition
+.calculated-nutrition {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid #e1f5fe;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 25px;
+
+  .calculated-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+
+    .calculated-item {
+      background: white;
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+
+      &.calories {
+        border-left: 4px solid #007bff;
+      }
+
+      &.protein {
+        border-left: 4px solid #17a2b8;
+      }
+
+      &.fat {
+        border-left: 4px solid #ffc107;
+      }
+
+      &.carbs {
+        border-left: 4px solid #28a745;
+      }
+
+      .calculated-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .calculated-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Notes Section
+.notes-section {
+  margin-bottom: 25px;
+
+  textarea.modern-form-control {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+// Modern Add Footer
+.modern-add-footer {
+  background: #f8f9fa;
+  padding: 20px 30px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+
+  .modern-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    justify-content: center;
+
+    &.secondary {
+      background: #6c757d;
+      color: white;
+
+      &:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+      }
+    }
+
+    &.primary {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+      }
+
+      &:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+// Responsive Design for Add Modal
+@media (max-width: 768px) {
+  .modern-add-modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .modern-add-modal {
+    max-height: calc(100vh - 40px);
+    border-radius: 15px;
+  }
+
+  .modern-add-header {
+    padding: 20px;
+
+    .add-header-content {
+      .add-title {
+        font-size: 1.3rem;
+      }
+
+      .add-subtitle {
+        font-size: 0.85rem;
+      }
+    }
+
+    .modern-close-btn {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .modern-add-body {
+    padding: 20px;
+  }
+
+  .modern-selected-product {
+    padding: 20px;
+
+    .product-summary {
+      .product-summary-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+
+        .product-type-badge {
+          margin-left: 0;
+        }
+      }
+
+      .nutrition-summary {
+        .nutrition-summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+      }
+    }
+  }
+
+  .amount-input-section {
+    .amount-input-grid {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+  }
+
+
+
+  .calculated-nutrition {
+    .calculated-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+  }
+
+  .modern-add-footer {
+    padding: 15px 20px;
+    flex-direction: column;
+
+    .modern-btn {
+      min-width: auto;
+    }
+  }
+}

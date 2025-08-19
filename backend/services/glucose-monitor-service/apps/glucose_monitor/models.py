@@ -1,9 +1,10 @@
 import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from .validators import validate_hex
+from .validators import validate_hex_key
 
 
 class UserManager(BaseUserManager):
@@ -65,29 +66,65 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Sensor(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     serial_number = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, blank=True, default="")
     secret_key = models.CharField(
-        max_length=128,
-        validators=[validate_hex],
-        help_text="Hex-encoded 64-byte secret key"
+        max_length=64,
+        validators=[validate_hex_key],
+        help_text="Hex-encoded 32-byte secret key"
     )
-    user = models.ForeignKey('glucose_monitor.User', on_delete=models.CASCADE, null=True)
-    active = models.BooleanField(default=True)
-    last_request = models.DateTimeField(null=True)
+    user = models.ForeignKey('glucose_monitor.User', on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    last_request = models.DateTimeField(null=True, blank=True)
+    request_counter = models.BigIntegerField(default=0)
+    claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    claim_used_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'main_app_sensor'
 
+    def __str__(self):
+        return f"{self.serial_number} ({'active' if self.is_active else 'inactive'})"
 
-class SensorData(models.Model):
+
+class GlucoseData(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
-    value = models.FloatField()
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='measurements')
+    value = models.FloatField(
+        validators=[
+            MinValueValidator(0.1),
+            MaxValueValidator(33.3)
+        ]
+    )
     timestamp = models.DateTimeField()
+    sequence_id = models.BigIntegerField(help_text="Monotonic sequence ID from device")
     created_at = models.DateTimeField(auto_now_add=True)
-    sequence_id = models.PositiveIntegerField(help_text="Monotonic sequence ID from device")
 
     class Meta:
-        db_table = 'main_app_sensordata'
+        db_table = 'main_app_glucose_data'
         unique_together = [('sensor', 'sequence_id')]
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.sensor.serial_number} - {self.value} mmol/L at {self.timestamp}"
+
+
+class SensorSettings(models.Model):
+    POLLING_MINUTE_CHOICES = [(i, f"{i} min") for i in range(1, 31)]
+
+    sensor = models.OneToOneField(Sensor, on_delete=models.CASCADE, related_name='settings')
+    battery_level = models.PositiveSmallIntegerField(default=100, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    low_glucose_threshold = models.FloatField(default=3.9, validators=[MinValueValidator(0.1), MaxValueValidator(33.3)])
+    high_glucose_threshold = models.FloatField(default=7.8, validators=[MinValueValidator(0.1), MaxValueValidator(33.3)])
+    polling_interval_minutes = models.IntegerField(choices=POLLING_MINUTE_CHOICES, default=5)
+    activation_time = models.DateTimeField(null=True, blank=True)
+    expiration_time = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'main_app_sensor_settings'
+
+    def __str__(self):
+        return f"Settings for {self.sensor.serial_number}"

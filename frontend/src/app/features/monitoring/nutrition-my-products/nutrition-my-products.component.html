@@ -1,0 +1,517 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="nutrition-sidebar">
+                <h5>Питание</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/search">
+                            <i class="fas fa-search"></i> Поиск продуктов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/nutrition/my-products">
+                            <i class="fas fa-user"></i> Мои продукты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/products/create">
+                            <i class="fas fa-plus"></i> Создать продукт
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/recipes">
+                            <i class="fas fa-book"></i> Рецепты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/diary">
+                            <i class="fas fa-calendar"></i> Дневник питания
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/analytics">
+                            <i class="fas fa-chart-bar"></i> Аналитика
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <!-- Header Section -->
+            <div class="recipes-header mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h2><i class="fas fa-user me-2"></i>Мои продукты</h2>
+                        <p class="text-muted">Управляйте своими созданными продуктами</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-primary btn-lg" routerLink="/patient/monitoring/nutrition/products/create">
+                            <i class="fas fa-plus me-2"></i>
+                            Создать продукт
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-icon recipes">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getTotalProducts() }}</h3>
+                            <p>Всего продуктов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-icon favorites">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getHighProteinProducts() }}</h3>
+                            <p>Высокобелковые</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-icon quick">
+                            <i class="fas fa-weight"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ getLowCalorieProducts() }}</h3>
+                            <p>Низкокалорийные</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-icon calories">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ formatNumber(getAverageCalories()) }}</h3>
+                            <p>Средние ккал</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="filters-section mb-4" *ngIf="userProducts.length > 0">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="search-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text"
+                                   class="form-control search-input"
+                                   placeholder="Поиск продуктов по названию, описанию или производителю..."
+                                   [(ngModel)]="searchFilter"
+                                   (input)="onSearchChange()">
+                            <button *ngIf="searchFilter"
+                                    class="btn btn-sm btn-outline-secondary clear-btn"
+                                    (click)="searchFilter = ''; onSearchChange()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="sort-controls">
+                            <select class="form-select" (change)="onSortChange($event)">
+                                <option value="created_at_desc">Сначала новые</option>
+                                <option value="created_at_asc">Сначала старые</option>
+                                <option value="name_asc">По названию А-Я</option>
+                                <option value="name_desc">По названию Я-А</option>
+                                <option value="calories_desc">Больше калорий</option>
+                                <option value="calories_asc">Меньше калорий</option>
+                                <option value="protein_desc">Больше белка</option>
+                                <option value="protein_asc">Меньше белка</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="text-center py-5">
+                <div class="spinner-border spinner-border-lg" role="status"></div>
+                <p class="mt-3 text-muted">Загрузка продуктов...</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error && !isLoading" class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                {{ error }}
+                <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadProducts()">
+                    Попробовать снова
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!isLoading && !error && userProducts.length === 0" class="empty-state">
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h4>У вас пока нет продуктов</h4>
+                    <p>Создайте свой первый продукт и начните управлять своей базой питания!</p>
+                    <button class="btn btn-primary btn-lg" routerLink="/patient/monitoring/nutrition/products/create">
+                        <i class="fas fa-plus me-2"></i>
+                        Создать первый продукт
+                    </button>
+                </div>
+            </div>
+
+            <!-- No Results after Filter -->
+            <div *ngIf="!isLoading && !error && userProducts.length > 0 && filteredProducts.length === 0" class="no-results">
+                <div class="no-results-content">
+                    <div class="no-results-icon">
+                        <i class="fas fa-search-minus"></i>
+                    </div>
+                    <h4>Продукты не найдены</h4>
+                    <p>По вашему запросу "<strong>{{ searchFilter }}</strong>" продукты не найдены.</p>
+                    <button class="btn btn-outline-primary" (click)="searchFilter = ''; onSearchChange()">
+                        <i class="fas fa-times me-1"></i>
+                        Очистить поиск
+                    </button>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div *ngIf="!isLoading && !error && filteredProducts.length > 0" class="results-grid">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let product of filteredProducts">
+                        <div class="product-card user-product">
+                            <div class="product-header">
+                                <h6 class="product-name" [title]="product.name">{{ product.name }}</h6>
+                                <div class="product-badge">
+                                    <span class="badge bg-info"><i class="fas fa-user"></i> Мой продукт</span>
+                                </div>
+                            </div>
+                            <div class="product-image">
+                                <img *ngIf="product.image_url" 
+                                     [src]="product.image_url" 
+                                     [alt]="product.name" 
+                                     class="img-fluid"
+                                     loading="lazy"
+                                     (load)="onImageLoad($event)"
+                                     (error)="onImageError($event)">
+                                <div class="product-image-placeholder" [style.display]="product.image_url ? 'none' : 'flex'">
+                                    <i class="fas fa-bowl-food"></i>
+                                </div>
+                                <!-- Product Actions Overlay -->
+                                <div class="recipe-actions-overlay">
+                                    <button class="btn btn-sm btn-light action-btn"
+                                            (click)="editProduct(product)"
+                                            title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light action-btn"
+                                            (click)="quickAddToIntake(product)"
+                                            title="В дневник">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light action-btn text-danger"
+                                            (click)="confirmDelete(product)"
+                                            title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <div class="nutrition-info">
+                                    <div class="nutrition-item">
+                                        <span class="label">Калории:</span>
+                                        <span class="value">{{ formatNumber(product.calories || 0) }} ккал</span>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <span class="label">Белки:</span>
+                                        <span class="value">{{ formatNumber(product.protein || 0) }} г</span>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <span class="label">Жиры:</span>
+                                        <span class="value">{{ formatNumber(product.fat || 0) }} г</span>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <span class="label">Углеводы:</span>
+                                        <span class="value">{{ formatNumber(product.carbohydrate || 0) }} г</span>
+                                    </div>
+                                </div>
+                                <div class="product-meta" *ngIf="product.manufacturer">
+                                    <small class="text-muted"><i class="fas fa-industry"></i> {{ product.manufacturer }}</small>
+                                </div>
+                                <div class="product-meta" *ngIf="product.description">
+                                    <small class="text-muted" [title]="product.description">
+                                        <i class="fas fa-info-circle"></i> {{ product.description | slice:0:50 }}<span *ngIf="product.description.length > 50">...</span>
+                                    </small>
+                                </div>
+                                <div class="product-meta">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ product.created_at | date:'dd.MM.yyyy' }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="product-footer">
+                                <button class="btn btn-sm btn-outline-primary" (click)="editProduct(product)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" (click)="quickAddToIntake(product)">
+                                    <i class="fas fa-plus me-1"></i>Добавить
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(product)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div *ngIf="showEditModal && selectedProduct" class="modal-overlay" (click)="closeEditModal()">
+    <div class="modern-modal large-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-edit me-2"></i>
+                Редактировать продукт: {{ selectedProduct.name }}
+            </h4>
+            <button type="button" class="modal-close-btn" (click)="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form [formGroup]="editProductForm" (ngSubmit)="updateProduct()">
+            <div class="modal-body">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h6 class="section-title">Основная информация</h6>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label class="form-label required">Название продукта</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="name"
+                                       placeholder="Введите название продукта">
+                                <div *ngIf="editProductForm.get('name')?.invalid && editProductForm.get('name')?.touched"
+                                     class="form-error">
+                                    Введите название продукта (минимум 2 символа)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Производитель</label>
+                                <input type="text"
+                                       class="form-control"
+                                       formControlName="manufacturer"
+                                       placeholder="Производитель">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Описание</label>
+                        <textarea class="form-control"
+                                  formControlName="description"
+                                  rows="2"
+                                  placeholder="Описание продукта"></textarea>
+                    </div>
+                </div>
+
+                <!-- Nutrition Information Section -->
+                <div class="form-section">
+                    <h6 class="section-title">Пищевая ценность (на 100г)</h6>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label required">Калории (ккал)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="calories"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label required">Белки (г)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="protein"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label required">Жиры (г)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="fat"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label required">Углеводы (г)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="carbohydrate"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Клетчатка (г)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="fiber"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Сахар (г)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="sugar"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Натрий (мг)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="sodium"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Калий (мг)</label>
+                                <input type="number"
+                                       class="form-control"
+                                       formControlName="potassium"
+                                       min="0"
+                                       step="0.1"
+                                       placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="form-section">
+                    <h6 class="section-title">Изображение продукта</h6>
+                    <div class="image-upload-area">
+                        <div *ngIf="!imagePreview && !selectedProduct?.image_url" class="upload-placeholder"
+                             (click)="editFileInput.click()">
+                            <i class="fas fa-camera fa-2x mb-2"></i>
+                            <p>Нажмите, чтобы добавить фото продукта</p>
+                        </div>
+                        <div *ngIf="imagePreview || selectedProduct?.image_url" class="image-preview">
+                            <img [src]="imagePreview || selectedProduct.image_url" alt="Product image">
+                            <button type="button" class="btn btn-sm btn-danger remove-image-btn"
+                                    (click)="removeImage()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <input #editFileInput type="file" accept="image/*" (change)="onImageSelected($event)"
+                               style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeEditModal()">
+                    <i class="fas fa-times me-1"></i>
+                    Отмена
+                </button>
+                <button type="submit"
+                        class="btn btn-primary"
+                        [disabled]="editProductForm.invalid">
+                    <i class="fas fa-save me-1"></i>
+                    Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal && selectedProduct" class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+        <div class="delete-modal-content">
+            <div class="delete-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h5>Удалить продукт?</h5>
+            <p>Вы уверены, что хотите удалить продукт "<strong>{{ selectedProduct.name }}</strong>"?</p>
+            <p class="text-muted">Это действие нельзя отменить.</p>
+
+            <div class="delete-actions">
+                <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+                    Отмена
+                </button>
+                <button type="button" class="btn btn-danger" (click)="deleteProduct()">
+                    <i class="fas fa-trash me-1"></i>
+                    Удалить продукт
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container">
+    <div class="toast" 
+         [class.show]="showToast" 
+         [class.toast-success]="toastType === 'success'"
+         [class.toast-error]="toastType === 'error'">
+        <div class="toast-content">
+            <div class="toast-icon">
+                <i class="fas fa-check-circle" *ngIf="toastType === 'success'"></i>
+                <i class="fas fa-exclamation-circle" *ngIf="toastType === 'error'"></i>
+            </div>
+            <div class="toast-message">{{ toastMessage }}</div>
+            <button class="toast-close" (click)="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>

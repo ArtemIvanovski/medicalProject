@@ -409,3 +409,32 @@ class RecipeService:
 
         recipe.calculate_nutrition()
         return recipe
+
+    @staticmethod
+    def update_recipe_with_ingredients(recipe_id, user, recipe_data, ingredients_data):
+        try:
+            recipe = Recipe.objects.get(id=recipe_id, user=user, is_deleted=False)
+        except Recipe.DoesNotExist:
+            raise ValueError("Recipe not found")
+
+        recipe.name = recipe_data['name']
+        recipe.description = recipe_data.get('description', '')
+        recipe.servings = recipe_data.get('servings', 1)
+        recipe.save()
+
+        from .models import RecipeIngredient
+        
+        recipe.ingredients.all().delete()
+
+        for order, ingredient_data in enumerate(ingredients_data):
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                product_id=ingredient_data.get('product_id'),
+                user_product_id=ingredient_data.get('user_product_id'),
+                amount=ingredient_data['amount'],
+                unit=ingredient_data.get('unit', 'g'),
+                order=order
+            )
+
+        recipe.calculate_nutrition()
+        return recipe

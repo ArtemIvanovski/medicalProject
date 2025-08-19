@@ -12,6 +12,10 @@ import {MedicationFavoritesComponent} from "./medication-favorites/medication-fa
 import {MedicationPatternsComponent} from "./medication-patterns/medication-patterns.component";
 import {MedicationRemindersComponent} from "./medication-reminders/medication-reminders.component";
 import {NutritionDashboardComponent} from "./nutrition-dashboard/nutrition-dashboard.component";
+import {NutritionRecipesComponent} from "./nutrition-recipes/nutrition-recipes.component";
+import {NutritionSearchComponent} from "./nutrition-search/nutrition-search.component";
+import {NutritionProductCreateComponent} from "./nutrition-product-create/nutrition-product-create.component";
+import {NutritionMyProductsComponent} from "./nutrition-my-products/nutrition-my-products.component";
 
 
 const routes: Routes = [
@@ -62,6 +66,30 @@ const routes: Routes = [
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'PATIENT' }
     },
+    {
+        path: 'nutrition/search',
+        component: NutritionSearchComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
+    },
+    {
+        path: 'nutrition/recipes',
+        component: NutritionRecipesComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
+    },
+    {
+        path: 'nutrition/products/create',
+        component: NutritionProductCreateComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
+    },
+    {
+        path: 'nutrition/my-products',
+        component: NutritionMyProductsComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { role: 'PATIENT' }
+    },
 ];
 
 @NgModule({
@@ -72,7 +100,11 @@ const routes: Routes = [
         MedicationPatternsComponent,
         MedicationFavoritesComponent,
         MedicationOverviewComponent,
-        NutritionDashboardComponent
+        NutritionDashboardComponent,
+        NutritionSearchComponent,
+        NutritionRecipesComponent,
+        NutritionProductCreateComponent,
+        NutritionMyProductsComponent
     ],
     imports: [
         CommonModule,

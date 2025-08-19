@@ -1,0 +1,1134 @@
+// Products Header
+.recipes-header {
+  h2 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #6c757d;
+    margin-bottom: 0;
+  }
+}
+
+// Filters Section
+.filters-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+
+  .search-wrapper {
+    position: relative;
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      z-index: 2;
+    }
+
+    .search-input {
+      padding-left: 45px;
+      padding-right: 45px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      }
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #6c757d;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #f8f9fa;
+        color: #495057;
+      }
+    }
+  }
+
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .sort-label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .btn-group {
+      .btn {
+        border-radius: 6px;
+        margin-right: 2px;
+        font-size: 0.85rem;
+        padding: 0.375rem 0.75rem;
+        transition: all 0.3s ease;
+
+        &.active {
+          background: #667eea;
+          border-color: #667eea;
+          color: white;
+        }
+
+        i {
+          margin-left: 0.25rem;
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+// No Results State
+.no-results {
+  text-align: center;
+  padding: 3rem 2rem;
+
+  .no-results-content {
+    max-width: 400px;
+    margin: 0 auto;
+
+    .no-results-icon {
+      font-size: 3rem;
+      color: #dee2e6;
+      margin-bottom: 1.5rem;
+    }
+
+    h4 {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      color: #6c757d;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Stats Cards
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: white;
+
+    &.recipes {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    &.favorites {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    &.quick {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    &.calories {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+  }
+
+  .stat-content {
+    h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.25rem;
+    }
+
+    p {
+      color: #6c757d;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+
+  .empty-state-content {
+    max-width: 500px;
+    margin: 0 auto;
+
+    .empty-state-icon {
+      font-size: 4rem;
+      color: #dee2e6;
+      margin-bottom: 2rem;
+    }
+
+    h4 {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: #6c757d;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Products Grid
+.results-grid {
+  margin-top: 2rem;
+}
+
+.product-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
+  }
+
+  &.user-product {
+    border-left: 4px solid #17a2b8;
+  }
+
+  .product-header {
+    padding: 1rem 1rem 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0;
+      flex: 1;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .product-badge {
+      margin-left: 0.5rem;
+      flex-shrink: 0;
+
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.65rem;
+      }
+    }
+  }
+
+  .product-image {
+    position: relative;
+    height: 160px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5rem 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-image-placeholder {
+      font-size: 2.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  .product-info {
+    padding: 1rem;
+
+    .nutrition-info {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      .nutrition-item {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 0.5rem;
+        text-align: center;
+        border: 1px solid #e9ecef;
+
+        .label {
+          display: block;
+          font-size: 0.75rem;
+          color: #6c757d;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+        }
+
+        .value {
+          display: block;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+      }
+    }
+
+    .product-meta {
+      margin-bottom: 0.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      small {
+        font-size: 0.8rem;
+        line-height: 1.4;
+
+        i {
+          width: 14px;
+          text-align: center;
+          margin-right: 0.25rem;
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+
+  .product-footer {
+    padding: 1rem;
+    border-top: 1px solid #f1f3f4;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+
+    .btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+
+      &.btn-sm {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Recipe Actions Overlay (reused for products)
+.recipe-actions-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: white;
+      transform: scale(1.1);
+    }
+
+    &.text-danger:hover {
+      background: #dc3545;
+      color: white !important;
+    }
+  }
+}
+
+.product-card:hover .recipe-actions-overlay {
+  opacity: 1;
+}
+
+// Modal Styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.3s ease-out;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modern-modal {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 1000px;
+  max-height: 90vh;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+  overflow: hidden;
+  position: relative;
+  margin: auto;
+  
+  @media (max-height: 600px) {
+    max-height: 95vh;
+    min-height: 300px;
+  }
+  
+  .modal-body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 1.5rem;
+    
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+      
+      > [class*="col-"] {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+    }
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .modal-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+  }
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  max-height: calc(85vh - 180px);
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+  scroll-behavior: smooth;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+  
+  .form-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  &:not(:hover)::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  
+  &:hover::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+  }
+  
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-footer {
+  background: #f8f9fa;
+  padding: 2rem 2rem;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  min-height: 80px;
+}
+
+// Form Sections
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  
+  &:first-child {
+    margin-top: 0;
+  }
+  
+  &:last-child {
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    text-align: left;
+
+    &::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 2px;
+    }
+  }
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+
+  .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+
+    i {
+      color: #6c757d;
+    }
+  }
+
+  .form-control,
+  .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+  }
+
+  .form-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+}
+
+// Delete Modal
+.delete-modal {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 450px;
+  animation: modalSlideIn 0.3s ease-out;
+
+  .delete-modal-content {
+    padding: 2rem;
+    text-align: center;
+
+    .delete-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+      color: white;
+    }
+
+    h5 {
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: #6c757d;
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+
+      &.text-muted {
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+    }
+
+    .delete-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+  }
+}
+
+// Image Upload Styling
+.image-upload-area {
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+  }
+
+  .upload-placeholder {
+    cursor: pointer;
+    color: #6c757d;
+
+    i {
+      color: #667eea;
+    }
+
+    &:hover {
+      color: #495057;
+    }
+  }
+
+  .image-preview {
+    position: relative;
+    display: inline-block;
+
+    img {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Large Modal
+.large-modal {
+  max-width: 1000px;
+  width: 95vw;
+  max-height: 90vh;
+}
+
+// Form Required Labels
+.form-label.required::after {
+  content: ' *';
+  color: #dc3545;
+}
+
+// Toast Notifications
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1060;
+}
+
+.toast {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e9ecef;
+  min-width: 300px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+
+  &.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &.toast-success {
+    border-left: 4px solid #28a745;
+  }
+
+  &.toast-error {
+    border-left: 4px solid #dc3545;
+  }
+
+  .toast-content {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+
+    .toast-icon {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+
+      .fa-check-circle {
+        color: #28a745;
+      }
+
+      .fa-exclamation-circle {
+        color: #dc3545;
+      }
+    }
+
+    .toast-message {
+      flex: 1;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: #6c757d;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-left: 0.75rem;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: #495057;
+      }
+    }
+  }
+}
+
+// Nutrition Sidebar
+.nutrition-sidebar {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 20px;
+
+  h5 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .nav-link {
+    color: #6c757d;
+    padding: 12px 16px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+
+    i {
+      width: 20px;
+      margin-right: 10px;
+    }
+
+    &:hover {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    &.active {
+      background-color: #007bff;
+      color: white;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .stat-card {
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 1.25rem;
+    }
+
+    .stat-content h3 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .product-card {
+    .product-info {
+      padding: 0.75rem;
+
+      .nutrition-info {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+
+        .nutrition-item {
+          padding: 0.375rem;
+        }
+      }
+    }
+
+    .product-footer {
+      padding: 0.75rem;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  .modern-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 1rem 1.5rem;
+
+    .modal-title {
+      font-size: 1.25rem;
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    max-height: calc(95vh - 120px);
+  }
+
+  .modal-footer {
+    padding: 1.5rem 1.5rem;
+    flex-direction: column;
+    min-height: 90px;
+    gap: 0.75rem;
+  }
+
+  .nutrition-sidebar {
+    position: static;
+    margin-bottom: 30px;
+
+    .nav {
+      flex-direction: row;
+      overflow-x: auto;
+
+      .nav-item {
+        flex: 0 0 auto;
+
+        .nav-link {
+          white-space: nowrap;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+  
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    @media (max-height: 500px) {
+      padding: 5px;
+      padding-top: 10px;
+    }
+    
+    @media (max-height: 400px) {
+      padding: 2px;
+      padding-top: 5px;
+    }
+    
+    @media (max-height: 300px) {
+      padding: 1px;
+      padding-top: 2px;
+    }
+  }
+  
+  .modern-modal {
+    max-width: 100%;
+    max-height: calc(100vh - 40px);
+    margin: 0;
+    border-radius: 15px;
+    min-height: 300px;
+    
+    @media (max-height: 500px) {
+      max-height: 98vh;
+      min-height: 250px;
+      border-radius: 12px;
+    }
+    
+    @media (max-height: 400px) {
+      max-height: 99vh;
+      min-height: 200px;
+      border-radius: 10px;
+    }
+    
+    @media (max-height: 300px) {
+      max-height: 99.5vh;
+      min-height: 150px;
+      border-radius: 8px;
+    }
+  }
+  
+  .modal-body {
+    max-height: calc(100vh - 250px);
+    padding: 1rem;
+    scroll-behavior: smooth;
+    
+    .form-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+    -webkit-overflow-scrolling: touch;
+    
+    @media (max-height: 500px) {
+      max-height: calc(98vh - 180px);
+      padding: 0.75rem;
+      
+      .form-section {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+      }
+      
+      .form-group {
+        margin-bottom: 0.75rem;
+      }
+    }
+    
+    @media (max-height: 400px) {
+      max-height: calc(99vh - 160px);
+      padding: 0.5rem;
+      
+      .form-section {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+      }
+      
+      .form-group {
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    @media (max-height: 300px) {
+      max-height: calc(99.5vh - 140px);
+      padding: 0.25rem;
+      
+      .form-section {
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
+      }
+      
+      .form-group {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+  
+  .modal-header {
+    padding: 1rem 1.5rem;
+    
+    .modal-title {
+      font-size: 1.25rem;
+    }
+    
+    @media (max-height: 500px) {
+      padding: 0.75rem 1rem;
+      
+      .modal-title {
+        font-size: 1.1rem;
+      }
+    }
+    
+    @media (max-height: 400px) {
+      padding: 0.5rem 0.75rem;
+      
+      .modal-title {
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  .modal-footer {
+    padding: 1.5rem 1.5rem;
+    flex-direction: column;
+    min-height: 100px;
+    gap: 0.75rem;
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    @media (max-height: 500px) {
+      padding: 0.75rem 1rem;
+    }
+    
+    @media (max-height: 400px) {
+      padding: 0.5rem 0.75rem;
+    }
+  }
+}
