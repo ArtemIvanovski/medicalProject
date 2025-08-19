@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { HttpClientModule } from '@angular/common/http';
 
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -31,7 +32,8 @@ import {EditIntakeModalComponent} from "./components/medication-modals/edit-inta
         CommonModule,
         RouterModule,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        HttpClientModule
     ],
     exports: [
         HeaderComponent,
@@ -42,6 +44,7 @@ import {EditIntakeModalComponent} from "./components/medication-modals/edit-inta
         FormsModule,
         ReactiveFormsModule,
         RouterModule,
+        HttpClientModule,
         AddIntakeModalComponent,
         CreatePatternModalComponent,
         CreateReminderModalComponent,

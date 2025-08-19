@@ -1,0 +1,553 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-2 col-md-3">
+            <div class="nutrition-sidebar">
+                <h5>Питание</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition">
+                            <i class="fas fa-chart-line"></i> Обзор
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/search">
+                            <i class="fas fa-search"></i> Поиск продуктов
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/my-products">
+                            <i class="fas fa-user"></i> Мои продукты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/products/create">
+                            <i class="fas fa-plus"></i> Создать продукт
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/recipes">
+                            <i class="fas fa-book"></i> Рецепты
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/patient/monitoring/nutrition/diary">
+                            <i class="fas fa-calendar"></i> Дневник питания
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/patient/monitoring/nutrition/analytics">
+                            <i class="fas fa-chart-bar"></i> Аналитика
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9">
+            <!-- Error Alert -->
+            <div class="row mb-3" *ngIf="error">
+                <div class="col-12">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ error }}
+                        <button type="button" class="btn-close" aria-label="Close" (click)="error = ''"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Title -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="page-title-card">
+                        <div class="page-title-content">
+                            <h2 class="page-title">
+                                <i class="fas fa-chart-bar me-3"></i>
+                                Аналитика питания
+                            </h2>
+                            <p class="page-subtitle">Глубокий анализ ваших пищевых привычек и рекомендации по питанию</p>
+                        </div>
+                        <div class="page-actions">
+                            <div class="period-selector">
+                                <label for="period" class="form-label">Период анализа:</label>
+                                <select id="period" class="form-select" [(ngModel)]="selectedPeriod" (change)="onPeriodChange()">
+                                    <option value="7">Последние 7 дней</option>
+                                    <option value="14">Последние 2 недели</option>
+                                    <option value="30">Последний месяц</option>
+                                    <option value="90">Последние 3 месяца</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Overview Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="analytics-card calories-card">
+                        <div class="analytics-card-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <h3>{{ formatNumber(overviewStats?.avg_calories || 0) }}</h3>
+                            <p>Ср. ккал/день</p>
+                            <div class="analytics-trend" [ngClass]="getCaloriesTrend()">
+                                <i class="fas" [ngClass]="getCaloriesTrendIcon()"></i>
+                                <span>{{ getCaloriesTrendText() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="analytics-card protein-card">
+                        <div class="analytics-card-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <h3>{{ formatNumber(overviewStats?.avg_protein || 0) }}г</h3>
+                            <p>Ср. белка/день</p>
+                            <div class="analytics-trend" [ngClass]="getProteinTrend()">
+                                <i class="fas" [ngClass]="getProteinTrendIcon()"></i>
+                                <span>{{ getProteinTrendText() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="analytics-card variety-card">
+                        <div class="analytics-card-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <h3>{{ overviewStats?.unique_products || 0 }}</h3>
+                            <p>Уникальных продуктов</p>
+                            <div class="analytics-trend good">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Разнообразие</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="analytics-card goals-card">
+                        <div class="analytics-card-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div class="analytics-card-content">
+                            <h3>{{ overviewStats?.goal_achievement || 0 }}%</h3>
+                            <p>Выполнение целей</p>
+                            <div class="analytics-trend" [ngClass]="getGoalAchievementTrend()">
+                                <i class="fas" [ngClass]="getGoalAchievementIcon()"></i>
+                                <span>{{ getGoalAchievementText() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row mb-4">
+                <!-- Nutrition Timeline Chart -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card analytics-chart-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Динамика питания
+                            </h5>
+                            <div class="chart-controls"></div>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoadingTimeline" class="chart-loading-overlay">
+                                <div class="spinner-border" role="status"></div>
+                                <p class="mt-2">Загрузка данных...</p>
+                            </div>
+                            
+                            <!-- Calories Chart -->
+                            <div class="chart-section mb-4">
+                                <h6 class="chart-title">Калории</h6>
+                                <div class="chart-container">
+                                    <canvas #nutritionChartCalories width="400" height="200" [style.opacity]="isLoadingTimeline ? 0.3 : 1"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Macronutrients Chart -->
+                            <div class="chart-section">
+                                <h6 class="chart-title">Макронутриенты</h6>
+                                <div class="chart-container">
+                                    <canvas #nutritionChartMacros width="400" height="200" [style.opacity]="isLoadingTimeline ? 0.3 : 1"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div *ngIf="error && !isLoadingTimeline" class="chart-error-overlay">
+                                <p class="text-muted">{{ error }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card analytics-chart-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-trophy me-2"></i>
+                                Топ продуктов
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoadingTopProducts" class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                            </div>
+                            <div *ngIf="!isLoadingTopProducts && topProducts.length === 0" class="text-center text-muted py-3">
+                                <i class="fas fa-apple-alt fa-2x mb-2"></i>
+                                <p>Нет данных за выбранный период</p>
+                            </div>
+                            <div *ngIf="!isLoadingTopProducts && topProducts.length > 0" class="top-products-list">
+                                <div class="top-product-item" *ngFor="let product of topProducts; let i = index">
+                                    <div class="product-rank">
+                                        <span class="rank-number" [ngClass]="'rank-' + (i+1)">{{ i+1 }}</span>
+                                    </div>
+                                    <div class="product-info">
+                                        <h6 class="product-name">{{ product.product_name }}</h6>
+                                        <div class="product-stats">
+                                            <span class="stat">{{ product.total_intake_count }}x</span>
+                                            <span class="stat">{{ formatNumber(product.total_calories) }} ккал</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-percentage">
+                                        <div class="percentage-bar" [class.overflowing]="isOverflowing(i)">
+                                            <div class="percentage-fill primary" [style.width.%]="getVisualPercentage(i)"></div>
+                                            <div class="percentage-fill overflow" 
+                                                 *ngIf="isOverflowing(i)"
+                                                 [style.width.%]="getOverflowPercentage(i)"></div>
+                                        </div>
+                                        <span class="percentage-text" [class.overflow-text]="isOverflowing(i)">
+                                            {{ getProductPercentage(product, i) }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis & Recommendations -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card ai-analysis-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-brain me-2"></i>
+                                AI Анализ и рекомендации
+                            </h5>
+                            <button class="btn btn-primary btn-sm" (click)="generateAIAnalysis()" [disabled]="isGeneratingAI">
+                                <i class="fas" [ngClass]="isGeneratingAI ? 'fa-spinner fa-spin' : 'fa-sync-alt'"></i>
+                                {{ isGeneratingAI ? 'Анализируем...' : 'Обновить анализ' }}
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="!aiAnalysis && !isGeneratingAI" class="text-center text-muted py-4">
+                                <i class="fas fa-robot fa-3x mb-3"></i>
+                                <h6>Начните AI-анализ ваших пищевых привычек</h6>
+                                <p>Нажмите кнопку "Обновить анализ" для получения персональных рекомендаций на основе ваших данных</p>
+                            </div>
+
+                            <div *ngIf="isGeneratingAI" class="text-center py-4">
+                                <div class="ai-loading">
+                                    <div class="ai-spinner">
+                                        <i class="fas fa-brain fa-2x fa-pulse"></i>
+                                    </div>
+                                    <h6 class="mt-3">Анализируем ваши данные...</h6>
+                                    <p class="text-muted">Это может занять несколько секунд</p>
+                                </div>
+                            </div>
+
+                            <div *ngIf="aiAnalysis && !isGeneratingAI" class="ai-content">
+                                <!-- Overall Assessment -->
+                                <div class="ai-section mb-4">
+                                    <div class="ai-section-header">
+                                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                                        <h6>Общая оценка питания</h6>
+                                    </div>
+                                    <div class="ai-content-text">
+                                        <p>{{ aiAnalysis.overall_assessment }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Key Insights -->
+                                <div class="ai-section mb-4" *ngIf="aiAnalysis.key_insights && aiAnalysis.key_insights.length > 0">
+                                    <div class="ai-section-header">
+                                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                                        <h6>Ключевые наблюдения</h6>
+                                    </div>
+                                    <div class="ai-insights-list">
+                                        <div class="ai-insight-item" *ngFor="let insight of aiAnalysis.key_insights">
+                                            <i class="fas fa-check-circle text-info me-2"></i>
+                                            <span>{{ insight }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recommendations -->
+                                <div class="ai-section mb-4" *ngIf="aiAnalysis.recommendations && aiAnalysis.recommendations.length > 0">
+                                    <div class="ai-section-header">
+                                        <i class="fas fa-clipboard-list text-success me-2"></i>
+                                        <h6>Рекомендации</h6>
+                                    </div>
+                                    <div class="ai-recommendations-list">
+                                        <div class="ai-recommendation-item" *ngFor="let rec of aiAnalysis.recommendations">
+                                            <div class="recommendation-icon">
+                                                <i class="fas fa-arrow-right"></i>
+                                            </div>
+                                            <div class="recommendation-content">
+                                                <strong>{{ rec.title }}</strong>
+                                                <p>{{ rec.description }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nutritional Balance -->
+                                <div class="ai-section mb-4" *ngIf="aiAnalysis.nutritional_balance">
+                                    <div class="ai-section-header">
+                                        <i class="fas fa-balance-scale text-info me-2"></i>
+                                        <h6>Баланс питательных веществ</h6>
+                                    </div>
+                                    <div class="nutrition-balance-grid">
+                                        <div class="balance-item protein-balance">
+                                            <div class="balance-header">
+                                                <span class="balance-name">Белки</span>
+                                                <span class="balance-score" [ngClass]="getBalanceClass(aiAnalysis.nutritional_balance.protein_score)">
+                                                    {{ aiAnalysis.nutritional_balance.protein_score }}/10
+                                                </span>
+                                            </div>
+                                            <div class="balance-bar">
+                                                <div class="balance-fill protein-fill" 
+                                                     [style.width.%]="aiAnalysis.nutritional_balance.protein_score * 10"></div>
+                                            </div>
+                                            <p class="balance-comment">{{ aiAnalysis.nutritional_balance.protein_comment }}</p>
+                                        </div>
+
+                                        <div class="balance-item carbs-balance">
+                                            <div class="balance-header">
+                                                <span class="balance-name">Углеводы</span>
+                                                <span class="balance-score" [ngClass]="getBalanceClass(aiAnalysis.nutritional_balance.carbs_score)">
+                                                    {{ aiAnalysis.nutritional_balance.carbs_score }}/10
+                                                </span>
+                                            </div>
+                                            <div class="balance-bar">
+                                                <div class="balance-fill carbs-fill" 
+                                                     [style.width.%]="aiAnalysis.nutritional_balance.carbs_score * 10"></div>
+                                            </div>
+                                            <p class="balance-comment">{{ aiAnalysis.nutritional_balance.carbs_comment }}</p>
+                                        </div>
+
+                                        <div class="balance-item fats-balance">
+                                            <div class="balance-header">
+                                                <span class="balance-name">Жиры</span>
+                                                <span class="balance-score" [ngClass]="getBalanceClass(aiAnalysis.nutritional_balance.fats_score)">
+                                                    {{ aiAnalysis.nutritional_balance.fats_score }}/10
+                                                </span>
+                                            </div>
+                                            <div class="balance-bar">
+                                                <div class="balance-fill fats-fill" 
+                                                     [style.width.%]="aiAnalysis.nutritional_balance.fats_score * 10"></div>
+                                            </div>
+                                            <p class="balance-comment">{{ aiAnalysis.nutritional_balance.fats_comment }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Goals & Targets -->
+                                <div class="ai-section" *ngIf="aiAnalysis.suggested_goals && aiAnalysis.suggested_goals.length > 0">
+                                    <div class="ai-section-header">
+                                        <i class="fas fa-target text-danger me-2"></i>
+                                        <h6>Предлагаемые цели</h6>
+                                    </div>
+                                    <div class="suggested-goals-grid">
+                                        <div class="goal-card" *ngFor="let goal of aiAnalysis.suggested_goals">
+                                            <div class="goal-icon">
+                                                <i class="fas" [ngClass]="goal.icon"></i>
+                                            </div>
+                                            <div class="goal-content">
+                                                <h6>{{ goal.title }}</h6>
+                                                <p>{{ goal.description }}</p>
+                                                <span class="goal-target">Цель: {{ goal.target }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="aiError" class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ aiError }}
+                                <button class="btn btn-sm btn-outline-warning ms-2" (click)="generateAIAnalysis()">
+                                    Попробовать снова
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Statistics -->
+            <div class="row mb-4">
+                <!-- Macronutrients Distribution -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card analytics-chart-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Распределение макронутриентов
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoadingMacros" class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                            </div>
+                            <div *ngIf="!isLoadingMacros" class="macros-distribution">
+                                <div class="macro-item-large protein-large">
+                                    <div class="macro-circle">
+                                        <div class="macro-percentage">{{ getMacroPercentage('protein') }}%</div>
+                                        <div class="macro-label">Белки</div>
+                                    </div>
+                                    <div class="macro-details">
+                                        <span class="macro-grams">{{ formatNumber(overviewStats?.avg_protein || 50) }}г</span>
+                                        <span class="macro-calories">{{ formatNumber((overviewStats?.avg_protein || 50) * 4) }} ккал</span>
+                                    </div>
+                                </div>
+
+                                <div class="macro-item-large carbs-large">
+                                    <div class="macro-circle">
+                                        <div class="macro-percentage">{{ getMacroPercentage('carbs') }}%</div>
+                                        <div class="macro-label">Углеводы</div>
+                                    </div>
+                                    <div class="macro-details">
+                                        <span class="macro-grams">{{ formatNumber(overviewStats?.avg_carbohydrate || 200) }}г</span>
+                                        <span class="macro-calories">{{ formatNumber((overviewStats?.avg_carbohydrate || 200) * 4) }} ккал</span>
+                                    </div>
+                                </div>
+
+                                <div class="macro-item-large fats-large">
+                                    <div class="macro-circle">
+                                        <div class="macro-percentage">{{ getMacroPercentage('fats') }}%</div>
+                                        <div class="macro-label">Жиры</div>
+                                    </div>
+                                    <div class="macro-details">
+                                        <span class="macro-grams">{{ formatNumber(overviewStats?.avg_fat || 70) }}г</span>
+                                        <span class="macro-calories">{{ formatNumber((overviewStats?.avg_fat || 70) * 9) }} ккал</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eating Patterns -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card analytics-chart-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>
+                                Режим питания
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div *ngIf="isLoadingPatterns" class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                            </div>
+                            <div *ngIf="!isLoadingPatterns" class="eating-patterns">
+                                <div class="pattern-summary">
+                                    <div class="pattern-stat">
+                                        <i class="fas fa-utensils"></i>
+                                        <span class="stat-value">{{ eatingPatterns?.avg_meals_per_day || 0 }}</span>
+                                        <span class="stat-label">приемов пищи в день</span>
+                                    </div>
+                                    <div class="pattern-stat">
+                                        <i class="fas fa-clock"></i>
+                                        <span class="stat-value">{{ eatingPatterns?.most_active_hour || '--' }}:00</span>
+                                        <span class="stat-label">самый активный час</span>
+                                    </div>
+                                </div>
+
+                                <div class="hourly-distribution" *ngIf="eatingPatterns?.hourly_distribution">
+                                    <h6>Распределение по часам</h6>
+                                    <div class="hour-bars">
+                                        <div class="hour-bar" *ngFor="let hour of getHourlyData()" 
+                                             [style.height.%]="hour.percentage">
+                                            <div class="hour-label">{{ hour.hour }}</div>
+                                            <div class="hour-count">{{ hour.count }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Insights -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card health-insights-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-heartbeat me-2"></i>
+                                Заключение по здоровью
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="health-score-overview">
+                                <div class="health-score-circle">
+                                    <div class="score-value">{{ getOverallHealthScore() }}</div>
+                                    <div class="score-label">Общий балл</div>
+                                    <div class="score-max">из 100</div>
+                                </div>
+                                <div class="health-breakdown">
+                                    <div class="health-metric" [ngClass]="getCalorieBalanceClass()">
+                                        <i class="fas fa-fire"></i>
+                                        <span>Калорийный баланс</span>
+                                        <span class="metric-score">{{ getCalorieBalanceScore() }}/25</span>
+                                    </div>
+                                    <div class="health-metric" [ngClass]="getMacroBalanceClass()">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <span>Баланс БЖУ</span>
+                                        <span class="metric-score">{{ getMacroBalanceScore() }}/25</span>
+                                    </div>
+                                    <div class="health-metric" [ngClass]="getVarietyScoreClass()">
+                                        <i class="fas fa-seedling"></i>
+                                        <span>Разнообразие</span>
+                                        <span class="metric-score">{{ getVarietyScore() }}/25</span>
+                                    </div>
+                                    <div class="health-metric" [ngClass]="getConsistencyClass()">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span>Регулярность</span>
+                                        <span class="metric-score">{{ getConsistencyScore() }}/25</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="health-recommendations mt-4">
+                                <h6><i class="fas fa-stethoscope me-2"></i>Рекомендации для улучшения</h6>
+                                <div class="recommendation-pills">
+                                    <span class="recommendation-pill" *ngFor="let rec of getHealthRecommendations()">
+                                        <i class="fas" [ngClass]="rec.icon"></i>
+                                        {{ rec.text }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

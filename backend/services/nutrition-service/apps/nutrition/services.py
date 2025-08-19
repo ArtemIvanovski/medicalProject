@@ -376,9 +376,25 @@ class NutritionStatsService:
             if stats['total_times'] > 0:
                 stats['avg_amount'] = stats['total_amount'] / stats['total_times']
 
+        # Convert to list with proper structure
+        result = []
+        for stats in product_stats.values():
+            if stats['total_times'] > 0:
+                stats['avg_amount'] = stats['total_amount'] / stats['total_times']
+            
+            result.append({
+                'product_name': stats['name'],
+                'total_intake_count': stats['total_times'],
+                'total_calories': float(stats['total_calories']),
+                'total_amount': float(stats['total_amount']),
+                'avg_amount_per_intake': float(stats['avg_amount']),
+                'type': stats['type'],
+                'type_id': stats['id']
+            })
+
         sorted_products = sorted(
-            product_stats.values(),
-            key=lambda x: x['total_times'],
+            result,
+            key=lambda x: x['total_intake_count'],
             reverse=True
         )
 

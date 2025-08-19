@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -15,6 +15,7 @@ export class NutritionDiaryComponent implements OnInit {
     foodIntakes: FoodIntake[] = [];
     dailyStats: NutritionStats | null = null;
     dailyGoal: DailyGoal | null = null;
+    originalDailyGoal: DailyGoal | null = null;
     
     isLoading = false;
     error = '';
@@ -49,18 +50,61 @@ export class NutritionDiaryComponent implements OnInit {
 
     loadDiary(): void {
         this.isLoading = true;
+        
+        if (this.selectedPeriod === 'day') {
+            this.loadDayDiary();
+        } else {
+            this.loadWeekDiary();
+        }
+    }
+
+    private loadDayDiary(): void {
         const dateStr = this.formatDate(this.selectedDate);
         
-        // Load food intakes for selected date
         this.nutritionService.getFoodIntakes(dateStr).subscribe({
             next: (response) => {
                 this.foodIntakes = response.results || [];
+                this.currentPage = 1;
+                this.updatePagination();
                 this.loadStats();
             },
             error: (error) => {
                 this.error = 'Ошибка загрузки дневника питания';
                 this.isLoading = false;
                 console.error('Diary error:', error);
+            }
+        });
+    }
+
+    private loadWeekDiary(): void {
+        const weekDates = this.getWeekDates(this.selectedDate);
+        const intakeObservables = weekDates.map(date => 
+            this.nutritionService.getFoodIntakes(this.formatDate(date))
+        );
+
+        forkJoin(intakeObservables).subscribe({
+            next: (results: any[]) => {
+                // Combine all intakes from the week
+                this.foodIntakes = [];
+                results.forEach(response => {
+                    if (response.results) {
+                        this.foodIntakes = this.foodIntakes.concat(response.results);
+                    }
+                });
+                
+                // Sort by consumed_at date (newest first)
+                this.foodIntakes.sort((a, b) => {
+                    return new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime();
+                });
+                
+                this.currentPage = 1;
+                this.updatePagination();
+                this.loadStats();
+            },
+            error: (error) => {
+                this.error = 'Ошибка загрузки недельного дневника питания';
+                this.isLoading = false;
+                console.error('Week diary error:', error);
             }
         });
     }
@@ -77,9 +121,16 @@ export class NutritionDiaryComponent implements OnInit {
         const dateStr = this.formatDate(this.selectedDate);
         
         this.nutritionService.getDailyStats(dateStr).subscribe({
-            next: (stats) => {
-                this.dailyStats = stats;
+            next: (response: any) => {
+                // Map API response to expected format
+                this.dailyStats = {
+                    calories: parseFloat(response.total_calories) || 0,
+                    protein: parseFloat(response.total_protein) || 0,
+                    fat: parseFloat(response.total_fat) || 0,
+                    carbohydrate: parseFloat(response.total_carbohydrate) || 0
+                };
                 this.isLoading = false;
+                this.updateCaloriesCircle();
             },
             error: (error) => {
                 this.error = 'Ошибка загрузки статистики';
@@ -97,16 +148,36 @@ export class NutritionDiaryComponent implements OnInit {
         );
 
         forkJoin(statsObservables).subscribe({
-            next: (results) => {
-                this.weekStats = results;
+            next: (results: any[]) => {
+                // Map each result and store in weekStats
+                this.weekStats = results.map((response: any) => ({
+                    calories: parseFloat(response.total_calories) || 0,
+                    protein: parseFloat(response.total_protein) || 0,
+                    fat: parseFloat(response.total_fat) || 0,
+                    carbohydrate: parseFloat(response.total_carbohydrate) || 0
+                }));
+                
                 // Calculate total for the week
                 this.dailyStats = {
-                    calories: results.reduce((sum, stat) => sum + (stat.calories || 0), 0),
-                    protein: results.reduce((sum, stat) => sum + (stat.protein || 0), 0),
-                    fat: results.reduce((sum, stat) => sum + (stat.fat || 0), 0),
-                    carbohydrate: results.reduce((sum, stat) => sum + (stat.carbohydrate || 0), 0)
+                    calories: this.weekStats.reduce((sum, stat) => sum + (stat.calories || 0), 0),
+                    protein: this.weekStats.reduce((sum, stat) => sum + (stat.protein || 0), 0),
+                    fat: this.weekStats.reduce((sum, stat) => sum + (stat.fat || 0), 0),
+                    carbohydrate: this.weekStats.reduce((sum, stat) => sum + (stat.carbohydrate || 0), 0)
                 };
+                
+                // For week view, multiply daily goals by 7
+                if (this.originalDailyGoal) {
+                    this.dailyGoal = {
+                        ...this.originalDailyGoal,
+                        calories_goal: this.originalDailyGoal.calories_goal * 7,
+                        protein_goal: this.originalDailyGoal.protein_goal * 7,
+                        fat_goal: this.originalDailyGoal.fat_goal * 7,
+                        carbohydrate_goal: this.originalDailyGoal.carbohydrate_goal * 7
+                    };
+                }
+                
                 this.isLoading = false;
+                this.updateCaloriesCircle();
             },
             error: (error) => {
                 this.error = 'Ошибка загрузки недельной статистики';
@@ -119,7 +190,8 @@ export class NutritionDiaryComponent implements OnInit {
     loadDailyGoal(): void {
         this.nutritionService.getDailyGoal().subscribe({
             next: (goal) => {
-                this.dailyGoal = goal;
+                this.originalDailyGoal = goal;
+                this.dailyGoal = { ...goal }; // Create a copy
             },
             error: (error) => {
                 console.error('Daily goal error:', error);
@@ -134,7 +206,19 @@ export class NutritionDiaryComponent implements OnInit {
 
     onPeriodChange(period: 'day' | 'week'): void {
         this.selectedPeriod = period;
+        
+        // Reset goals to original values before applying period multiplier
+        if (this.originalDailyGoal) {
+            this.dailyGoal = { ...this.originalDailyGoal };
+        }
+        
         this.loadStats();
+    }
+
+    onPeriodSwitchChange(event: Event): void {
+        const target = event.target as HTMLInputElement;
+        const period = target.checked ? 'week' : 'day';
+        this.onPeriodChange(period);
     }
 
     previousDate(): void {
@@ -165,7 +249,10 @@ export class NutritionDiaryComponent implements OnInit {
             consumed_at: this.formatDateTime(new Date(intake.consumed_at)),
             notes: intake.notes || ''
         });
+        
         this.showEditModal = true;
+        // Блокируем скролл body
+        document.body.classList.add('modal-open');
     }
 
     saveIntake(): void {
@@ -209,7 +296,25 @@ export class NutritionDiaryComponent implements OnInit {
     closeEditModal(): void {
         this.showEditModal = false;
         this.selectedIntake = null;
-        this.editForm.reset();
+        
+        // Сбрасываем форму с начальными значениями
+        this.editForm.reset({
+            amount: 100,
+            unit: 'g',
+            consumed_at: '',
+            notes: ''
+        });
+        
+        // Разблокируем скролл body
+        document.body.classList.remove('modal-open');
+    }
+
+    // Обработка клавиши Escape для закрытия модального окна
+    @HostListener('document:keydown.escape', ['$event'])
+    onEscapeKey(event: KeyboardEvent): void {
+        if (this.showEditModal) {
+            this.closeEditModal();
+        }
     }
 
     // Utility methods
@@ -310,32 +415,65 @@ export class NutritionDiaryComponent implements OnInit {
         return Math.abs(value);
     }
 
-    // Toast notification system
-    toastMessage = '';
-    toastType: 'success' | 'error' = 'success';
-    showToast = false;
+    // Pagination
+    currentPage = 1;
+    itemsPerPage = 12;
+    totalItems = 0;
+    paginatedIntakes: FoodIntake[] = [];
 
     private showSuccessMessage(message: string): void {
-        this.toastMessage = message;
-        this.toastType = 'success';
-        this.showToast = true;
-        this.hideToastAfterDelay();
+        if (typeof window !== 'undefined' && (window as any).alert) {
+            (window as any).alert(message, 'success');
+        }
     }
 
     private showErrorMessage(message: string): void {
-        this.toastMessage = message;
-        this.toastType = 'error';
-        this.showToast = true;
-        this.hideToastAfterDelay();
+        if (typeof window !== 'undefined' && (window as any).alert) {
+            (window as any).alert(message, 'error');
+        }
     }
 
-    private hideToastAfterDelay(): void {
+    // Image error handling
+    onImageError(event: any): void {
+        event.target.src = 'assets/img/default-food.svg';
+    }
+
+    // Statistics circle update
+    private updateCaloriesCircle(): void {
         setTimeout(() => {
-            this.showToast = false;
-        }, 4000);
+            const circleElement = document.querySelector('.circle-progress') as HTMLElement;
+            if (circleElement) {
+                const percentage = this.getCaloriesPercentage();
+                circleElement.style.setProperty('--percentage', percentage.toString());
+            }
+        }, 100);
     }
 
-    hideToast(): void {
-        this.showToast = false;
+    // Pagination methods
+    updatePagination(): void {
+        this.totalItems = this.foodIntakes.length;
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        this.paginatedIntakes = this.foodIntakes.slice(startIndex, endIndex);
+    }
+
+    getTotalPages(): number {
+        return Math.ceil(this.totalItems / this.itemsPerPage);
+    }
+
+    changePage(page: number): void {
+        if (page >= 1 && page <= this.getTotalPages()) {
+            this.currentPage = page;
+            this.updatePagination();
+        }
+    }
+
+    getPageNumbers(): number[] {
+        const totalPages = this.getTotalPages();
+        const pages: number[] = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(i);
+        }
+        return pages;
     }
 }

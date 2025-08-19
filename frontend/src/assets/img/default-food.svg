@@ -1,45 +1,9 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle -->
-  <circle cx="100" cy="100" r="90" fill="#f8f9fa" stroke="#dee2e6" stroke-width="3"/>
-  
-  <!-- Plate -->
-  <ellipse cx="100" cy="130" rx="50" ry="8" fill="#e9ecef"/>
-  <ellipse cx="100" cy="125" rx="55" ry="45" fill="#ffffff" stroke="#dee2e6" stroke-width="2"/>
-  
-  <!-- Food items -->
-  <!-- Main dish (meat/protein) -->
-  <ellipse cx="85" cy="115" rx="15" ry="12" fill="#d4a574"/>
-  <ellipse cx="85" cy="112" rx="12" ry="8" fill="#e6c194"/>
-  
-  <!-- Vegetables -->
-  <circle cx="115" cy="110" r="8" fill="#28a745"/>
-  <circle cx="125" cy="120" r="6" fill="#ffc107"/>
-  <circle cx="105" cy="125" r="5" fill="#dc3545"/>
-  
-  <!-- Side items -->
-  <ellipse cx="75" cy="135" rx="8" ry="4" fill="#ffd700"/>
-  <ellipse cx="90" cy="138" rx="6" ry="3" fill="#ff6347"/>
-  
-  <!-- Fork and knife icons -->
-  <!-- Fork -->
-  <g transform="translate(50, 60)">
-    <rect x="2" y="0" width="2" height="30" fill="#6c757d"/>
-    <rect x="0" y="0" width="1" height="8" fill="#6c757d"/>
-    <rect x="2" y="0" width="1" height="8" fill="#6c757d"/>
-    <rect x="4" y="0" width="1" height="8" fill="#6c757d"/>
-    <rect x="6" y="0" width="1" height="8" fill="#6c757d"/>
-  </g>
-  
-  <!-- Knife -->
-  <g transform="translate(140, 60)">
-    <rect x="2" y="0" width="2" height="30" fill="#6c757d"/>
-    <path d="M0,0 L6,0 L4,8 L2,8 Z" fill="#adb5bd"/>
-  </g>
-  
-  <!-- Steam lines -->
-  <g stroke="#adb5bd" stroke-width="1.5" fill="none" opacity="0.6">
-    <path d="M90,85 Q92,80 90,75 Q88,70 90,65" stroke-linecap="round"/>
-    <path d="M100,80 Q102,75 100,70 Q98,65 100,60" stroke-linecap="round"/>
-    <path d="M110,85 Q112,80 110,75 Q108,70 110,65" stroke-linecap="round"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="8" fill="#f8f9fa"/>
+  <path d="M16 32V16C16 14.9 16.9 14 18 14C19.1 14 20 14.9 20 16V32" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M24 32V12" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 32V18" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 32V20" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M14 32H34" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="24" cy="16" r="2" fill="#667eea"/>
 </svg>

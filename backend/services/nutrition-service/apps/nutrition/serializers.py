@@ -284,19 +284,30 @@ class CreateFoodIntakeSerializer(serializers.Serializer):
 
 
 class NutritionStatsSerializer(serializers.Serializer):
-    date = serializers.DateField()
-    total_calories = serializers.DecimalField(max_digits=10, decimal_places=2)
-    total_protein = serializers.DecimalField(max_digits=10, decimal_places=3)
-    total_fat = serializers.DecimalField(max_digits=10, decimal_places=3)
-    total_carbohydrate = serializers.DecimalField(max_digits=10, decimal_places=3)
-    goal_calories = serializers.DecimalField(max_digits=10, decimal_places=2)
-    goal_protein = serializers.DecimalField(max_digits=10, decimal_places=3)
-    goal_fat = serializers.DecimalField(max_digits=10, decimal_places=3)
-    goal_carbohydrate = serializers.DecimalField(max_digits=10, decimal_places=3)
-    calories_percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
-    protein_percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
-    fat_percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
-    carbohydrate_percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
+    date = serializers.DateField(required=False)
+    calories = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    protein = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    fat = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    carbohydrate = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    intakes_count = serializers.IntegerField(required=False)
+    
+    # Support legacy field names for backwards compatibility
+    total_calories = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    total_protein = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    total_fat = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    total_carbohydrate = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    
+    # Goal related fields
+    goal_calories = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    goal_protein = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    goal_fat = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    goal_carbohydrate = serializers.DecimalField(max_digits=10, decimal_places=3, required=False)
+    
+    # Percentage fields
+    calories_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    protein_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    fat_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    carbohydrate_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
 
 
 class ProductSearchSerializer(serializers.Serializer):
@@ -309,4 +320,4 @@ class ProductSearchSerializer(serializers.Serializer):
 
 class NutritionTimelineSerializer(serializers.Serializer):
     days = serializers.IntegerField(default=7, min_value=1, max_value=90)
-    group_by = serializers.ChoiceField(choices=['day', 'week', 'month'], default='day')
+    group_by = serializers.ChoiceField(choices=['day', 'week', 'month', 'intake'], default='day')

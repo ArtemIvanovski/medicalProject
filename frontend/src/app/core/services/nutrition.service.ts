@@ -145,4 +145,39 @@ export class NutritionService {
     deleteFoodIntake(id: string): Observable<any> {
         return this.http.delete<any>(`${environment.nutritionApiUrl}/intakes/${id}/`);
     }
+
+    // Analytics methods
+    getPeriodStats(days: number): Observable<{period_days: number, stats: NutritionStats[]}> {
+        const params = new HttpParams().set('days', days.toString());
+        return this.http.get<{period_days: number, stats: NutritionStats[]}>(`${environment.nutritionApiUrl}/stats/period/`, { params });
+    }
+
+    getNutritionTimeline(days: number, groupBy: 'day' | 'intake'): Observable<any> {
+        const params = new HttpParams()
+            .set('days', days.toString())
+            .set('group_by', groupBy);
+        return this.http.get<any>(`${environment.nutritionApiUrl}/stats/timeline/`, { params });
+    }
+
+    getTopProducts(days: number, limit: number): Observable<{period_days: number, limit: number, top_products: any[]}> {
+        const params = new HttpParams()
+            .set('days', days.toString())
+            .set('limit', limit.toString());
+        return this.http.get<{period_days: number, limit: number, top_products: any[]}>(`${environment.nutritionApiUrl}/stats/top-products/`, { params });
+    }
+
+    getAnalyticsOverview(days: number): Observable<any> {
+        const params = new HttpParams().set('days', days.toString());
+        return this.http.get<any>(`${environment.nutritionApiUrl}/analytics/overview/`, { params });
+    }
+
+    getEatingPatterns(days: number): Observable<any> {
+        const params = new HttpParams().set('days', days.toString());
+        return this.http.get<any>(`${environment.nutritionApiUrl}/analytics/patterns/`, { params });
+    }
+
+    generateAIRecommendations(days: number): Observable<any> {
+        const params = new HttpParams().set('days', days.toString());
+        return this.http.post<any>(`${environment.nutritionApiUrl}/analytics/ai-recommendations/`, { days });
+    }
 }

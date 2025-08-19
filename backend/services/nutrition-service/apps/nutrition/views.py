@@ -381,7 +381,25 @@ class FoodIntakeListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return FoodIntake.objects.filter(user=self.request.user, is_deleted=False)
+        queryset = FoodIntake.objects.filter(user=self.request.user, is_deleted=False)
+        
+        # Filter by date if provided
+        date_param = self.request.query_params.get('date')
+        if date_param:
+            try:
+                from datetime import datetime, time
+                filter_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+                # Filter by date range (start of day to end of day)
+                start_datetime = datetime.combine(filter_date, time.min)
+                end_datetime = datetime.combine(filter_date, time.max)
+                queryset = queryset.filter(
+                    consumed_at__gte=start_datetime,
+                    consumed_at__lte=end_datetime
+                )
+            except ValueError:
+                pass  # Invalid date format, return all results
+                
+        return queryset.order_by('-consumed_at')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -415,13 +433,7 @@ class FoodIntakeDetailView(RetrieveUpdateDestroyAPIView):
         return FoodIntake.objects.filter(user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance):
-        if instance.image_drive_id:
-            from .drive_service import DriveService
-            drive_service = DriveService()
-            try:
-                drive_service.remove_file(instance.image_drive_id)
-            except Exception:
-                pass
+        # FoodIntake doesn't have image_drive_id, so we just mark it as deleted
         instance.is_deleted = True
         instance.save()
 
@@ -460,17 +472,31 @@ def nutrition_timeline(request):
     )
 
     if group_by == 'day':
+        # timeline contains dictionaries with nutrition stats, format them properly
+        formatted_timeline = []
+        for day_stats in timeline:
+            formatted_day = {
+                'date': day_stats['date'].isoformat() if day_stats['date'] else None,
+                'calories': float(day_stats.get('calories', 0)),
+                'protein': float(day_stats.get('protein', 0)),
+                'fat': float(day_stats.get('fat', 0)),
+                'carbohydrate': float(day_stats.get('carbohydrate', 0)),
+                'intakes_count': len(day_stats.get('intakes', []))
+            }
+            formatted_timeline.append(formatted_day)
+            
         return Response({
             'days': days,
             'group_by': group_by,
-            'timeline': timeline
+            'timeline': formatted_timeline
         })
     else:
-        serializer = FoodIntakeSerializer(timeline, many=True)
+        # timeline contains FoodIntake objects, serialize them
+        intake_serializer = FoodIntakeSerializer(timeline, many=True)
         return Response({
             'days': days,
             'group_by': group_by,
-            'intakes': serializer.data
+            'intakes': intake_serializer.data
         })
 
 
@@ -569,3 +595,304 @@ def quick_add_intake(request):
         'success': True,
         'intake': FoodIntakeSerializer(food_intake).data
     }, status=201)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def analytics_overview(request):
+    """Get analytics overview for a specific period"""
+    days = int(request.GET.get('days', 30))
+    if days < 1 or days > 365:
+        return Response({'error': 'Days must be between 1 and 365'}, status=400)
+
+    # Get period stats
+    period_stats = NutritionStatsService.get_period_stats(request.user, days)
+    
+    # Calculate overview metrics
+    if not period_stats:
+        return Response({
+            'avg_calories': 0,
+            'avg_protein': 0,
+            'avg_fat': 0,
+            'avg_carbohydrate': 0,
+            'unique_products': 0,
+            'goal_achievement': 0,
+            'total_intakes': 0,
+            'days_with_data': 0
+        })
+
+    total_days = len(period_stats)
+    avg_calories = sum(stat.calories or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+    avg_protein = sum(stat.protein or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+    avg_fat = sum(stat.fat or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+    avg_carbs = sum(stat.carbohydrate or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+
+    # Get unique products count
+    from datetime import timedelta
+    start_date = timezone.now().date() - timedelta(days=days)
+    unique_products = FoodIntake.objects.filter(
+        user=request.user,
+        is_deleted=False,
+        consumed_at__date__gte=start_date
+    ).values('product_id', 'user_product_id', 'recipe_id').distinct().count()
+
+    # Calculate goal achievement (simplified)
+    daily_goal = DailyGoalService.get_or_create_daily_goal(request.user)
+    goal_achievement = 0
+    if daily_goal and daily_goal.calories_goal > 0:
+        goal_achievement = min(100, (avg_calories / daily_goal.calories_goal) * 100)
+
+    return Response({
+        'avg_calories': round(avg_calories, 1),
+        'avg_protein': round(avg_protein, 1),
+        'avg_fat': round(avg_fat, 1),
+        'avg_carbohydrate': round(avg_carbs, 1),
+        'unique_products': unique_products,
+        'goal_achievement': round(goal_achievement, 1),
+        'total_intakes': sum(getattr(stat, 'intakes_count', 0) for stat in period_stats),
+        'days_with_data': total_days
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def eating_patterns(request):
+    """Get eating patterns analysis"""
+    days = int(request.GET.get('days', 30))
+    if days < 1 or days > 365:
+        return Response({'error': 'Days must be between 1 and 365'}, status=400)
+
+    from datetime import timedelta
+    start_date = timezone.now().date() - timedelta(days=days)
+    
+    intakes = FoodIntake.objects.filter(
+        user=request.user,
+        is_deleted=False,
+        consumed_at__date__gte=start_date
+    ).order_by('consumed_at')
+
+    if not intakes:
+        return Response({
+            'avg_meals_per_day': 0,
+            'most_active_hour': 12,
+            'hourly_distribution': {},
+            'weekly_distribution': {}
+        })
+
+    # Calculate hourly distribution
+    hourly_count = {}
+    daily_meals = {}
+    
+    for intake in intakes:
+        hour = intake.consumed_at.hour
+        day = intake.consumed_at.date()
+        
+        hourly_count[hour] = hourly_count.get(hour, 0) + 1
+        daily_meals[day] = daily_meals.get(day, 0) + 1
+
+    # Find most active hour
+    most_active_hour = max(hourly_count, key=hourly_count.get) if hourly_count else 12
+
+    # Calculate average meals per day
+    avg_meals_per_day = sum(daily_meals.values()) / len(daily_meals) if daily_meals else 0
+
+    # Format hourly distribution for frontend
+    formatted_hourly = {str(hour): hourly_count.get(hour, 0) for hour in range(24)}
+
+    return Response({
+        'avg_meals_per_day': round(avg_meals_per_day, 1),
+        'most_active_hour': most_active_hour,
+        'hourly_distribution': formatted_hourly,
+        'weekly_distribution': {}  # Could be implemented similarly
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def ai_recommendations(request):
+    """Generate AI-powered nutrition recommendations"""
+    days = request.data.get('days', 30)
+    if days < 7 or days > 365:
+        return Response({'error': 'Days must be between 7 and 365'}, status=400)
+
+    try:
+        # Get user's nutrition data
+        period_stats = NutritionStatsService.get_period_stats(request.user, days)
+        top_products_data = NutritionStatsService.get_top_products(request.user, days, 10)
+        daily_goal = DailyGoalService.get_or_create_daily_goal(request.user)
+
+        # Even if we have no data, generate default recommendations
+        if not period_stats or len(period_stats) == 0:
+            return Response({
+                'overall_assessment': 'Недостаточно данных для полного анализа. Начните записывать свое питание для получения персональных рекомендаций.',
+                'key_insights': [
+                    'Для точного анализа необходимо вести дневник питания',
+                    'Регулярные записи помогут выявить паттерны питания',
+                    'Рекомендуется записывать все приемы пищи в течение недели'
+                ],
+                'recommendations': [
+                    {
+                        'title': 'Начните вести дневник питания',
+                        'description': 'Записывайте все, что едите и пьете в течение дня'
+                    },
+                    {
+                        'title': 'Установите цели',
+                        'description': 'Определите свои цели по калориям и макронутриентам'
+                    },
+                    {
+                        'title': 'Пейте больше воды',
+                        'description': 'Поддерживайте водный баланс, употребляя 1.5-2 литра воды в день'
+                    }
+                ],
+                'nutritional_balance': {
+                    'protein_score': 5,
+                    'protein_comment': 'Нет данных для анализа',
+                    'carbs_score': 5,
+                    'carbs_comment': 'Нет данных для анализа',
+                    'fats_score': 5,
+                    'fats_comment': 'Нет данных для анализа'
+                },
+                'suggested_goals': [
+                    {
+                        'title': 'Ведите дневник питания',
+                        'description': 'Записывайте питание минимум 7 дней для получения анализа',
+                        'target': '7 дней записей',
+                        'icon': 'fa-calendar-check'
+                    }
+                ]
+            })
+
+        # Calculate averages safely
+        total_days = len(period_stats)
+        avg_calories = sum(getattr(stat, 'total_calories', 0) or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+        avg_protein = sum(getattr(stat, 'total_protein', 0) or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+        avg_fat = sum(getattr(stat, 'total_fat', 0) or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+        avg_carbs = sum(getattr(stat, 'total_carbohydrate', 0) or 0 for stat in period_stats) / total_days if total_days > 0 else 0
+
+        # Generate AI analysis using a simple rule-based system
+        analysis = generate_nutrition_analysis(
+            avg_calories, avg_protein, avg_fat, avg_carbs,
+            top_products_data, daily_goal
+        )
+
+        return Response(analysis)
+
+    except Exception as e:
+        print(f"Error generating AI recommendations: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return Response({'error': f'Failed to generate recommendations: {str(e)}'}, status=500)
+
+
+def generate_nutrition_analysis(avg_calories, avg_protein, avg_fat, avg_carbs, top_products, daily_goal):
+    """Generate nutrition analysis using rule-based AI"""
+    
+    # Ensure we have valid numbers
+    avg_calories = float(avg_calories) if avg_calories else 0
+    avg_protein = float(avg_protein) if avg_protein else 0
+    avg_fat = float(avg_fat) if avg_fat else 0
+    avg_carbs = float(avg_carbs) if avg_carbs else 0
+    
+    # Calculate macro percentages
+    total_macros_cals = (avg_protein * 4) + (avg_fat * 9) + (avg_carbs * 4)
+    protein_percent = (avg_protein * 4 / total_macros_cals * 100) if total_macros_cals > 0 else 0
+    fat_percent = (avg_fat * 9 / total_macros_cals * 100) if total_macros_cals > 0 else 0
+    carbs_percent = (avg_carbs * 4 / total_macros_cals * 100) if total_macros_cals > 0 else 0
+
+    # Generate overall assessment
+    assessment = ""
+    if avg_calories < 1200:
+        assessment = "Ваше потребление калорий значительно ниже рекомендуемого минимума. Это может привести к дефициту питательных веществ и замедлению метаболизма."
+    elif avg_calories < 1500:
+        assessment = "Потребление калорий ниже среднего. Убедитесь, что получаете достаточно энергии для поддержания здоровья."
+    elif avg_calories > 2500:
+        assessment = "Потребление калорий превышает среднюю норму. Рассмотрите сокращение порций или увеличение физической активности."
+    else:
+        assessment = "Ваше потребление калорий находится в здоровом диапазоне. Продолжайте поддерживать сбалансированное питание."
+
+    # Generate key insights
+    insights = [
+        f"Среднее потребление калорий: {avg_calories:.0f} ккал/день",
+        f"Белки составляют {protein_percent:.1f}% от общей калорийности",
+        f"Жиры составляют {fat_percent:.1f}% от общей калорийности",
+        f"Углеводы составляют {carbs_percent:.1f}% от общей калорийности"
+    ]
+
+    if len(top_products) > 5:
+        insights.append(f"В рационе присутствует {len(top_products)} различных продуктов")
+
+    # Generate recommendations
+    recommendations = []
+    
+    if protein_percent < 15:
+        recommendations.append({
+            "title": "Увеличьте потребление белка",
+            "description": "Добавьте в рацион больше белковых продуктов: мясо, рыбу, яйца, бобовые, орехи"
+        })
+    
+    if fat_percent > 35:
+        recommendations.append({
+            "title": "Сократите потребление жиров",
+            "description": "Ограничьте жирную пищу и отдайте предпочтение полезным жирам из орехов, авокадо, рыбы"
+        })
+    
+    if carbs_percent > 65:
+        recommendations.append({
+            "title": "Контролируйте углеводы",
+            "description": "Сократите простые углеводы и увеличьте долю сложных углеводов из овощей и цельнозерновых"
+        })
+
+    if avg_calories < 1500:
+        recommendations.append({
+            "title": "Увеличьте калорийность рациона",
+            "description": "Добавьте здоровые высококалорийные продукты: орехи, семена, авокадо"
+        })
+
+    recommendations.append({
+        "title": "Пейте больше воды",
+        "description": "Поддерживайте водный баланс, употребляя 1.5-2 литра чистой воды в день"
+    })
+
+    # Nutritional balance scoring
+    protein_score = min(10, max(1, (protein_percent / 2.5)))  # Optimal around 20-25%
+    carbs_score = min(10, max(1, 10 - abs(carbs_percent - 50) / 5))  # Optimal around 45-55%
+    fats_score = min(10, max(1, 10 - abs(fat_percent - 30) / 3))  # Optimal around 25-35%
+
+    # Generate comments
+    protein_comment = "Отлично" if protein_score >= 8 else "Нужно корректировать" if protein_score >= 6 else "Требует внимания"
+    carbs_comment = "Сбалансированно" if carbs_score >= 8 else "Умеренно" if carbs_score >= 6 else "Нуждается в коррекции"
+    fats_comment = "В норме" if fats_score >= 8 else "Можно улучшить" if fats_score >= 6 else "Требует изменений"
+
+    # Suggested goals
+    suggested_goals = []
+    
+    if avg_protein < 60:
+        suggested_goals.append({
+            "title": "Увеличить потребление белка",
+            "description": "Достичь 60г белка в день для лучшего восстановления мышц",
+            "target": "60г белка/день",
+            "icon": "fa-dumbbell"
+        })
+    
+    if len(top_products) < 15:
+        suggested_goals.append({
+            "title": "Разнообразить рацион",
+            "description": "Попробовать новые продукты для получения различных питательных веществ",
+            "target": "15+ разных продуктов",
+            "icon": "fa-seedling"
+        })
+
+    return {
+        "overall_assessment": assessment,
+        "key_insights": insights,
+        "recommendations": recommendations,
+        "nutritional_balance": {
+            "protein_score": int(protein_score),
+            "protein_comment": protein_comment,
+            "carbs_score": int(carbs_score),
+            "carbs_comment": carbs_comment,
+            "fats_score": int(fats_score),
+            "fats_comment": fats_comment
+        },
+        "suggested_goals": suggested_goals
+    }

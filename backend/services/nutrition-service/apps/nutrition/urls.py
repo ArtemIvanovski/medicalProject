@@ -28,6 +28,11 @@ urlpatterns = [
 
     path('dashboard/', views.nutrition_dashboard, name='nutrition-dashboard'),
 
+    # Analytics endpoints
+    path('analytics/overview/', views.analytics_overview, name='analytics-overview'),
+    path('analytics/patterns/', views.eating_patterns, name='eating-patterns'),
+    path('analytics/ai-recommendations/', views.ai_recommendations, name='ai-recommendations'),
+
     path('user-products/<uuid:product_id>/image/', views.upload_product_image, name='upload-product-image'),
     path('user-products/<uuid:product_id>/image/delete/', views.delete_product_image, name='delete-product-image'),
     path('product-image/<str:file_id>/', views.get_product_image, name='get-product-image'),

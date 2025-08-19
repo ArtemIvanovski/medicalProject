@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import SensorRegistrationSerializer, SensorAdminSerializer, SensorSettingsSerializer, MeasurementItemSerializer
+from .serializers import SensorRegistrationSerializer, SensorAdminSerializer, SensorSettingsSerializer, \
+    MeasurementItemSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ class BaseSensorView(APIView):
 
 class SingleDataView(BaseSensorView):
     permission_classes = [AllowAny]
+
     def post(self, request, serial_number):
         serializer = SingleDataSerializer(data=request.data)
         if not serializer.is_valid():
@@ -94,6 +96,7 @@ class SingleDataView(BaseSensorView):
 
 class BatchDataView(BaseSensorView):
     permission_classes = [AllowAny]
+
     def post(self, request, serial_number):
         serializer = BatchDataSerializer(data=request.data)
         if not serializer.is_valid():
@@ -191,7 +194,7 @@ class SensorRegistrationView(APIView):
                 "status": "success",
                 "sensor_id": str(sensor.id),
                 "serial_number": sensor.serial_number,
-                "secret_key": secret_key,  # Передается только один раз!
+                "secret_key": secret_key,
                 "message": "Keep this secret key secure. It will not be shown again."
             }, status=status.HTTP_201_CREATED)
 

@@ -86,7 +86,7 @@ export class NutritionRecipesComponent implements OnInit {
         });
     }
 
-    // Ingredient FormArray helpers
+    // Ingredient FormArray helpers 
     get createIngredientsFormArray(): FormArray {
         return this.createRecipeForm.get('ingredients') as FormArray;
     }
