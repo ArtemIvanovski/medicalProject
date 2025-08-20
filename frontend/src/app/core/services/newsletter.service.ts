@@ -23,24 +23,15 @@ export class NewsletterService {
     return this.http.post<NewsletterResponse>(`${this.apiUrl}/unsubscribe/`, data);
   }
 
-  /**
-   * Получение статистики подписок
-   */
   getStats(): Observable<NewsletterStats> {
     return this.http.get<NewsletterStats>(`${this.apiUrl}/stats/`);
   }
 
-  /**
-   * Валидация email адреса
-   */
   isValidEmail(email: string): boolean {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email.trim());
   }
 
-  /**
-   * Проверка на подозрительные домены
-   */
   isSuspiciousDomain(email: string): boolean {
     const suspiciousDomains = [
       '10minutemail.com',

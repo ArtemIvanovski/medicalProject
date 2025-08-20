@@ -1,0 +1,264 @@
+<div class="container-fluid" *ngIf="!isLoading; else loadingTemplate">
+  
+  <!-- Активный датчик -->
+  <form [formGroup]="sensorForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate *ngIf="hasActiveSensor && activeSensor">
+    <section class="py-5 bg-light">
+      <div class="container">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold">Текущий датчик глюкозы</h2>
+          <p class="text-muted">Управление активным датчиком</p>
+        </div>
+
+        <div class="row g-3 justify-content-center">
+          <div class="col-md-8">
+            <div class="card">
+              <div class="card-body">
+                <div class="row g-3">
+                  <!-- Основная информация -->
+                  <div class="col-md-6">
+                    <h5 class="mb-3">Информация о датчике</h5>
+                    <div class="info-row">
+                      <span class="label">Серийный номер:</span>
+                      <span class="value">{{ activeSensor.serial_number }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="label">Последний сигнал:</span>
+                      <span class="value">{{ formatDateTime(activeSensor.last_request) }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="label">Активирован:</span>
+                      <span class="value">{{ formatDateTime(activeSensor.activation_time) }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="label">Истекает:</span>
+                      <span class="value">{{ formatDateTime(activeSensor.expiration_time) }}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Статус батареи -->
+                  <div class="col-md-6">
+                    <h5 class="mb-3">Статус батареи</h5>
+                    <div class="text-center">
+                      <div class="mb-3">
+                        <i [class]="getBatteryIcon(activeSensor.battery_level)" 
+                           [ngClass]="getBatteryClass(activeSensor.battery_level)" 
+                           style="font-size: 3rem;"></i>
+                      </div>
+                      <h4 [ngClass]="getBatteryClass(activeSensor.battery_level)">
+                        {{ activeSensor.battery_level }}%
+                      </h4>
+                      <div class="progress mt-2" style="height: 10px;">
+                        <div class="progress-bar" 
+                             [style.width.%]="activeSensor.battery_level"
+                             [ngClass]="getBatteryClass(activeSensor.battery_level).replace('text-', 'bg-')">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-5 bg-white border-top">
+      <div class="container">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold">Настройки датчика</h2>
+          <p class="text-muted">Настройте параметры работы</p>
+        </div>
+
+        <div class="row g-3 justify-content-center">
+          <div class="col-md-8">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label for="name" class="form-label">Название датчика</label>
+                <input
+                  type="text"
+                  id="name"
+                  formControlName="name"
+                  class="form-control"
+                  [class.is-invalid]="sensorForm.get('name')?.invalid && sensorForm.get('name')?.touched"
+                  placeholder="Введите название датчика">
+                <div class="invalid-feedback" 
+                     *ngIf="sensorForm.get('name')?.invalid && sensorForm.get('name')?.touched">
+                  Название обязательно для заполнения
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="low_glucose_threshold" class="form-label">Нижний порог глюкозы (ммоль/л)</label>
+                <input
+                  type="number"
+                  id="low_glucose_threshold"
+                  formControlName="low_glucose_threshold"
+                  class="form-control"
+                  [class.is-invalid]="sensorForm.get('low_glucose_threshold')?.invalid && sensorForm.get('low_glucose_threshold')?.touched"
+                  step="0.1"
+                  min="0.1"
+                  max="33.3">
+                <div class="invalid-feedback" 
+                     *ngIf="sensorForm.get('low_glucose_threshold')?.invalid && sensorForm.get('low_glucose_threshold')?.touched">
+                  Значение должно быть от 0.1 до 33.3
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="high_glucose_threshold" class="form-label">Верхний порог глюкозы (ммоль/л)</label>
+                <input
+                  type="number"
+                  id="high_glucose_threshold"
+                  formControlName="high_glucose_threshold"
+                  class="form-control"
+                  [class.is-invalid]="sensorForm.get('high_glucose_threshold')?.invalid && sensorForm.get('high_glucose_threshold')?.touched"
+                  step="0.1"
+                  min="0.1"
+                  max="33.3">
+                <div class="invalid-feedback" 
+                     *ngIf="sensorForm.get('high_glucose_threshold')?.invalid && sensorForm.get('high_glucose_threshold')?.touched">
+                  Значение должно быть от 0.1 до 33.3
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="polling_interval_minutes" class="form-label">Интервал измерений</label>
+                <select formControlName="polling_interval_minutes" class="nice-select form-control wide">
+                  <option *ngFor="let option of pollingIntervalOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-12 d-flex justify-content-center gap-4 mt-4">
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  (click)="deactivateSensor()">
+                  <i class="fas fa-power-off me-1"></i>
+                  Деактивировать датчик
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary px-4"
+                  [disabled]="isSaving || sensorForm.invalid">
+                  <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ isSaving ? 'Сохранение...' : 'Сохранить настройки' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+
+  <!-- Нет активного датчика -->
+  <section class="py-5 bg-light" *ngIf="!hasActiveSensor">
+    <div class="container">
+      <div class="text-center mb-5">
+        <i class="fas fa-thermometer-half fa-5x text-muted mb-4"></i>
+        <h2 class="fw-bold text-primary">Время активировать датчик!</h2>
+        <p class="text-muted fs-5">
+          У вас пока нет активного датчика глюкозы. Закажите новый датчик для непрерывного мониторинга.
+        </p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card border-primary">
+            <div class="card-body text-center p-4">
+              <h5 class="card-title text-primary">Преимущества постоянного мониторинга</h5>
+              <ul class="list-unstyled text-start mt-3">
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  Непрерывный контроль уровня глюкозы
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  Уведомления о критических значениях
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  Детальная аналитика и тренды
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  Удобное управление через приложение
+                </li>
+              </ul>
+              <button type="button" class="btn btn-primary btn-lg mt-3" (click)="orderNewSensor()">
+                <i class="fas fa-shopping-cart me-2"></i>
+                Заказать сейчас
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- История датчиков -->
+  <section class="py-5 bg-white border-top" *ngIf="inactiveSensors.length > 0">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold">История датчиков</h2>
+        <p class="text-muted">Ранее использованные датчики</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Серийный номер</th>
+                  <th>Название</th>
+                  <th>Период работы</th>
+                  <th>Время работы</th>
+                  <th>Настройки</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let sensor of inactiveSensors">
+                  <td>
+                    <code>{{ sensor.serial_number }}</code>
+                  </td>
+                  <td>{{ sensor.name || 'Без названия' }}</td>
+                  <td>
+                    <small>
+                      <strong>Активирован:</strong> {{ formatDate(sensor.activation_time) }}<br>
+                      <strong>Деактивирован:</strong> {{ formatDate(sensor.time_deactive) }}
+                    </small>
+                  </td>
+                  <td>
+                    <strong>{{ calculateWorkingTime(sensor.activation_time, sensor.time_deactive) }}</strong>
+                  </td>
+                  <td>
+                    <small>
+                      <strong>Пороги:</strong> {{ sensor.low_glucose_threshold }} - {{ sensor.high_glucose_threshold }} ммоль/л<br>
+                      <strong>Интервал:</strong> {{ getPollingIntervalLabel(sensor.polling_interval_minutes) }}
+                    </small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Шаблон загрузки -->
+<ng-template #loadingTemplate>
+  <div class="container">
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Загрузка...</span>
+      </div>
+      <p class="mt-3 text-muted fs-5">Загрузка данных датчика...</p>
+    </div>
+  </div>
+</ng-template>

@@ -23,7 +23,7 @@ class SensorRegistrationSerializer(serializers.Serializer):
 class SensorAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
-        fields = ['id', 'serial_number', 'name', 'is_active', 'user', 'created_at', 'updated_at', 'claim_token']
+        fields = ['id', 'serial_number', 'name', 'active', 'user', 'created_at', 'updated_at', 'claim_token']
         read_only_fields = ['id', 'created_at', 'updated_at', 'claim_token']
 
 
@@ -88,10 +88,10 @@ class BatchDataSerializer(serializers.Serializer):
 class GlucoseDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlucoseData
-        fields = ['value', 'timestamp', 'sequence_id']
+        fields = ['value', 'created_at']
 
 
 class MeasurementItemSerializer(serializers.Serializer):
     value = serializers.FloatField(min_value=0.1, max_value=33.3)
     timestamp = serializers.IntegerField()
-    sequence_id = serializers.IntegerField(min_value=0)
+    sequence_id = serializers.IntegerField(min_value=0, required=False)  # Необязательное для новой системы

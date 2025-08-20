@@ -11,6 +11,8 @@ import { PatientDoctorComponent } from './patient-doctor/patient-doctor.componen
 import { PatientSettingsComponent } from './patient-settings/patient-settings.component';
 import { PatientTrustedPersonComponent } from './patient-trusted-person/patient-trusted-person.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
+import { AccessSettingsComponent } from './access-settings/access-settings.component';
+import { SensorSettingsComponent } from './sensor-settings/sensor-settings.component';
 
 import {PatientDoctorsListComponent} from "./patient-doctor-list/patient-doctor-list.component";
 import { RoleGuard } from '../../core/guards/role.guard';
@@ -24,7 +26,6 @@ import {
 import {
     PatientRestrictDoctorListComponent
 } from "./patient-restrict-doctor-list/patient-restrict-doctor-list.component";
-import {PatientTrustedListComponent} from "./patient-trusted-list/patient-trusted-list.component";
 import {PatientStopAccessTrustedComponent} from "./patient-stop-access-trusted/patient-stop-access-trusted.component";
 import {PatientInviteTrustedComponent} from "./patient-invite-trusted/patient-invite-trusted.component";
 import {
@@ -33,6 +34,7 @@ import {
 import {
     PatientRestrictTrustedListComponent
 } from "./patient-restrict-trusted-list/patient-restrict-trusted-list.component";
+import {PatientTrustedListComponent} from "./patient-trusted-list/patient-trusted-list.component";
 
 const routes: Routes = [
     {
@@ -67,8 +69,16 @@ const routes: Routes = [
                 component: PatientSettingsComponent
             },
             {
+                path: 'access-settings',
+                component: AccessSettingsComponent
+            },
+            {
                 path: 'profile-settings',
                 component: ProfileSettingsComponent
+            },
+            {
+                path: 'sensor-settings',
+                component: SensorSettingsComponent
             },
             {
                 path: 'doctors-list',
@@ -141,7 +151,9 @@ const routes: Routes = [
         PatientRestrictTrustedAccessComponent,
         PatientInviteTrustedComponent,
         PatientStopAccessTrustedComponent,
-        PatientTrustedListComponent
+        PatientTrustedListComponent,
+        AccessSettingsComponent,
+        SensorSettingsComponent
     ],
     imports: [
         CommonModule,
