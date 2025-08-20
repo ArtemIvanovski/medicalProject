@@ -15,9 +15,9 @@
                             <nav class="navigation">
                                 <ul class="nav menu">
                                     <li class="active">
-                                        <a href="#">Главная страница <i class="icofont-rounded-down"></i></a>
+                                        <a routerLink="/home">Главная страница <i class="icofont-rounded-down"></i></a>
                                         <ul class="dropdown">
-                                            <li><a routerLink="/">Home Page 1</a></li>
+                                            <li><a routerLink="/home/home">Главная</a></li>
                                         </ul>
                                     </li>
                                     <li><a href="#">Обслуживание</a></li>
@@ -28,12 +28,13 @@
                                         </ul>
                                     </li>
                                     <li>
-                                        <a href="#">Блог <i class="icofont-rounded-down"></i></a>
+                                        <a routerLink="/home/blogs-grid">Блог <i class="icofont-rounded-down"></i></a>
                                         <ul class="dropdown">
-                                            <li><a href="#">Детали блога</a></li>
+                                            <li><a routerLink="/home/blogs-grid">Все блоги</a></li>
+                                            <li><a routerLink="/home/blog-single/1">Пример блога</a></li>
                                         </ul>
                                     </li>
-                                    <li><a href="/contact_us">Связаться с нами</a></li>
+                                    <li><a routerLink="/home/contact_us">Связаться с нами</a></li>
                                 </ul>
                             </nav>
                         </div>

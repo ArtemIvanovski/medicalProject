@@ -26,12 +26,13 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_yasg',
-    'django_ratelimit',
     'django_celery_beat',
 ]
 
 LOCAL_APPS = [
     'apps.newsletter',
+    'apps.contacts',
+    'apps.blogs',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -70,7 +71,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('NEWSLETTER_DB_NAME', default='newsletter_db'),
+        'NAME': env('DB_NAME'),
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
@@ -93,13 +94,19 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'ru-ru'
+TIME_ZONE = 'Europe/Minsk'
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -114,29 +121,18 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-if env('REDIS_URL', default=None):
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': env('REDIS_URL'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            }
-        }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        }
-    }
+}
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
 CORS_ALLOW_CREDENTIALS = True
 
-# Rate limiting settings
-RATELIMIT_USE_CACHE = 'default'
-RATELIMIT_ENABLE = True
+# Rate limiting settings (disabled for now)
+# RATELIMIT_USE_CACHE = 'default'
+# RATELIMIT_ENABLE = True
 
 # Celery settings
 CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/6')

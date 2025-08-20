@@ -6,9 +6,9 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Newsletter Service API",
+        title="Content Service API",
         default_version='v1',
-        description="API для управления рассылкой новостей",
+        description="API для управления контентом: рассылка, контакты, блоги",
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
@@ -17,6 +17,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/newsletter/', include('apps.newsletter.urls')),
+    path('api/contacts/', include('apps.contacts.urls')),
+    path('api/blogs/', include('apps.blogs.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

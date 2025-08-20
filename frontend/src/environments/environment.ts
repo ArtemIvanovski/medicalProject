@@ -7,4 +7,5 @@ export const environment = {
     nutritionApiUrl: 'http://localhost:8005/api/v1',
     glucoseApiUrl: 'http://localhost:8006/api/v1',
     newsletterApiUrl: 'http://localhost:8007/api/newsletter',
+    blogApiUrl: 'http://localhost:8007/api/blogs',
 };

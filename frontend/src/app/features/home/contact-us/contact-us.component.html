@@ -5,7 +5,17 @@
                 <div class="col-lg-6">
                     <div class="contact-us-left">
                         <!--Start Google-map -->
-                        <div id="myMap"></div>
+                        <div class="map-container">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2351.5668472641706!2d27.59505!3d53.91774!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46dbcfe35b1e6ad3%3A0xb932d36bd2b9b5d!2z0YPQuy4g0J_QtdGC0YDRg9GB0Y8g0JHRgNC-0LLQutC4IDYsINCc0LjQvdGB0LosINCR0LXQu9Cw0YDRg9GB0Yw!5e1!3m2!1sru!2sby!4v1647859857364!5m2!1sru!2sby&t=k"
+                                width="100%"
+                                height="100%"
+                                style="border:0; min-height: 500px;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
                         <!--/End Google-map -->
                     </div>
                 </div>
@@ -14,39 +24,94 @@
                         <h2>Контакт с нами</h2>
                         <p>Если у вас есть какие-либо вопросы, пожалуйста, не стесняйтесь связаться с нами.</p>
                         <!-- Form -->
-                        <form class="form" method="post" action="mail/mail.php">
+                        
+                        <form class="form" (ngSubmit)="onSubmit()" #contactForm="ngForm">
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <input type="text" name="name" placeholder="Name" required="">
+                                        <input type="text" 
+                                               name="name" 
+                                               [(ngModel)]="formData.name" 
+                                               placeholder="Имя" 
+                                               [class.error]="hasError('name')"
+                                               [disabled]="isSubmitting"
+                                               required>
+                                        <div *ngIf="hasError('name')" class="error-message">
+                                            {{ getError('name') }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <input type="email" name="email" placeholder="Email" required="">
+                                        <input type="email" 
+                                               name="email" 
+                                               [(ngModel)]="formData.email" 
+                                               placeholder="Электронная почта" 
+                                               [class.error]="hasError('email')"
+                                               [disabled]="isSubmitting"
+                                               required>
+                                        <div *ngIf="hasError('email')" class="error-message">
+                                            {{ getError('email') }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <input type="text" name="phone" placeholder="Phone" required="">
+                                        <input type="tel" 
+                                               name="phone" 
+                                               [(ngModel)]="formData.phone" 
+                                               placeholder="Телефон"
+                                               [class.error]="hasError('phone')"
+                                               [disabled]="isSubmitting"
+                                               required>
+                                        <div *ngIf="hasError('phone')" class="error-message">
+                                            {{ getError('phone') }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <input type="text" name="subject" placeholder="Subject" required="">
+                                        <input type="text" 
+                                               name="subject" 
+                                               [(ngModel)]="formData.subject" 
+                                               placeholder="Тема" 
+                                               [class.error]="hasError('subject')"
+                                               [disabled]="isSubmitting"
+                                               required>
+                                        <div *ngIf="hasError('subject')" class="error-message">
+                                            {{ getError('subject') }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group">
-                                        <textarea name="message" placeholder="Your Message" required=""></textarea>
+                                        <textarea name="message" 
+                                                  [(ngModel)]="formData.message" 
+                                                  placeholder="Ваше сообщение" 
+                                                  [class.error]="hasError('message')"
+                                                  [disabled]="isSubmitting"
+                                                  required></textarea>
+                                        <div *ngIf="hasError('message')" class="error-message">
+                                            {{ getError('message') }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <div class="form-group login-btn">
-                                        <button class="btn" type="submit">Send</button>
-                                    </div>
                                     <div class="checkbox">
-                                        <label class="checkbox-inline" for="2"><input name="news" id="2" type="checkbox">Вы хотите подписаться на нашу рассылку?</label>
+                                        <label class="checkbox-inline" for="newsletter-checkbox">
+                                            <input name="newsletter" 
+                                                   id="newsletter-checkbox" 
+                                                   type="checkbox" 
+                                                   [(ngModel)]="formData.newsletter"
+                                                   [disabled]="isSubmitting">
+                                            Вы хотите подписаться на нашу рассылку?
+                                        </label>
+                                    </div>
+                                    <div class="form-group login-btn">
+                                        <button class="btn" type="submit" [disabled]="isSubmitting">
+                                            <span *ngIf="!isSubmitting">Отправить</span>
+                                            <span *ngIf="isSubmitting">Отправка...</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -63,8 +128,8 @@
                     <div class="single-info">
                         <i class="icofont icofont-ui-call"></i>
                         <div class="content">
-                            <h3>+(000) 1234 56789</h3>
-                            <p>info&#64;company.com</p>
+                            <h3>+375 (17) 293-88-56</h3>
+                            <p>info&#64;bsuir.by</p>
                         </div>
                     </div>
                 </div>
@@ -74,8 +139,8 @@
                     <div class="single-info">
                         <i class="icofont-google-map"></i>
                         <div class="content">
-                            <h3>2 Fir e Brigade Road</h3>
-                            <p>Chittagonj, Lakshmipur</p>
+                            <h3>ул. Петруся Бровки, 6</h3>
+                            <p>Минск, Беларусь 220013</p>
                         </div>
                     </div>
                 </div>

@@ -56,11 +56,6 @@
                         <h2>Новостная Рассылка</h2>
                         <p>Подпишитесь на нашу рассылку, чтобы получать все новости на свой почтовый ящик.</p>
                         
-                        <!-- Сообщения о результате -->
-                        <div *ngIf="message" class="newsletter-message" 
-                             [ngClass]="{'success': messageType === 'success', 'error': messageType === 'error'}">
-                            {{ message }}
-                        </div>
                         
                         <form (ngSubmit)="subscribeNewsletter()" class="newsletter-inner">
                             <input

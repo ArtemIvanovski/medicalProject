@@ -148,6 +148,8 @@ AUTH_USER_MODEL = 'drug_search.User'
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
 CORS_ALLOW_CREDENTIALS = True
 
+RABBITMQ_URL = env('RABBITMQ_URL', default='amqp://guest:guest@localhost:5672/')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

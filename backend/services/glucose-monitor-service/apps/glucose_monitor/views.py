@@ -1,12 +1,10 @@
-import base64
 import binascii
-import json
+import binascii
 import logging
 import os
-import datetime
 
-from django.utils import timezone
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
@@ -19,10 +17,9 @@ logger = logging.getLogger(__name__)
 
 from .models import Sensor, GlucoseData, SensorSettings, SensorBatchData
 from .security import (
-    verify_signature, check_nonce_advanced, decrypt_payload, 
-    sync_sensor_time, decrypt_batch_data, encrypt_batch_data
+    verify_signature, check_nonce_advanced, sync_sensor_time, decrypt_batch_data
 )
-from .serializers import SingleDataSerializer, BatchDataSerializer, GlucoseDataSerializer
+from .serializers import SingleDataSerializer, BatchDataSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +231,6 @@ class SensorManagementView(APIView):
                     'last_request': sensor.last_request,
                     'time_active': sensor.time_active,
                     'time_deactive': sensor.time_deactive,
-                    # Включаем данные о настройках и батарее
                     'battery_level': settings_obj.battery_level,
                     'low_glucose_threshold': settings_obj.low_glucose_threshold,
                     'high_glucose_threshold': settings_obj.high_glucose_threshold,

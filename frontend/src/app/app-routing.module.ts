@@ -9,6 +9,11 @@ import {MainLayoutComponent} from "./shared/layouts/main-layout.component";
 const routes: Routes = [
     {
         path: '',
+        redirectTo: '/home',
+        pathMatch: 'full'
+    },
+    {
+        path: '',
         component: MainLayoutComponent,
         children: [
             {
@@ -23,16 +28,16 @@ const routes: Routes = [
                 path: 'profile-selection',
                 component: ProfileSelectionComponent,
                 canActivate: [AuthGuard]
+            },
+            {
+                path: 'home',
+                loadChildren: () => import('./features/home/home.module').then(m => m.HomeModule),
             }
         ]
     },
     {
         path: 'patient',
         loadChildren: () => import('./features/patient/patient.module').then(m => m.PatientModule)
-    },
-    {
-        path: 'home',
-        loadChildren: () => import('./features/home/home.module').then(m => m.HomeModule),
     },
     { path: 'unauthorized', redirectTo: '/profile-selection' }
 ];

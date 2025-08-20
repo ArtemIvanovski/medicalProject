@@ -32,7 +32,8 @@ def main():
         ("messaging-service", 8004, os.path.join(base_dir, "services", "messaging-service")),
         ("nutrition-service", 8005, os.path.join(base_dir, "services", "nutrition-service")),
         ("glucose-monitor-service", 8006, os.path.join(base_dir, "services", "glucose-monitor-service")),
-        # ("newsletter-service", 8007, os.path.join(base_dir, "services", "newsletter-service")),
+        ("newsletter-service", 8007, os.path.join(base_dir, "services", "newsletter-service")),
+        ("notification-service", 8008, os.path.join(base_dir, "services", "notification-service")),
     ]
 
     threads = []
