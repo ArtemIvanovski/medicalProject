@@ -200,6 +200,76 @@ def get_avatar(request, file_id):
         return JsonResponse({'error': str(e)}, status=404)
 
 
+@require_http_methods(["GET"])
+def get_user_avatar_by_id(request, user_id):
+    """Получает аватарку пользователя по его ID для внешних сервисов"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"get_user_avatar_by_id called with user_id: {user_id}")
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        logger.info(f"Looking for user with id: {user_id}")
+        user = User.objects.get(id=user_id, is_active=True)
+        logger.info(f"Found user: {user.email}, avatar_drive_id: {user.avatar_drive_id}")
+        
+        if user.avatar_drive_id:
+            # Возвращаем корректный URL для получения аватарки
+            avatar_url = f"/api/v1/avatar/{user.avatar_drive_id}/"
+            return JsonResponse({
+                'avatar_url': avatar_url,
+                'has_avatar': True
+            })
+        else:
+            # Пользователь без аватарки
+            return JsonResponse({
+                'avatar_url': 'assets/img/author1.jpg',
+                'has_avatar': False
+            })
+            
+    except User.DoesNotExist:
+        logger.warning(f"User with id {user_id} not found for avatar")
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Error getting user avatar for {user_id}: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_user_info_by_id(request, user_id):
+    """Получает информацию о пользователе по его ID для внешних сервисов"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"get_user_info_by_id called with user_id: {user_id}")
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        logger.info(f"Looking for user with id: {user_id}")
+        user = User.objects.get(id=user_id, is_active=True)
+        logger.info(f"Found user: {user.email}")
+        
+        return JsonResponse({
+            'id': str(user.id),
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'patronymic': user.patronymic or '',
+            'email': user.email,
+            'avatar_drive_id': user.avatar_drive_id,
+            'has_avatar': bool(user.avatar_drive_id)
+        })
+            
+    except User.DoesNotExist:
+        logger.warning(f"User with id {user_id} not found for info")
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Error getting user info for {user_id}: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 # Reference endpoints
 @require_http_methods(["GET"])
 def get_genders(request):

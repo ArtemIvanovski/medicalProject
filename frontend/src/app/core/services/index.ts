@@ -5,3 +5,4 @@ export * from './messaging.service';
 export * from './nutrition.service';
 export * from './newsletter.service';
 export * from './sensor.service';
+export * from './contact.service';

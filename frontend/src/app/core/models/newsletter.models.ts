@@ -17,7 +17,7 @@ export interface NewsletterStats {
     };
 }
 
-// Blog models
+
 export interface BlogCategory {
     id: number;
     name: string;
@@ -61,6 +61,7 @@ export interface BlogComment {
     author_name: string;
     content: string;
     created_at: string;
+    avatar_url: string;
     replies: BlogComment[];
 }
 
@@ -96,9 +97,19 @@ export interface BlogCategoriesResponse extends DRFPaginationResponse<BlogCatego
 
 export interface BlogTagsResponse extends DRFPaginationResponse<BlogTag> {}
 
-export interface BlogCommentsResponse {
+export interface BlogCommentsResponse extends DRFPaginationResponse<BlogComment> {}
+
+export interface BlogCommentCreateRequest {
+    author_name?: string;  // Опционально для авторизованных пользователей
+    author_email?: string; // Опционально для авторизованных пользователей
+    content: string;
+    parent?: number;
+}
+
+export interface BlogCommentCreateResponse {
     success: boolean;
-    data: BlogComment[];
+    message: string;
+    comment_id: number;
 }
 
 export interface BlogSearchParams {
@@ -107,4 +118,19 @@ export interface BlogSearchParams {
     category?: string;
     tag?: string;
     search?: string;
+}
+
+// Contact Form Models
+export interface ContactFormRequest {
+    name: string;
+    email: string;
+    phone: string;
+    subject: string;
+    message: string;
+}
+
+export interface ContactFormResponse {
+    success: boolean;
+    message: string;
+    errors?: { [key: string]: string[] };
 }

@@ -58,16 +58,116 @@
   opacity: 0.6;
 }
 
-.checkbox {
+// Кастомный круглый чекбокс
+.custom-checkbox-container {
   margin-bottom: 20px;
 }
 
-.checkbox label {
+.custom-checkbox-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+// Скрываем стандартный чекбокс
+.custom-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+// Стили для label
+.custom-checkbox-label {
+  display: flex;
+  align-items: center;
   cursor: pointer;
   font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
   user-select: none;
 }
 
-.checkbox input[type="checkbox"] {
-  margin-right: 8px;
+// Круглый элемент чекбокса
+.custom-checkbox-circle {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+// Внутренний круг (точка)
+.custom-checkbox-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #007bff;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.2s ease;
+}
+
+// Текст чекбокса
+.custom-checkbox-text {
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+// Состояние при наведении
+.custom-checkbox-label:hover .custom-checkbox-circle {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.custom-checkbox-label:hover .custom-checkbox-text {
+  color: #007bff;
+}
+
+// Состояние когда чекбокс отмечен
+.custom-checkbox-input:checked + .custom-checkbox-label .custom-checkbox-circle {
+  background-color: #fff;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-label .custom-checkbox-circle::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-label .custom-checkbox-text {
+  color: #007bff;
+  font-weight: 500;
+}
+
+// Состояние фокуса
+.custom-checkbox-input:focus + .custom-checkbox-label .custom-checkbox-circle {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+}
+
+// Состояние когда отключен
+.custom-checkbox-input:disabled + .custom-checkbox-label {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.custom-checkbox-input:disabled + .custom-checkbox-label .custom-checkbox-circle {
+  background-color: #f8f9fa;
+  border-color: #e9ecef;
+}
+
+// Анимация при клике
+.custom-checkbox-label:active .custom-checkbox-circle {
+  transform: scale(0.95);
 }

@@ -19,7 +19,7 @@
                             <nav class="navigation">
                                 <ul class="nav menu d-flex justify-content-center">
                                     <!-- Главная -->
-                                    <li>
+                                    <li [class.active]="isDashboardActive()">
                                         <a routerLink="/patient/dashboard">
                                             Главная <i class="icofont-rounded-down"></i>
                                         </a>
@@ -30,7 +30,7 @@
                                     </li>
 
                                     <!-- Мониторинг -->
-                                    <li>
+                                    <li [class.active]="isMonitoringActive()">
                                         <a routerLink="/patient/monitoring">
                                             Мониторинг <i class="icofont-rounded-down"></i>
                                         </a>
@@ -42,7 +42,7 @@
                                     </li>
 
                                     <!-- Уведомления + badge -->
-                                    <li>
+                                    <li [class.active]="isNotificationsActive()">
                                         <a routerLink="/patient/notifications">
                                             Уведомления
                                             <span class="badge"
@@ -54,7 +54,7 @@
                                     </li>
 
                                     <!-- Сообщения + badge -->
-                                    <li>
+                                    <li [class.active]="isMessagesActive()">
                                         <a routerLink="/patient/messages">
                                             Сообщения
                                             <span class="badge"
@@ -66,7 +66,7 @@
                                     </li>
 
                                     <!-- Врач -->
-                                    <li>
+                                    <li [class.active]="isDoctorActive()">
                                         <a routerLink="/patient/doctor">
                                             Врач <i class="icofont-rounded-down"></i>
                                         </a>
@@ -79,7 +79,7 @@
                                     </li>
 
                                     <!-- Доверенные лица -->
-                                    <li>
+                                    <li [class.active]="isTrustedPersonActive()">
                                         <a routerLink="/patient/trusted-person">
                                             Доверенные лица <i class="icofont-rounded-down"></i>
                                         </a>
@@ -92,7 +92,7 @@
                                     </li>
 
                                     <!-- Настройки -->
-                                    <li>
+                                    <li [class.active]="isSettingsActive()">
                                         <a routerLink="/patient/settings">
                                             Настройки <i class="icofont-rounded-down"></i>
                                         </a>

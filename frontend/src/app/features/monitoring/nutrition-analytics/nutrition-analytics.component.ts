@@ -662,7 +662,6 @@ export class NutritionAnalyticsComponent implements OnInit, AfterViewInit, OnDes
 
   private triggerAutoAI(): void {
     try {
-      // Auto-generate AI analysis if we have any data (even if limited)
       if (!this.aiAnalysis && !this.isGeneratingAI && this.overviewStats) {
         console.log('[NutritionAnalytics] Auto-triggering AI analysis');
         this.generateAIAnalysis();

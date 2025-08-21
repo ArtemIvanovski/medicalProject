@@ -2,6 +2,8 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
@@ -19,20 +21,21 @@ from .serializers import (
 )
 from ..utils.drive_service import DriveService
 
+
 class BlogPostListView(generics.ListAPIView):
     serializer_class = BlogPostListSerializer
-    
+
     def get_queryset(self):
         queryset = BlogPost.objects.filter(status='published').select_related().prefetch_related('categories', 'tags')
-        
+
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(categories__slug=category)
-            
+
         tag = self.request.query_params.get('tag')
         if tag:
             queryset = queryset.filter(tags__slug=tag)
-            
+
         search = self.request.query_params.get('search')
         if search:
             queryset = queryset.filter(
@@ -40,20 +43,20 @@ class BlogPostListView(generics.ListAPIView):
                 Q(content__icontains=search) |
                 Q(excerpt__icontains=search)
             )
-            
+
         return queryset.distinct()
-    
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        
+
         page_size = int(request.query_params.get('page_size', 6))
         page_number = int(request.query_params.get('page', 1))
-        
+
         paginator = Paginator(queryset, page_size)
         page = paginator.get_page(page_number)
-        
+
         serializer = self.get_serializer(page.object_list, many=True)
-        
+
         return Response({
             'success': True,
             'data': serializer.data,
@@ -67,16 +70,17 @@ class BlogPostListView(generics.ListAPIView):
             }
         })
 
+
 class BlogPostDetailView(generics.RetrieveAPIView):
     queryset = BlogPost.objects.filter(status='published')
     serializer_class = BlogPostDetailSerializer
     lookup_field = 'slug'
-    
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        
+
         BlogPost.objects.filter(id=instance.id).update(views_count=F('views_count') + 1)
-        
+
         if request.META.get('REMOTE_ADDR'):
             from .models import BlogView
             BlogView.objects.create(
@@ -85,44 +89,45 @@ class BlogPostDetailView(generics.RetrieveAPIView):
                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
                 referrer=request.META.get('HTTP_REFERER')
             )
-        
+
         serializer = self.get_serializer(instance)
         return Response({
             'success': True,
             'data': serializer.data
         })
 
+
 class BlogPostAdminListView(generics.ListAPIView):
     serializer_class = BlogPostListSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         queryset = BlogPost.objects.all().select_related().prefetch_related('categories', 'tags')
-        
+
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-            
+
         search = self.request.query_params.get('search')
         if search:
             queryset = queryset.filter(
                 Q(title__icontains=search) |
                 Q(author_name__icontains=search)
             )
-            
+
         return queryset
-    
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        
+
         page_size = int(request.query_params.get('page_size', 20))
         page_number = int(request.query_params.get('page', 1))
-        
+
         paginator = Paginator(queryset, page_size)
         page = paginator.get_page(page_number)
-        
+
         serializer = self.get_serializer(page.object_list, many=True)
-        
+
         return Response({
             'success': True,
             'data': serializer.data,
@@ -136,49 +141,52 @@ class BlogPostAdminListView(generics.ListAPIView):
             }
         })
 
+
 class BlogPostCreateView(generics.CreateAPIView):
     serializer_class = BlogPostCreateUpdateSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         post = serializer.save()
-        
+
         return Response({
             'success': True,
             'message': 'Блог пост успешно создан',
             'data': BlogPostDetailSerializer(post).data
         }, status=status.HTTP_201_CREATED)
 
+
 class BlogPostUpdateView(generics.UpdateAPIView):
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostCreateUpdateSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        
+
         post = serializer.save()
-        
+
         return Response({
             'success': True,
             'message': 'Блог пост успешно обновлен',
             'data': BlogPostDetailSerializer(post).data
         })
 
+
 class BlogPostDeleteView(generics.UpdateAPIView):
     queryset = BlogPost.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = BlogPostActionSerializer
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         action = request.data.get('action')
-        
+
         if action == 'hide':
             instance.status = 'hidden'
             message = 'Блог пост скрыт'
@@ -190,65 +198,101 @@ class BlogPostDeleteView(generics.UpdateAPIView):
                 'success': False,
                 'message': 'Неверное действие'
             }, status=status.HTTP_400_BAD_REQUEST)
-            
+
         instance.save()
-        
+
         return Response({
             'success': True,
             'message': message
         })
 
+
 class BlogCategoryListView(generics.ListCreateAPIView):
     queryset = BlogCategory.objects.all()
     serializer_class = BlogCategorySerializer
-    
+
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated()]
         return []
+
 
 class BlogTagListView(generics.ListCreateAPIView):
     queryset = BlogTag.objects.all()
     serializer_class = BlogTagSerializer
-    
+
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated()]
         return []
 
+
 class BlogCommentListView(generics.ListAPIView):
     serializer_class = BlogCommentSerializer
-    
+
     def get_queryset(self):
         post_slug = self.kwargs['post_slug']
         post = get_object_or_404(BlogPost, slug=post_slug, status='published')
         return BlogComment.objects.filter(
-            post=post, 
+            post=post,
             status='approved',
             parent__isnull=True
         ).select_related('post').prefetch_related('replies')
 
+
+@method_decorator(csrf_exempt, name='dispatch')
 class BlogCommentCreateView(generics.CreateAPIView):
     serializer_class = BlogCommentCreateSerializer
+    permission_classes = []  # Явно отключаем permission classes
     
+    def get_permissions(self):
+        """Переопределяем метод get_permissions для полного контроля"""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"BlogCommentCreateView.get_permissions called")
+        return []
+
     def create(self, request, *args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"BlogCommentCreateView.create called")
+        logger.info(f"Request user: {request.user}")
+        logger.info(f"Is authenticated: {request.user.is_authenticated}")
+        logger.info(f"Is anonymous: {request.user.is_anonymous}")
+        # Проверяем аутентификацию через middleware
+        if request.user.is_anonymous:
+            return Response({
+                'success': False,
+                'message': 'Аутентификация обязательна для создания комментариев'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+            
         post_slug = kwargs['post_slug']
         post = get_object_or_404(BlogPost, slug=post_slug, status='published')
-        
-        serializer = self.get_serializer(data=request.data)
+
+        # Добавляем логирование для отладки
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Creating comment for post: {post_slug}")
+        logger.info(f"Request user: {request.user}")
+        logger.info(f"Is authenticated: {request.user.is_authenticated}")
+        logger.info(f"Request data: {request.data}")
+
+        # Передаем контекст запроса в сериализатор
+        serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        
+
         comment = serializer.save(
             post=post,
             ip_address=request.META.get('REMOTE_ADDR'),
             user_agent=request.META.get('HTTP_USER_AGENT', '')
         )
-        
+
         return Response({
             'success': True,
-            'message': 'Комментарий отправлен на модерацию',
+            'message': 'Комментарий успешно добавлен',
             'comment_id': comment.id
         }, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -258,21 +302,21 @@ def upload_blog_image(request):
             'success': False,
             'message': 'Файл изображения не найден'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     image_file = request.FILES['image']
     post_id = request.data.get('post_id')
-    
+
     if not post_id:
         return Response({
             'success': False,
             'message': 'ID поста обязателен'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         post = BlogPost.objects.get(id=post_id)
         drive_service = DriveService()
         drive_id = drive_service.upload_image(image_file)
-        
+
         blog_image = BlogImage.objects.create(
             post=post,
             drive_id=drive_id,
@@ -280,15 +324,15 @@ def upload_blog_image(request):
             caption=request.data.get('caption', ''),
             sort_order=request.data.get('sort_order', 0)
         )
-        
+
         serializer = BlogImageSerializer(blog_image)
-        
+
         return Response({
             'success': True,
             'message': 'Изображение успешно загружено',
             'data': serializer.data
         })
-        
+
     except BlogPost.DoesNotExist:
         return Response({
             'success': False,

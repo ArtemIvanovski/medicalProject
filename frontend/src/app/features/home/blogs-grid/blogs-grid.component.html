@@ -3,17 +3,27 @@
         <div class="row">
             <div class="col-lg-8 col-12">
                 <div class="row">
+                    <!-- Loading state -->
+                    <div class="col-12" *ngIf="isLoading">
+                        <div class="text-center py-5">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">Загрузка...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Blog posts -->
                     <div class="col-lg-6 col-md-6 col-12" *ngFor="let post of blogPosts">
                         <!-- Single Blog -->
                         <div class="single-news">
                             <div class="news-head">
-                                <img [src]="post.image" [alt]="post.title">
+                                <img [src]="post.featured_image_url || 'assets/img/blog1.jpg'" [alt]="post.title">
                             </div>
                             <div class="news-body">
                                 <div class="news-content">
-                                    <div class="date">{{ post.date }}</div>
+                                    <div class="date">{{ formatDate(post.published_at || post.created_at) }}</div>
                                     <h2>
-                                        <a [routerLink]="['/home/blog-single', post.id]" (click)="onBlogClick(post.id)">{{ post.title }}</a>
+                                        <a [routerLink]="['/home/blog-single', post.slug]" (click)="onBlogClick(post.slug)">{{ post.title }}</a>
                                     </h2>
                                     <p class="text">
                                         {{ post.excerpt }}
@@ -23,18 +33,33 @@
                         </div>
                         <!-- End Single Blog -->
                     </div>
-                    <div class="col-12">
-                        <!-- Pagination -->
+                    
+                    <!-- No posts message -->
+                    <div class="col-12" *ngIf="!isLoading && blogPosts.length === 0">
+                        <div class="text-center py-5">
+                            <h4>Статьи не найдены</h4>
+                            <p>Попробуйте изменить параметры поиска или фильтры.</p>
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="col-12" *ngIf="pagination && pagination.total_pages > 1">
                         <div class="pagination">
                             <ul class="pagination-list">
-                                <li>
-                                    <a href="#"><i class="icofont-rounded-left"></i></a>
+                                <li [class.disabled]="!pagination.has_previous">
+                                    <a href="#" (click)="$event.preventDefault(); onPreviousPage()" 
+                                       [class.disabled]="!pagination.has_previous">
+                                        <i class="icofont-rounded-left"></i>
+                                    </a>
                                 </li>
-                                <li class="active"><a href="#">1</a></li>
-                                <li><a href="#">2</a></li>
-                                <li><a href="#">3</a></li>
-                                <li>
-                                    <a href="#"><i class="icofont-rounded-right"></i></a>
+                                <li *ngFor="let page of getPageNumbers()" 
+                                    [class.active]="page === pagination.current_page">
+                                    <a href="#" (click)="$event.preventDefault(); onPageChange(page)">{{ page }}</a>
+                                </li>
+                                <li [class.disabled]="!pagination.has_next">
+                                    <a href="#" (click)="$event.preventDefault(); onNextPage()" 
+                                       [class.disabled]="!pagination.has_next">
+                                        <i class="icofont-rounded-right"></i>
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -47,35 +72,52 @@
                     <!-- Single Widget -->
                     <div class="single-widget search">
                         <div class="form">
-                            <input type="text" placeholder="Search Here..." (input)="onSearch($event)">
+                            <input type="text" placeholder="Поиск статей..." 
+                                   (input)="onSearch($event)" 
+                                   [value]="currentSearch">
                             <a class="button" href="#"><i class="fa fa-search"></i></a>
                         </div>
                     </div>
                     <!--/ End Single Widget -->
                     <!-- Single Widget -->
                     <div class="single-widget category">
-                        <h3 class="title">Blog Categories</h3>
-                        <ul class="categor-list">
-                            <li *ngFor="let category of categories"><a href="#">{{ category }}</a></li>
+                        <h3 class="title">Категории блога</h3>
+                        <div *ngIf="isLoadingCategories" class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="sr-only">Загрузка...</span>
+                            </div>
+                        </div>
+                        <ul class="categor-list" *ngIf="!isLoadingCategories">
+                            <li *ngFor="let category of categories">
+                                <a href="#" (click)="$event.preventDefault(); onCategoryClick(category)"
+                                   [class.active]="selectedCategory === category.slug">
+                                    {{ category.name }}
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <!--/ End Single Widget -->
                     <!-- Single Widget -->
                     <div class="single-widget recent-post">
-                        <h3 class="title">Recent post</h3>
+                        <h3 class="title">Последние статьи</h3>
+                        <div *ngIf="isLoadingRecent" class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="sr-only">Загрузка...</span>
+                            </div>
+                        </div>
                         <!-- Single Post -->
                         <div class="single-post" *ngFor="let post of recentPosts">
                             <div class="image">
-                                <img [src]="post.image" [alt]="post.title">
+                                <img [src]="post.featured_image_url || 'assets/img/blog1.jpg'" [alt]="post.title">
                             </div>
                             <div class="content">
-                                <h5><a [routerLink]="['/home/blog-single', post.id]">{{ post.title }}</a></h5>
+                                <h5><a [routerLink]="['/home/blog-single', post.slug]">{{ post.title }}</a></h5>
                                 <ul class="comment">
                                     <li>
-                                        <i class="fa fa-calendar" aria-hidden="true"></i>{{ post.date }}
+                                        <i class="icofont-calendar" aria-hidden="true"></i>{{ formatDate(post.published_at || post.created_at) }}
                                     </li>
                                     <li>
-                                        <i class="fa fa-commenting-o" aria-hidden="true"></i>35
+                                        <i class="icofont-speech-comments" aria-hidden="true"></i>{{ post.comments_count }}
                                     </li>
                                 </ul>
                             </div>
@@ -85,9 +127,19 @@
                     <!--/ End Single Widget -->
                     <!-- Single Widget -->
                     <div class="single-widget side-tags">
-                        <h3 class="title">Tags</h3>
-                        <ul class="tag">
-                            <li *ngFor="let tag of tags"><a href="#">{{ tag }}</a></li>
+                        <h3 class="title">Теги</h3>
+                        <div *ngIf="isLoadingTags" class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="sr-only">Загрузка...</span>
+                            </div>
+                        </div>
+                        <ul class="tag" *ngIf="!isLoadingTags">
+                            <li *ngFor="let tag of tags">
+                                <a href="#" (click)="$event.preventDefault(); onTagClick(tag)"
+                                   [class.active]="selectedTag === tag.slug">
+                                    {{ tag.name }}
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <!--/ End Single Widget -->

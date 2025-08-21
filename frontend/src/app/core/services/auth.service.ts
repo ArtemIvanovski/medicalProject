@@ -117,15 +117,29 @@ export class AuthService {
 
     logout(): Observable<any> {
         const refreshToken = this.getRefreshToken();
-        return this.http.post(`${environment.authApiUrl}/logout/`, {
+        
+        // Сначала очищаем локальное состояние независимо от результата запроса
+        console.log('Logout, clearing all auth state');
+        this.clearAuthState();
+        
+        // Затем отправляем запрос на сервер для инвалидации токена
+        const logoutRequest = this.http.post(`${environment.authApiUrl}/logout/`, {
             refresh_token: refreshToken
         }).pipe(
-            tap(() => {
-                console.log('Logout, clearing all auth state');
-                this.clearAuthState();
-                this.router.navigate(['/login']);
+            tap({
+                next: () => {
+                    console.log('Server logout successful');
+                },
+                error: (error) => {
+                    console.log('Server logout failed, but local state already cleared:', error);
+                }
             })
         );
+        
+        // Навигация на страницу логина
+        this.router.navigate(['/login']);
+        
+        return logoutRequest;
     }
 
     setActiveRole(roleName: string): Observable<any> {

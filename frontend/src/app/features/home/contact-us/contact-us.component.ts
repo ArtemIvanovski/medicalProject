@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NewsletterService } from '../../../core/services/newsletter.service';
-import { NewsletterResponse } from '../../../core/models/newsletter.models';
+import { ContactService } from '../../../core/services/contact.service';
+import { NewsletterResponse, ContactFormResponse } from '../../../core/models/newsletter.models';
+import { forkJoin } from 'rxjs';
 
 declare var Swal: any;
 
@@ -36,7 +38,8 @@ export class ContactUsComponent implements OnInit {
 
   constructor(
     private titleService: Title,
-    private newsletterService: NewsletterService
+    private newsletterService: NewsletterService,
+    private contactService: ContactService
   ) {}
 
   ngOnInit(): void {
@@ -49,23 +52,51 @@ export class ContactUsComponent implements OnInit {
     if (this.validateForm()) {
       this.isSubmitting = true;
       
-      // Логика для подписки на рассылку
+      const contactData = {
+        name: this.formData.name,
+        email: this.formData.email,
+        phone: this.formData.phone,
+        subject: this.formData.subject,
+        message: this.formData.message
+      };
+
+      // Исправленная логика отправки:
+      // Когда чекбокс отмечен (true) - пользователь хочет подписаться: контакт + подписка
+      // Когда чекбокс НЕ отмечен (false) - пользователь НЕ хочет подписываться: только контакт
       if (this.formData.newsletter) {
-        this.subscribeToNewsletter();
+        // Чекбокс отмечен - отправляем два запроса: контакт + подписка
+        console.log('Чекбокс отмечен - отправляем контакт + подписку');
+        forkJoin({
+          contact: this.contactService.sendContactMessage(contactData),
+          newsletter: this.newsletterService.subscribe(this.formData.email)
+        }).subscribe({
+          next: (results) => {
+            this.isSubmitting = false;
+            this.handleContactSuccess(results.contact);
+            console.log('Newsletter result:', results.newsletter);
+            this.resetForm();
+          },
+          error: (error) => {
+            this.isSubmitting = false;
+            console.error('Error in forkJoin:', error);
+            this.handleContactError(error);
+          }
+        });
+      } else {
+        // Чекбокс НЕ отмечен - отправляем только контакт
+        console.log('Чекбокс НЕ отмечен - отправляем только контакт');
+        this.contactService.sendContactMessage(contactData).subscribe({
+          next: (response: ContactFormResponse) => {
+            this.isSubmitting = false;
+            this.handleContactSuccess(response);
+            this.resetForm();
+          },
+          error: (error) => {
+            this.isSubmitting = false;
+            this.handleContactError(error);
+          }
+        });
       }
-      
-      // Основная логика отправки формы
-      console.log('=== ФОРМА ОТПРАВЛЕНА ===');
-      console.log('Данные формы:', this.formData);
-      console.log('Подписка на рассылку:', this.formData.newsletter ? 'Да' : 'Нет');
-      console.log('========================');
-      
-      // Имитация отправки
-      setTimeout(() => {
-        this.isSubmitting = false;
-        this.showAlert('Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.', 'success');
-        this.resetForm();
-      }, 1000);
     }
   }
 
@@ -122,29 +153,31 @@ export class ContactUsComponent implements OnInit {
     return phoneRegex.test(cleanPhone);
   }
 
-  private subscribeToNewsletter(): void {
-    this.newsletterService.subscribe(this.formData.email).subscribe({
-      next: (response: NewsletterResponse) => {
-        if (response.success) {
-          this.showAlert(response.message, 'success');
-        } else {
-          this.showAlert(response.message, 'error');
-        }
-      },
-      error: (error: any) => {
-        console.error('❌ Ошибка подписки на рассылку:', error);
-        if (error.status === 429) {
-          this.showAlert('Слишком много запросов. Попробуйте позже.', 'error');
-        } else if (error.error?.errors?.email && error.error.errors.email.length > 0) {
-          // Извлекаем конкретное сообщение об ошибке email
-          this.showAlert(error.error.errors.email[0], 'error');
-        } else if (error.error?.message) {
-          this.showAlert(error.error.message, 'error');
-        } else {
-          this.showAlert('Произошла ошибка при подписке на рассылку.', 'error');
-        }
+  private handleContactSuccess(response: ContactFormResponse): void {
+    if (response.success) {
+      this.showAlert(response.message || 'Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.', 'success');
+    } else {
+      this.showAlert(response.message || 'Произошла ошибка при отправке сообщения.', 'error');
+    }
+  }
+
+  private handleContactError(error: any): void {
+    console.error('❌ Ошибка отправки контактной формы:', error);
+    if (error.status === 429) {
+      this.showAlert('Слишком много запросов. Попробуйте позже.', 'error');
+    } else if (error.error?.errors) {
+      // Показываем первую ошибку валидации
+      const firstError = Object.values(error.error.errors)[0];
+      if (Array.isArray(firstError) && firstError.length > 0) {
+        this.showAlert(firstError[0], 'error');
+      } else {
+        this.showAlert('Ошибка валидации данных.', 'error');
       }
-    });
+    } else if (error.error?.message) {
+      this.showAlert(error.error.message, 'error');
+    } else {
+      this.showAlert('Произошла ошибка при отправке сообщения. Попробуйте позже.', 'error');
+    }
   }
 
   private clearMessages(): void {
@@ -184,5 +217,10 @@ export class ContactUsComponent implements OnInit {
 
   getError(field: string): string {
     return this.validationErrors[field] || '';
+  }
+
+  // Метод для отладки изменения чекбокса
+  onNewsletterChange(): void {
+    console.log('Newsletter checkbox changed:', this.formData.newsletter);
   }
 }

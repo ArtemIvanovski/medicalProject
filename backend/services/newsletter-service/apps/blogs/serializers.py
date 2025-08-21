@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import BlogPost, BlogCategory, BlogTag, BlogComment, BlogImage
 from ..utils.drive_service import DriveService
+from ..utils.user_service import UserService
 
 class BlogCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -145,11 +146,13 @@ class BlogPostCreateUpdateSerializer(serializers.ModelSerializer):
 
 class BlogCommentSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
+    author_name = serializers.SerializerMethodField()
     
     class Meta:
         model = BlogComment
         fields = [
-            'id', 'author_name', 'content', 'created_at', 'replies'
+            'id', 'author_name', 'content', 'created_at', 'replies', 'avatar_url'
         ]
         
     def get_replies(self, obj):
@@ -159,14 +162,112 @@ class BlogCommentSerializer(serializers.ModelSerializer):
                 many=True
             ).data
         return []
+    
+    def get_avatar_url(self, obj):
+        """Получает URL аватарки комментатора"""
+        user_service = UserService()
+        if obj.user_id:
+            # Для авторизованных пользователей получаем их аватарку
+            return user_service.get_user_avatar_url(str(obj.user_id))
+        else:
+            # Для анонимных пользователей возвращаем дефолтную аватарку
+            return user_service.get_default_avatar_url()
+    
+    def get_author_name(self, obj):
+        """Получает корректное отображаемое имя автора комментария"""
+        if obj.user_id:
+            # Для авторизованных пользователей пытаемся получить актуальные данные
+            user_service = UserService()
+            user_info = user_service.get_user_info(str(obj.user_id))
+            if user_info:
+                return user_service.get_user_display_name(user_info)
+            else:
+                # Fallback на сохраненное имя или дефолтное
+                return obj.author_name or user_service.get_user_display_name(None)
+        else:
+            # Для анонимных комментариев используем сохраненное имя
+            return obj.author_name
 
 class BlogCommentCreateSerializer(serializers.ModelSerializer):
+    # Поля для анонимных пользователей (необязательные для авторизованных)
+    author_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    author_email = serializers.EmailField(required=False, allow_blank=True)
+    
     class Meta:
         model = BlogComment
         fields = ['author_name', 'author_email', 'content', 'parent']
         
     def validate_author_email(self, value):
-        return value.lower().strip()
+        if value:
+            return value.lower().strip()
+        return value
+    
+    def validate(self, attrs):
+        """Проверка данных в зависимости от типа пользователя"""
+        request = self.context.get('request')
+        
+        # Логирование для отладки
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"Request: {request}")
+        logger.info(f"Has user attr: {hasattr(request, 'user') if request else False}")
+        logger.info(f"User: {getattr(request, 'user', None) if request else None}")
+        logger.info(f"Is authenticated: {request.user.is_authenticated if request and hasattr(request, 'user') else False}")
+        logger.info(f"Received attrs: {attrs}")
+        
+        # Если пользователь авторизован
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            # Для авторизованных пользователей author_name и author_email не требуются
+            return attrs
+        else:
+            # Для анонимных пользователей проверяем обязательные поля
+            if not attrs.get('author_name'):
+                raise serializers.ValidationError({
+                    'author_name': 'Это поле обязательно для анонимных пользователей.'
+                })
+            if not attrs.get('author_email'):
+                raise serializers.ValidationError({
+                    'author_email': 'Это поле обязательно для анонимных пользователей.'
+                })
+            return attrs
+    
+    def create(self, validated_data):
+        """Создание комментария с учетом типа пользователя"""
+        request = self.context.get('request')
+        
+        # Если пользователь авторизован
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            # Получаем данные пользователя из patient-service
+            user_service = UserService()
+            user_info = user_service.get_user_info(str(request.user.id))
+            
+            validated_data['user_id'] = request.user.id
+            
+            if user_info:
+                validated_data['author_name'] = user_service.get_user_display_name(user_info)
+                validated_data['author_email'] = user_info.get('email', '')
+            else:
+                # Если не удалось получить данные пользователя из patient-service
+                # используем fallback имя и попробуем получить email из токена
+                validated_data['author_name'] = user_service.get_user_display_name(None)
+                validated_data['author_email'] = getattr(request.user, 'email', '')
+        
+        # Сохраняем IP адрес и User-Agent
+        if request:
+            validated_data['ip_address'] = self.get_client_ip(request)
+            validated_data['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
+        
+        return super().create(validated_data)
+    
+    def get_client_ip(self, request):
+        """Получает IP адрес клиента"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 class BlogPostActionSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=['hide', 'restore'])

@@ -6,7 +6,6 @@ import {HomeComponent} from "./home/home.component";
 import {SharedModule} from "../../shared/shared.module";
 import {ContactUsComponent} from "./contact-us/contact-us.component";
 import {BlogsGridComponent} from "./blogs-grid/blogs-grid.component";
-import {BlogsGridExampleComponent} from "./blogs-grid-example/blogs-grid-example.component";
 import {BlogSingleComponent} from "./blog-single/blog-single.component";
 
 const routes: Routes = [
@@ -31,11 +30,7 @@ const routes: Routes = [
                 component: BlogsGridComponent
             },
             {
-                path: 'blogs-grid-example',
-                component: BlogsGridExampleComponent
-            },
-            {
-                path: 'blog-single/:id',
+                path: 'blog-single/:slug',
                 component: BlogSingleComponent
             }
         ]
@@ -47,7 +42,6 @@ const routes: Routes = [
         HomeComponent,
         ContactUsComponent,
         BlogsGridComponent,
-        BlogsGridExampleComponent,
         BlogSingleComponent
     ],
     imports: [

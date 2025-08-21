@@ -124,10 +124,11 @@ class BlogComment(models.Model):
 
     post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='comments')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='replies')
+    user_id = models.UUIDField(blank=True, null=True, help_text='ID авторизованного пользователя, NULL для анонимных комментариев')
     author_name = models.CharField(max_length=100)
     author_email = models.EmailField()
     content = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='approved')
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     user_agent = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -138,6 +139,11 @@ class BlogComment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author_name} on {self.post.title}"
+    
+    @property
+    def is_authenticated_user(self):
+        """Проверяет, оставлен ли комментарий авторизованным пользователем"""
+        return self.user_id is not None
 
 
 class BlogView(models.Model):

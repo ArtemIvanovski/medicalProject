@@ -97,15 +97,21 @@
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <div class="checkbox">
-                                        <label class="checkbox-inline" for="newsletter-checkbox">
-                                            <input name="newsletter" 
-                                                   id="newsletter-checkbox" 
-                                                   type="checkbox" 
-                                                   [(ngModel)]="formData.newsletter"
-                                                   [disabled]="isSubmitting">
-                                            Вы хотите подписаться на нашу рассылку?
-                                        </label>
+                                    <div class="custom-checkbox-container">
+                                        <div class="custom-checkbox-wrapper">
+                                            <input 
+                                                type="checkbox" 
+                                                id="newsletter-checkbox" 
+                                                name="newsletter"
+                                                class="custom-checkbox-input"
+                                                [(ngModel)]="formData.newsletter"
+                                                (ngModelChange)="onNewsletterChange()"
+                                                [disabled]="isSubmitting">
+                                            <label for="newsletter-checkbox" class="custom-checkbox-label">
+                                                <span class="custom-checkbox-circle"></span>
+                                                <span class="custom-checkbox-text">Вы хотите подписаться на нашу рассылку?</span>
+                                            </label>
+                                        </div>
                                     </div>
                                     <div class="form-group login-btn">
                                         <button class="btn" type="submit" [disabled]="isSubmitting">

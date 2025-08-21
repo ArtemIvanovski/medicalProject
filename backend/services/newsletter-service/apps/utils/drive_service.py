@@ -81,4 +81,8 @@ class DriveService:
     def get_image_url(self, file_id: str) -> str:
         if not file_id:
             return None
+        # Если file_id уже является полным URL (например, с Unsplash), возвращаем как есть
+        if file_id.startswith('http'):
+            return file_id
+        # Иначе это Google Drive ID, формируем Google Drive URL
         return f"https://drive.google.com/uc?id={file_id}"

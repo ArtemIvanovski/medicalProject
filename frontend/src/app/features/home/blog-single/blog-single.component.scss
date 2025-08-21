@@ -1,3 +1,41 @@
-.section{
-  padding:50px 50px;
+/* Стили для вложенных комментариев */
+.single-comments {
+  margin-bottom: 20px;
+}
+
+.single-comments.left {
+  margin-left: 30px;
+  position: relative;
+}
+
+.single-comments.left::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #ddd;
+}
+
+/* Дополнительные уровни вложенности */
+.single-comments.left .single-comments.left {
+  margin-left: 20px;
+}
+
+/* Отступы для форм ответов */
+.reply-form {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  margin-top: 15px;
+}
+
+/* Плавные переходы для кнопок */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
 }

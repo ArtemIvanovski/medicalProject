@@ -366,7 +366,17 @@ body {
 
 .header .logo {
     float: left;
-    margin-top: 18px;
+    margin-top: 3px;
+    img {
+        width: 120px!important;      // Устанавливаем фиксированную ширину
+        height: auto!important;      // Высота автоматически подстраивается для сохранения пропорций
+        max-width: 100%!important;   // Ограничиваем максимальную ширину для адаптивности
+    }
+    @media (max-width: 768px) {
+        .logo img {
+            width: 80px;     // Еще меньше на мобильных устройствах
+        }
+    }
 }
 
 .header .navbar {

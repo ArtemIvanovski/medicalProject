@@ -11,6 +11,8 @@ import {
   BlogCategoriesResponse,
   BlogTagsResponse,
   BlogCommentsResponse,
+  BlogCommentCreateRequest,
+  BlogCommentCreateResponse,
   BlogSearchParams
 } from "../models/newsletter.models";
 
@@ -91,6 +93,10 @@ export class NewsletterService {
 
   getBlogComments(postSlug: string): Observable<BlogCommentsResponse> {
     return this.http.get<BlogCommentsResponse>(`${this.blogApiUrl}/posts/${postSlug}/comments/`);
+  }
+
+  createBlogComment(postSlug: string, commentData: BlogCommentCreateRequest): Observable<BlogCommentCreateResponse> {
+    return this.http.post<BlogCommentCreateResponse>(`${this.blogApiUrl}/posts/${postSlug}/comments/create/`, commentData);
   }
 
   getRecentBlogPosts(limit: number = 3): Observable<BlogListResponse> {

@@ -2,41 +2,57 @@
     <div class="header-inner">
         <div class="container">
             <div class="inner">
-                <div class="row">
+                <div class="row align-items-center justify-content-between">
                     <div class="col-lg-3 col-md-3 col-12">
                         <div class="logo">
                             <a routerLink="/home"><img src="assets/img/logo.png" alt="Логотип"></a>
-                            <a routerLink="/home"><img src="assets/img/logo_bsuir.png" alt="BSUIR"></a>
                         </div>
                         <div class="mobile-nav"></div>
                     </div>
-                    <div class="col-lg-8 col-md-9 col-12">
+                    <div class="col-lg-6 col-md-6 col-12">
                         <div class="main-menu">
                             <nav class="navigation">
                                 <ul class="nav menu">
-                                    <li class="active">
-                                        <a routerLink="/home">Главная страница <i class="icofont-rounded-down"></i></a>
-                                        <ul class="dropdown">
-                                            <li><a routerLink="/home/home">Главная</a></li>
-                                        </ul>
+                                    <li [class.active]="isHomeActive()">
+                                        <a routerLink="/home">Главная страница</a>
                                     </li>
                                     <li><a href="#">Обслуживание</a></li>
-                                    <li>
-                                        <a href="#">Страницы <i class="icofont-rounded-down"></i></a>
-                                        <ul class="dropdown">
-                                            <li><a href="#">404 Error</a></li>
-                                        </ul>
+                                    <li [class.active]="isBlogActive()">
+                                        <a routerLink="/home/blogs-grid">Блог</a>
                                     </li>
-                                    <li>
-                                        <a routerLink="/home/blogs-grid">Блог <i class="icofont-rounded-down"></i></a>
-                                        <ul class="dropdown">
-                                            <li><a routerLink="/home/blogs-grid">Все блоги</a></li>
-                                            <li><a routerLink="/home/blog-single/1">Пример блога</a></li>
-                                        </ul>
+                                    <li [class.active]="isContactActive()">
+                                        <a routerLink="/home/contact_us">Связаться с нами</a>
                                     </li>
-                                    <li><a routerLink="/home/contact_us">Связаться с нами</a></li>
                                 </ul>
                             </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопки авторизации -->
+                    <div class="col-lg-auto">
+                        <div class="get-quote text button d-flex align-items-center">
+                            <!-- Кнопка "Войти" для неавторизованных пользователей -->
+                            <button *ngIf="!isAuthenticated" 
+                                    (click)="navigateToLogin()"
+                                    class="btn">
+                                Войти
+                            </button>
+                            
+                            <!-- Кнопки для авторизованных пользователей -->
+                            <ng-container *ngIf="isAuthenticated">
+                                <!-- Кнопка "Профиль" -->
+                                <button (click)="navigateToProfile()"
+                                        class="btn"
+                                        style="margin-right: 20px;">
+                                    Профиль
+                                </button>
+                                
+                                <!-- Кнопка "Выход" -->
+                                <button (click)="logout()"
+                                        class="btn btn-sm btn-outline-light">
+                                    Выход
+                                </button>
+                            </ng-container>
                         </div>
                     </div>
                 </div>
